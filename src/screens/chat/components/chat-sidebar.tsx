@@ -37,6 +37,7 @@ import {
   SEARCH_MODAL_EVENTS,
   useSearchModal,
 } from '@/hooks/use-search-modal'
+import { GatewayStatusIndicator } from '@/components/gateway-status-indicator'
 
 type ChatSidebarProps = {
   sessions: Array<SessionMeta>
@@ -630,6 +631,7 @@ function ChatSidebarComponent({
       </div>
 
       <div className="px-2 py-3 border-t border-primary-200 bg-surface shrink-0">
+        <GatewayStatusIndicator collapsed={isCollapsed} />
         <div className="w-full">
           <Button
             variant="ghost"

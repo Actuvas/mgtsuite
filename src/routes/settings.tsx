@@ -14,6 +14,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import type * as React from 'react'
 import type {AccentColor, SettingsThemeMode} from '@/hooks/use-settings';
+import { usePageTitle } from '@/hooks/use-page-title'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTab } from '@/components/ui/tabs'
@@ -74,6 +75,7 @@ function SettingsRow({ label, description, children }: RowProps) {
 }
 
 function SettingsRoute() {
+  usePageTitle('Settings')
   const { settings, updateSettings } = useSettings()
   const [connectionStatus, setConnectionStatus] = useState<
     'idle' | 'testing' | 'connected' | 'failed'

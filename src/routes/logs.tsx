@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { PinIcon, RefreshIcon, Search01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import type {ActivityLogEntry, ActivityLogLevel} from '@/hooks/use-activity-log';
+import { usePageTitle } from '@/hooks/use-page-title'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
@@ -50,6 +51,7 @@ function matchesSearch(entry: ActivityLogEntry, search: string): boolean {
 }
 
 function LogsRoute() {
+  usePageTitle('Activity Logs')
   const entries = useActivityLog((state) => state.entries)
   const searchText = useActivityLog((state) => state.searchText)
   const sessionFilter = useActivityLog((state) => state.sessionFilter)

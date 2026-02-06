@@ -13,6 +13,7 @@ import type {
   MemorySearchResult,
   MemoryViewerFile,
 } from '@/components/memory-viewer'
+import { usePageTitle } from '@/hooks/use-page-title'
 import {
   MemoryEditor,
   MemoryFileList,
@@ -267,6 +268,7 @@ export const Route = createFileRoute('/memory')({
 })
 
 function MemoryRoute() {
+  usePageTitle('Memory')
   const { settings } = useSettings()
   const resolvedTheme = resolveTheme(settings.theme)
 

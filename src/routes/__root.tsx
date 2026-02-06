@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import appCss from '../styles.css?url'
 import { SearchModal } from '@/components/search/search-modal'
 import { TerminalShortcutListener } from '@/components/terminal-shortcut-listener'
+import { KeyboardShortcutsModal } from '@/components/keyboard-shortcuts-modal'
 
 
 const themeScript = `
@@ -105,6 +106,7 @@ function RootLayout() {
       <TerminalShortcutListener />
       <Outlet />
       <SearchModal />
+      <KeyboardShortcutsModal />
     </QueryClientProvider>
   )
 }

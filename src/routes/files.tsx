@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { Editor } from '@monaco-editor/react'
 import { createFileRoute } from '@tanstack/react-router'
+import { usePageTitle } from '@/hooks/use-page-title'
 import { FileExplorerSidebar } from '@/components/file-explorer'
 import { resolveTheme, useSettings } from '@/hooks/use-settings'
 
@@ -18,6 +19,7 @@ export const Route = createFileRoute('/files')({
 })
 
 function FilesRoute() {
+  usePageTitle('Files')
   const { settings } = useSettings()
   const [fileExplorerCollapsed, setFileExplorerCollapsed] = useState(false)
   const [editorValue, setEditorValue] = useState(INITIAL_EDITOR_VALUE)
