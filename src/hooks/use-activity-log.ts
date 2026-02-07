@@ -83,7 +83,7 @@ function createSeedEntries(total: number): Array<ActivityLogEntry> {
 }
 
 export const useActivityLog = create<ActivityLogState>((set, get) => ({
-  entries: createSeedEntries(50),
+  entries: [], // Real entries will come from Gateway event stream when implemented
   searchText: '',
   sessionFilter: 'all',
   autoScroll: true,

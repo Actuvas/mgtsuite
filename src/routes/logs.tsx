@@ -65,14 +65,13 @@ function LogsRoute() {
   const appendMockEntry = useActivityLog((state) => state.appendMockEntry)
   const viewportRef = useRef<HTMLDivElement | null>(null)
 
+  // Real-time event streaming will be added when Gateway exposes event stream API
+  // For now, logs are only populated when manually added via useActivityLog store
   useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      appendMockEntry()
-    }, 1_400)
-    return () => {
-      window.clearInterval(intervalId)
-    }
-  }, [appendMockEntry])
+    // TODO: Connect to Gateway event stream (SSE or WebSocket)
+    // Poll /api/sessions for changes and generate synthetic events
+    // or subscribe to gateway.events if that API becomes available
+  }, [])
 
   useEffect(() => {
     if (!autoScroll) return
@@ -194,8 +193,11 @@ function LogsRoute() {
 
           <div ref={viewportRef} className="min-h-0 flex-1 overflow-y-auto">
             {filteredEntries.length === 0 ? (
-              <div className="flex h-full items-center justify-center p-8 text-sm text-primary-500 text-pretty">
-                No log entries match the current filters.
+              <div className="flex h-full flex-col items-center justify-center gap-2 p-8 text-center text-sm text-primary-500 text-pretty">
+                <p className="font-medium">No activity logs yet</p>
+                <p className="text-xs">
+                  Real-time event streaming will be added when Gateway exposes event API
+                </p>
               </div>
             ) : (
               <div className="space-y-1 py-2">
