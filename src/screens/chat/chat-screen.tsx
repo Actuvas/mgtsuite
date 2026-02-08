@@ -202,13 +202,39 @@ export function ChatScreen({
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
+  const currentModelQuery = useQuery({
+    queryKey: ['gateway', 'session-status-model'],
+    queryFn: async () => {
+      try {
+        const res = await fetch('/api/session-status')
+        if (!res.ok) return ''
+        const data = await res.json()
+        const payload = data.payload ?? data
+        // Same logic as chat-composer: read model from status payload
+        if (payload.model) return String(payload.model)
+        if (payload.currentModel) return String(payload.currentModel)
+        if (payload.modelAlias) return String(payload.modelAlias)
+        if (payload.resolved?.modelProvider && payload.resolved?.model) {
+          return `${payload.resolved.modelProvider}/${payload.resolved.model}`
+        }
+        return ''
+      } catch {
+        return ''
+      }
+    },
+    refetchInterval: 30_000,
+    retry: false,
+  })
+
   const availableModelIds = useMemo(() => {
     const models = modelsQuery.data?.models || []
     return models.map((m: any) => m.id).filter((id: string) => id)
   }, [modelsQuery.data])
 
+  const currentModel = currentModelQuery.data || ''
+
   const { suggestion, dismiss, dismissForSession } = useModelSuggestions({
-    currentModel: 'claude-sonnet-4-5', // TODO: Extract from session/runtime state
+    currentModel, // Real model from session-status (fail closed if empty)
     sessionKey: resolvedSessionKey || 'main',
     messages: historyMessages.map(m => ({
       role: m.role,

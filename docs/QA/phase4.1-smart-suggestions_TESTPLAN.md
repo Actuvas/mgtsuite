@@ -103,6 +103,19 @@
 3. Send messages
 4. **Expected:** No suggestions (graceful degradation)
 
+### T13: Suggestions Change When Switching Models
+1. Enable Smart Suggestions
+2. Start on Haiku/Flash (budget tier)
+3. Send 3 simple messages
+4. **Expected:** NO downgrade suggestion (already on cheapest)
+5. Switch to Sonnet (balanced tier) via model switcher
+6. Send 3 more simple messages
+7. **Expected:** Suggestion appears to downgrade to Haiku/Flash
+8. Switch to Opus (premium tier)
+9. Send 3 more simple messages
+10. **Expected:** Suggestion appears to downgrade to cheaper model
+11. **Verify:** Suggestions adapt to currently active model
+
 ## Edge Cases
 
 ### E1: Empty Message History

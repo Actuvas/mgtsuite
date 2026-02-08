@@ -79,13 +79,17 @@ google: { budget: ['gemini-flash'], balanced: ['gemini-pro'], premium: ['gemini-
 }
 ```
 
+## Fixed Issues
+
+1. **Current model detection** — ✅ FIXED
+   - Now queries `/api/session-status` (same source as model switcher UI)
+   - Extracts model from `payload.model`, `payload.currentModel`, or `payload.resolved`
+   - Fails closed if model is unknown (no suggestions shown)
+   - Refetches every 30s to stay in sync
+
 ## Current Limitations
 
-1. **Current model detection** — Hardcoded to `'claude-sonnet-4-5'` as placeholder
-   - TODO: Extract from session/runtime state
-   - Could be enhanced with `/api/sessions` or runtime query
-
-2. **Cost metadata** — Not available in `/api/models` response yet
+1. **Cost metadata** — Not available in `/api/models` response yet
    - Falls back to tier-based priority
    - Shows generic cost impact text
 

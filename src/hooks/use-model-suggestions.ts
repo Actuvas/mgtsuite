@@ -167,6 +167,12 @@ export function useModelSuggestions({
       return
     }
     
+    // Fail closed: no suggestions if current model unknown
+    if (!currentModel || currentModel.trim() === '') {
+      setSuggestion(null)
+      return
+    }
+    
     // Global cooldown active
     const lastShown = getLastShownTimestamp()
     if (Date.now() - lastShown < GLOBAL_COOLDOWN_MS) {
