@@ -151,7 +151,7 @@ export function HeaderAmbientStatus() {
       {editing ? (
         <div
           ref={popoverRef}
-          className="absolute right-0 top-full z-50 mt-2 w-64 rounded-xl border border-primary-200 bg-primary-50 p-3 shadow-lg backdrop-blur-xl dark:bg-primary-100"
+          className="absolute right-0 top-full z-[9999] mt-2 w-64 rounded-xl border border-primary-200 bg-primary-50 p-3 shadow-xl backdrop-blur-xl dark:bg-primary-100"
         >
           <div className="space-y-3">
             {/* Weather location */}

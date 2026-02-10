@@ -271,7 +271,7 @@ export function DashboardScreen() {
   return (
     <main className="min-h-screen bg-surface px-4 py-6 text-primary-900 md:px-6 md:py-8">
       <section className="mx-auto w-full max-w-[1600px]">
-        <header className="mb-6 rounded-2xl border border-primary-200 bg-primary-50/85 p-4 backdrop-blur-xl md:mb-7 md:p-5">
+        <header className="relative z-20 mb-6 rounded-2xl border border-primary-200 bg-primary-50/85 p-4 backdrop-blur-xl md:mb-7 md:p-5">
           {/* Row 1: Brand left, controls right */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
