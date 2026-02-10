@@ -11,10 +11,20 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Responsive as ResponsiveGridLayout } from 'react-grid-layout/legacy'
-import type { Layout } from 'react-grid-layout'
+import type { ResponsiveLayouts } from 'react-grid-layout'
 
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
+
+import {
+  GRID_BREAKPOINTS,
+  GRID_COLS,
+  GRID_ROW_HEIGHT,
+  GRID_MARGIN,
+  loadLayouts,
+  saveLayouts,
+  resetLayouts,
+} from './constants/grid-config'
 import { AgentStatusWidget } from './components/agent-status-widget'
 import { ActivityLogWidget } from './components/activity-log-widget'
 import { CostTrackerWidget } from './components/cost-tracker-widget'
@@ -29,7 +39,6 @@ import { WeatherWidget } from './components/weather-widget'
 import type {
   QuickAction,
   RecentSession,
-  SystemStatus,
 } from './components/dashboard-types'
 import { Button } from '@/components/ui/button'
 import type { SessionMeta } from '@/screens/chat/types'
@@ -70,42 +79,7 @@ function formatModelName(raw: string): string {
   return raw
 }
 
-/* ── Layout persistence ── */
-const LAYOUT_STORAGE_KEY = 'openclaw-dashboard-layout'
-
-const DEFAULT_LAYOUT: Layout[] = [
-  // Row 1: Weather(3) | Quick Actions(6) | Time(3)
-  { i: 'weather', x: 0, y: 0, w: 3, h: 3 },
-  { i: 'quick-actions', x: 3, y: 0, w: 6, h: 3 },
-  { i: 'time-date', x: 9, y: 0, w: 3, h: 3 },
-  // Row 2: Usage(6) | Tasks(6)
-  { i: 'usage-meter', x: 0, y: 3, w: 6, h: 5 },
-  { i: 'tasks', x: 6, y: 3, w: 6, h: 5 },
-  // Row 3: Agents(6) | Cost(6)
-  { i: 'agent-status', x: 0, y: 8, w: 6, h: 5 },
-  { i: 'cost-tracker', x: 6, y: 8, w: 6, h: 5 },
-  // Row 4: Sessions(8) | System(4)
-  { i: 'recent-sessions', x: 0, y: 13, w: 8, h: 5 },
-  { i: 'system-status', x: 8, y: 13, w: 4, h: 5 },
-  // Row 5: Notifications(8) | Activity(4)
-  { i: 'notifications', x: 0, y: 18, w: 8, h: 4 },
-  { i: 'activity-log', x: 8, y: 18, w: 4, h: 4 },
-]
-
-function loadLayout(): Layout[] {
-  try {
-    const raw = localStorage.getItem(LAYOUT_STORAGE_KEY)
-    if (raw) {
-      const parsed = JSON.parse(raw) as Layout[]
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed
-    }
-  } catch {}
-  return DEFAULT_LAYOUT
-}
-
-function saveLayout(layout: Layout[]) {
-  localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layout))
-}
+/* Layout config imported from ./constants/grid-config */
 
 const quickActions: Array<QuickAction> = [
   {
@@ -178,7 +152,7 @@ function toSessionUpdatedAt(session: SessionMeta): number {
 
 export function DashboardScreen() {
   const navigate = useNavigate()
-  const [gridLayout, setGridLayout] = useState<Layout[]>(loadLayout)
+  const [gridLayouts, setGridLayouts] = useState<ResponsiveLayouts>(loadLayouts)
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(1200)
 
@@ -191,14 +165,14 @@ export function DashboardScreen() {
     return () => ro.disconnect()
   }, [])
 
-  const handleLayoutChange = useCallback((layout: Layout[]) => {
-    setGridLayout(layout)
-    saveLayout(layout)
+  const handleLayoutChange = useCallback((_current: unknown, allLayouts: ResponsiveLayouts) => {
+    setGridLayouts(allLayouts)
+    saveLayouts(allLayouts)
   }, [])
 
   const handleResetLayout = useCallback(() => {
-    setGridLayout(DEFAULT_LAYOUT)
-    localStorage.removeItem(LAYOUT_STORAGE_KEY)
+    const fresh = resetLayouts()
+    setGridLayouts(fresh)
   }, [])
 
   const sessionsQuery = useQuery({
@@ -309,17 +283,17 @@ export function DashboardScreen() {
         <div ref={containerRef}>
           <ResponsiveGridLayout
             className="layout"
-            layouts={{ lg: gridLayout }}
-            breakpoints={{ lg: 1080, md: 768, sm: 480, xs: 0 }}
-            cols={{ lg: 12, md: 8, sm: 4, xs: 4 }}
-            rowHeight={70}
+            layouts={gridLayouts}
+            breakpoints={GRID_BREAKPOINTS}
+            cols={GRID_COLS}
+            rowHeight={GRID_ROW_HEIGHT}
             width={containerWidth}
             onLayoutChange={handleLayoutChange}
             draggableHandle=".widget-drag-handle"
             isResizable={false}
             isDraggable
             compactType="vertical"
-            margin={[10, 10]}
+            margin={GRID_MARGIN}
           >
             <div key="weather" className="h-full">
               <WeatherWidget draggable />
