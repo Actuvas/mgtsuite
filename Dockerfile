@@ -5,7 +5,7 @@ WORKDIR /app
 # Skip Playwright browser download (not needed for production)
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json .npmrc ./
 RUN npm ci
 
 COPY . .
@@ -24,10 +24,11 @@ RUN addgroup -S clawsuite && adduser -S clawsuite -G clawsuite
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
+COPY --from=builder /app/server-entry.js ./
 
 # Expose default port
 EXPOSE 3000
 
 USER clawsuite
 
-CMD ["node", "dist/server/server.js"]
+CMD ["node", "server-entry.js"]
