@@ -49,41 +49,11 @@ export function WorkspaceShell() {
   const setSidebarCollapsed = useWorkspaceStore((s) => s.setSidebarCollapsed)
 
   const [creatingSession, setCreatingSession] = useState(false)
-  const [authState, setAuthState] = useState<{
-    checked: boolean
-    authenticated: boolean
-    authRequired: boolean
-  }>({
-    checked: false,
-    authenticated: false,
+  const [authState] = useState({
+    checked: true,
+    authenticated: true,
     authRequired: false,
   })
-
-  // Check authentication on mount
-  useEffect(() => {
-    async function checkAuth() {
-      try {
-        const controller = new AbortController()
-        const timeout = setTimeout(() => controller.abort(), 3000)
-        const res = await fetch('/api/auth-check', { signal: controller.signal })
-        clearTimeout(timeout)
-        const data = await res.json()
-        setAuthState({
-          checked: true,
-          authenticated: data.authenticated ?? false,
-          authRequired: data.authRequired ?? false,
-        })
-      } catch {
-        // On error/timeout, assume no auth required (fail open for local dev)
-        setAuthState({
-          checked: true,
-          authenticated: true,
-          authRequired: false,
-        })
-      }
-    }
-    checkAuth()
-  }, [])
 
   // Derive active session from URL
   const chatMatch = pathname.match(/^\/chat\/(.+)$/)
