@@ -1062,44 +1062,36 @@ function ChatComposerComponent({
               className="relative ml-1 flex items-center gap-2"
               ref={modelSelectorRef}
             >
-              <TooltipProvider>
-                <TooltipRoot>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        if (isModelSwitcherDisabled) return
-                        setIsModelMenuOpen((prev) => !prev)
-                      }}
-                      className={cn(
-                        'inline-flex h-7 items-center gap-1 rounded-full bg-primary-100/70 px-2.5 text-[11px] font-medium text-primary-600 transition-colors hover:bg-primary-200 hover:text-primary-800',
-                        isModelSwitcherDisabled &&
-                          'cursor-not-allowed opacity-50',
-                      )}
-                      aria-haspopup="listbox"
-                      aria-expanded={
-                        !isModelSwitcherDisabled && isModelMenuOpen
-                      }
-                      aria-disabled={isModelSwitcherDisabled}
-                      disabled={isModelSwitcherDisabled}
-                    >
-                      <span className="max-w-[12rem] truncate">
-                        {modelButtonLabel}
-                      </span>
-                      <HugeiconsIcon
-                        icon={ArrowDown01Icon}
-                        size={12}
-                        strokeWidth={2}
-                        className="opacity-60"
-                      />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    {currentModel || modelAvailabilityLabel || 'Select model'}
-                  </TooltipContent>
-                </TooltipRoot>
-              </TooltipProvider>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  if (isModelSwitcherDisabled) return
+                  setIsModelMenuOpen((prev) => !prev)
+                }}
+                className={cn(
+                  'inline-flex h-7 items-center gap-1 rounded-full bg-primary-100/70 px-2.5 text-[11px] font-medium text-primary-600 transition-colors hover:bg-primary-200 hover:text-primary-800',
+                  isModelSwitcherDisabled &&
+                    'cursor-not-allowed opacity-50',
+                )}
+                aria-haspopup="listbox"
+                aria-expanded={
+                  !isModelSwitcherDisabled && isModelMenuOpen
+                }
+                aria-disabled={isModelSwitcherDisabled}
+                disabled={isModelSwitcherDisabled}
+                title={currentModel || modelAvailabilityLabel || 'Select model'}
+              >
+                <span className="max-w-[12rem] truncate">
+                  {modelButtonLabel}
+                </span>
+                <HugeiconsIcon
+                  icon={ArrowDown01Icon}
+                  size={12}
+                  strokeWidth={2}
+                  className="opacity-60"
+                />
+              </button>
               {modelAvailabilityLabel ? (
                 <span className="text-xs text-primary-500 text-pretty">
                   {modelAvailabilityLabel}

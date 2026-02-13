@@ -159,9 +159,9 @@ function TaskReminderRunner() {
 }
 
 function RootLayout() {
-  // Register service worker (client-side only)
+  // Register service worker (production only — dev mode causes fetch errors)
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && import.meta.env.PROD) {
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {
