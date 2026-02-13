@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { DialogClose, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 
@@ -160,6 +160,29 @@ function ProviderLineRenderer({ line }: { line: UsageLine }) {
   )
 }
 
+function getActionableMessage(provider: string, status: ProviderUsage['status'], originalMessage?: string): string {
+  if (status === 'auth_expired') {
+    if (provider === 'claude' || provider === 'codex') {
+      const cliCmd = provider === 'claude' ? 'claude' : 'codex'
+      return `Run \`${cliCmd}\` in terminal to re-authenticate your session.`
+    }
+    if (provider === 'openai') {
+      return 'Run `chatgpt` in terminal to refresh your ChatGPT session, or update your API key in Settings → Providers.'
+    }
+    return 'Re-authenticate your provider session or update your API key in Settings → Providers.'
+  }
+
+  if (status === 'missing_credentials') {
+    return 'Add your API key in Settings → Providers, or run the provider\'s CLI to authenticate.'
+  }
+
+  if (status === 'error') {
+    return 'Check your network connection and try refreshing. If the issue persists, check the provider\'s status page.'
+  }
+
+  return originalMessage || 'Provider data unavailable.'
+}
+
 function statusBadge(status: ProviderUsage['status']) {
   switch (status) {
     case 'ok':
@@ -198,6 +221,14 @@ function buildCsv(usage: UsageSummary): string {
   return rows.join('\n')
 }
 
+// Map provider IDs to their model strings
+const PROVIDER_TO_MODEL: Record<string, string> = {
+  'claude': 'anthropic/claude-sonnet-4-5',
+  'codex': 'openai/gpt-5.2-codex',
+  'openai': 'openai/gpt-4o',
+  'openrouter': 'openrouter/auto',
+}
+
 export function UsageDetailsModal({
   usage,
   error,
@@ -206,6 +237,64 @@ export function UsageDetailsModal({
   providerUpdatedAt,
 }: UsageDetailsModalProps) {
   const [activeTab, setActiveTab] = useState<'session' | 'providers'>('providers')
+  const [defaultModel, setDefaultModel] = useState<string | null>(null)
+  const [isSettingDefault, setIsSettingDefault] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  // Fetch current default model on mount
+  useEffect(() => {
+    fetch('/api/config-get')
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok && data.payload?.defaultModel) {
+          setDefaultModel(data.payload.defaultModel)
+        }
+      })
+      .catch(() => {
+        // Ignore errors
+      })
+  }, [])
+
+  const handleSetDefault = async (provider: string) => {
+    const modelString = PROVIDER_TO_MODEL[provider]
+    if (!modelString) return
+
+    setIsSettingDefault(true)
+    try {
+      const patch = { defaultModel: modelString }
+      const res = await fetch('/api/config-patch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          raw: JSON.stringify(patch, null, 2),
+          reason: 'Set default model from Usage Details',
+        }),
+      })
+
+      if (res.ok) {
+        // Optimistic update
+        setDefaultModel(modelString)
+      }
+    } catch (error) {
+      console.error('Failed to set default model:', error)
+    } finally {
+      setIsSettingDefault(false)
+    }
+  }
+
+  const handleRefreshProvider = async () => {
+    setIsRefreshing(true)
+    try {
+      // Force refresh by adding force=1 query param
+      await fetch('/api/provider-usage?force=1')
+      // Trigger a page refresh to update the data
+      window.location.reload()
+    } catch (error) {
+      console.error('Failed to refresh provider data:', error)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
 
   const handleExport = () => {
     const csv = buildCsv(usage)
@@ -323,6 +412,20 @@ export function UsageDetailsModal({
             </div>
           ) : null}
 
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-xs text-primary-500">
+              Auto-polls every 30s · Last updated {formatTimestamp(providerUpdatedAt ?? undefined)}
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleRefreshProvider}
+              disabled={isRefreshing}
+            >
+              {isRefreshing ? 'Refreshing...' : '🔄 Refresh'}
+            </Button>
+          </div>
+
           <div className="grid gap-3">
             {providerUsage.length === 0 ? (
               <div className="rounded-2xl border border-primary-200 bg-white/70 p-6 text-center">
@@ -332,48 +435,80 @@ export function UsageDetailsModal({
                 </div>
               </div>
             ) : (
-              providerUsage.map((provider) => (
-                <div
-                  key={provider.provider}
-                  className="rounded-2xl border border-primary-200 bg-white/70 p-4"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm font-semibold text-primary-900">
-                        {provider.displayName}
+              providerUsage.map((provider) => {
+                const providerModel = PROVIDER_TO_MODEL[provider.provider]
+                const isDefault = defaultModel === providerModel
+
+                return (
+                  <div
+                    key={provider.provider}
+                    className={`rounded-2xl border p-4 ${
+                      isDefault
+                        ? 'border-primary-300 bg-primary-50/50'
+                        : 'border-primary-200 bg-white/70'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm font-semibold text-primary-900">
+                          {provider.displayName}
+                        </div>
+                        {provider.plan ? (
+                          <span className="rounded-full bg-primary-100 px-2 py-0.5 text-[10px] font-medium text-primary-700">
+                            {provider.plan}
+                          </span>
+                        ) : null}
+                        {isDefault ? (
+                          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                            ⭐ Default
+                          </span>
+                        ) : null}
                       </div>
-                      {provider.plan ? (
-                        <span className="rounded-full bg-primary-100 px-2 py-0.5 text-[10px] font-medium text-primary-700">
-                          {provider.plan}
+                      <div className="flex items-center gap-2">
+                        {statusBadge(provider.status)}
+                        <span className="text-[10px] text-primary-400">
+                          {formatTimestamp(provider.updatedAt)}
                         </span>
-                      ) : null}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {statusBadge(provider.status)}
-                      <span className="text-[10px] text-primary-400">
-                        {formatTimestamp(provider.updatedAt)}
-                      </span>
-                    </div>
+
+                    {provider.status !== 'ok' ? (
+                      <div className="mt-3 space-y-2">
+                        <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs text-amber-700">
+                          {getActionableMessage(provider.provider, provider.status, provider.message)}
+                        </div>
+                        {provider.message && provider.message !== getActionableMessage(provider.provider, provider.status, provider.message) ? (
+                          <div className="text-[10px] text-primary-500">
+                            Details: {provider.message}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="mt-3 flex items-center justify-between gap-2">
+                          <div className="flex-1"></div>
+                          {!isDefault && providerModel ? (
+                            <button
+                              type="button"
+                              onClick={() => handleSetDefault(provider.provider)}
+                              disabled={isSettingDefault}
+                              className="rounded-lg border border-primary-200 bg-white px-3 py-1.5 text-xs font-medium text-primary-700 transition hover:bg-primary-50 disabled:opacity-50"
+                            >
+                              {isSettingDefault ? 'Setting...' : 'Set as Default'}
+                            </button>
+                          ) : null}
+                        </div>
+                        <div className="mt-3 space-y-3">
+                          {provider.lines.map((line, i) => (
+                            <ProviderLineRenderer key={`${line.label}-${i}`} line={line} />
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
-
-                  {provider.status !== 'ok' ? (
-                    <div className="mt-3 rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs text-amber-700">
-                      {provider.message || 'Provider data unavailable.'}
-                    </div>
-                  ) : (
-                    <div className="mt-4 space-y-3">
-                      {provider.lines.map((line, i) => (
-                        <ProviderLineRenderer key={`${line.label}-${i}`} line={line} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))
+                )
+              })
             )}
-          </div>
-
-          <div className="text-xs text-primary-500">
-            Auto-polls every 30s · Last updated {formatTimestamp(providerUpdatedAt ?? undefined)}
           </div>
         </>
       )}

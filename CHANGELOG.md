@@ -3,6 +3,7 @@
 ## v2.0.0
 
 ### Features
+
 - **Model Switcher** (Phase 1.1): Switch AI models via Gateway RPC from the chat composer
 - **Model Switcher Fixes** (Phase 1.2): Correct provider/model ID format, filter to configured models only
 - **Model Switcher Safeguards** (Phase 1.3): 10s undo toast, streaming confirmation, premium model detection, failure-safe rollback
@@ -13,12 +14,14 @@
 - **Release Hardening** (Phase 2.0): Feature audit, demo content removal, error handling improvements, docs
 
 ### Security
+
 - Sensitive field stripping on all API responses (apiKey, token, secret, password, refresh)
 - Provider names read from config keys only — secrets never accessed by Studio
 - Gateway URL masking in debug console
 - Config examples use placeholder keys only
 
 ### Docs
+
 - `docs/ACTIVITY_LOGS.md` — Activity log architecture
 - `docs/DEBUG_CONSOLE.md` — Debug console reference
 - `docs/PROVIDER_WIZARD.md` — Provider wizard guide
@@ -28,7 +31,9 @@
 - `docs/RELEASE_CHECKLIST.md` — Release process
 
 ## v0.1.1-alpha
+
 - Phase 0: UI honesty pass (demo badges, disabled features marked)
 
 ## v0.1.0-alpha
+
 - Initial Studio release

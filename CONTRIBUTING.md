@@ -30,15 +30,15 @@ npm run dev
 
 ### Development Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server with hot reload |
-| `npm run build` | Build optimized production bundle |
-| `npm run preview` | Preview production build locally |
-| `npm run lint` | Run ESLint and check for issues |
-| `npm run format` | Format code with Prettier |
-| `npm run check` | Format + lint (auto-fix) |
-| `npm test` | Run test suite |
+| Command           | Description                              |
+| ----------------- | ---------------------------------------- |
+| `npm run dev`     | Start development server with hot reload |
+| `npm run build`   | Build optimized production bundle        |
+| `npm run preview` | Preview production build locally         |
+| `npm run lint`    | Run ESLint and check for issues          |
+| `npm run format`  | Format code with Prettier                |
+| `npm run check`   | Format + lint (auto-fix)                 |
+| `npm test`        | Run test suite                           |
 
 ---
 
@@ -54,15 +54,16 @@ npm run dev
 - **Export types**: Place shared types in `src/types/`
 
 **Example:**
+
 ```typescript
 // ✅ Good
 type MessageContent = {
-  role: 'user' | 'assistant';
-  content: string;
-};
+  role: 'user' | 'assistant'
+  content: string
+}
 
 // ❌ Avoid
-const data: any = response.json();
+const data: any = response.json()
 ```
 
 ### React & Components
@@ -74,15 +75,19 @@ const data: any = response.json();
 - **Performance**: Use `useMemo`/`useCallback` for expensive operations
 
 **Example:**
+
 ```tsx
 // ✅ Good
 export function ChatMessage({ message }: { message: Message }) {
-  const formattedTime = useMemo(() => formatTime(message.timestamp), [message.timestamp]);
-  return <div>{formattedTime}</div>;
+  const formattedTime = useMemo(
+    () => formatTime(message.timestamp),
+    [message.timestamp],
+  )
+  return <div>{formattedTime}</div>
 }
 
 // ❌ Avoid default exports
-export default ChatMessage;
+export default ChatMessage
 ```
 
 ### Styling with Tailwind
@@ -93,6 +98,7 @@ export default ChatMessage;
 - **Consistent spacing**: Follow the existing design system
 
 **Example:**
+
 ```tsx
 // ✅ Good
 <div className="flex items-center gap-2 rounded-lg border border-zinc-200 p-4">
@@ -108,17 +114,20 @@ export default ChatMessage;
 #### ⛔ **No Portals or ScrollArea Components**
 
 **Why?**: Portals and custom scroll containers cause:
+
 - Layout shift and flickering
 - Z-index stacking issues
 - Accessibility problems (focus traps)
 - Complexity in event handling
 
 **Instead**:
+
 - Use native overflow (`overflow-y-auto`, `overflow-x-hidden`)
 - Use CSS positioning (`fixed`, `absolute`, `sticky`)
 - Let the browser handle scroll behavior
 
 **Example:**
+
 ```tsx
 // ✅ Good: Native overflow
 <div className="h-full overflow-y-auto">
@@ -138,18 +147,19 @@ export default ChatMessage;
 - **React state** for local component state
 
 **Example:**
+
 ```typescript
 // Server state (TanStack Query)
 const { data: sessions } = useQuery({
   queryKey: ['sessions'],
   queryFn: fetchSessions,
-});
+})
 
 // Global state (Zustand)
-const theme = useThemeStore(state => state.theme);
+const theme = useThemeStore((state) => state.theme)
 
 // Local state (React)
-const [isOpen, setIsOpen] = useState(false);
+const [isOpen, setIsOpen] = useState(false)
 ```
 
 ---
@@ -161,6 +171,7 @@ const [isOpen, setIsOpen] = useState(false);
 Run the following checklist:
 
 #### Code Quality
+
 - [ ] Code builds without errors: `npm run build`
 - [ ] Linter passes: `npm run lint`
 - [ ] Types check: `tsc --noEmit`
@@ -168,18 +179,21 @@ Run the following checklist:
 - [ ] Code formatted: `npm run format`
 
 #### Security
+
 - [ ] **No secrets, API keys, or tokens** in code
 - [ ] No hardcoded credentials or sensitive URLs
 - [ ] User paths use folder names only (not full system paths)
 - [ ] Auth tokens handled securely (never logged or exposed)
 
 #### Documentation
+
 - [ ] README updated if adding new features
 - [ ] JSDoc comments for new functions/components
 - [ ] CHANGELOG entry if user-facing change
 - [ ] Architecture docs updated if changing structure
 
 #### Testing
+
 - [ ] New features have test coverage
 - [ ] Manual testing completed (run app and verify changes)
 - [ ] Edge cases considered (empty states, errors, loading)
@@ -199,20 +213,24 @@ Run the following checklist:
 
 ```markdown
 ## Description
+
 Brief description of what this PR does.
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Documentation update
 - [ ] Refactor
 
 ## Testing
+
 - [ ] Tested locally
 - [ ] Added/updated tests
 - [ ] Verified on multiple browsers
 
 ## Screenshots (if applicable)
+
 Add screenshots or videos showing the changes.
 ```
 
@@ -220,25 +238,29 @@ Add screenshots or videos showing the changes.
 
 ## 📚 Where to Add Documentation
 
-| Type | Location | Description |
-|------|----------|-------------|
-| Feature docs | `docs/features/` | How features work |
-| API changes | `docs/api/` | API endpoint documentation |
-| Architecture | `docs/ARCHITECTURE.md` | System design decisions |
-| Component docs | Component file (JSDoc) | Inline documentation |
-| Release notes | `CHANGELOG.md` | User-facing changes |
+| Type           | Location               | Description                |
+| -------------- | ---------------------- | -------------------------- |
+| Feature docs   | `docs/features/`       | How features work          |
+| API changes    | `docs/api/`            | API endpoint documentation |
+| Architecture   | `docs/ARCHITECTURE.md` | System design decisions    |
+| Component docs | Component file (JSDoc) | Inline documentation       |
+| Release notes  | `CHANGELOG.md`         | User-facing changes        |
 
 **Example JSDoc:**
+
 ```typescript
 /**
  * Sends a message to the AI agent and returns the response.
- * 
+ *
  * @param sessionId - Unique session identifier
  * @param content - Message content to send
  * @returns Promise resolving to the AI response
  * @throws {GatewayError} If gateway is unreachable
  */
-export async function sendMessage(sessionId: string, content: string): Promise<Message> {
+export async function sendMessage(
+  sessionId: string,
+  content: string,
+): Promise<Message> {
   // implementation
 }
 ```
@@ -283,6 +305,7 @@ src/
 Clear description of the bug.
 
 **Steps to Reproduce**
+
 1. Go to '...'
 2. Click on '...'
 3. See error
@@ -297,6 +320,7 @@ What actually happens.
 Add screenshots if applicable.
 
 **Environment**
+
 - OS: [e.g., macOS 14.0]
 - Browser: [e.g., Chrome 120]
 - Node.js: [e.g., 22.0.0]

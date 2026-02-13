@@ -25,7 +25,7 @@ jobs:
       release_upload_url: ${{ steps.create-release.outputs.upload_url }}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Get version from tag
         id: version
         run: |
@@ -34,7 +34,7 @@ jobs:
           else
             echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Create Release
         id: create-release
         uses: softprops/action-gh-release@v1
@@ -45,39 +45,39 @@ jobs:
           prerelease: ${{ contains(steps.version.outputs.version, 'beta') || contains(steps.version.outputs.version, 'alpha') }}
           body: |
             ## OpenClaw Studio ${{ steps.version.outputs.version }}
-            
+
             **VSCode for AI Agents** - Desktop interface for OpenClaw Gateway
-            
+
             ### Downloads
-            
+
             | Platform | Architecture | Download |
             |----------|-------------|----------|
             | macOS | Apple Silicon (M1/M2/M3) | `OpenClaw-Studio_*_aarch64.dmg` |
             | macOS | Intel | `OpenClaw-Studio_*_x64.dmg` |
             | Windows | 64-bit | `OpenClaw-Studio_*_x64-setup.exe` |
             | Linux | 64-bit | `OpenClaw-Studio_*_amd64.AppImage` |
-            
+
             ### Installation
-            
+
             **macOS:** Download the `.dmg`, open it, and drag OpenClaw Studio to Applications.
-            
+
             **Windows:** Download and run the installer.
-            
+
             **Linux:** Download the AppImage, make it executable (`chmod +x`), and run.
-            
+
             ### What's New
-            
+
             - 🎛️ Full Dashboard with Gateway connection status
             - 📊 Activity Logs viewer for agent events
             - 🌐 Browser control interface
             - 📁 File explorer with Monaco editor
             - 💬 Chat interface for agent conversations
             - ⚙️ Settings, Memory, Skills management
-            
+
             ---
-            
+
             Built with ❤️ by [@outsourc_e](https://twitter.com/outsourc_e)
-            
+
             Learn more at [buildingthefuture.io](https://buildingthefuture.io)
 
   build-tauri:

@@ -33,7 +33,7 @@ jobs:
         if: always()
         run: |
           echo "🔍 Scanning for common secret patterns..."
-          
+
           # Patterns that indicate secrets
           PATTERNS=(
             "sk-[a-zA-Z0-9]{20,}"
@@ -45,7 +45,7 @@ jobs:
             "-----BEGIN RSA"
             "-----BEGIN OPENSSH"
           )
-          
+
           FOUND=0
           for pattern in "${PATTERNS[@]}"; do
             if grep -rE "$pattern" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.json" --include="*.env*" . 2>/dev/null | grep -v node_modules | grep -v ".lock" | grep -v dist; then
@@ -53,10 +53,10 @@ jobs:
               FOUND=1
             fi
           done
-          
+
           if [ $FOUND -eq 1 ]; then
             echo "❌ Potential secrets detected! Please review and remove."
             exit 1
           fi
-          
+
           echo "✅ No obvious secret patterns found"

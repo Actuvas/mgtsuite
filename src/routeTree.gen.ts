@@ -62,6 +62,7 @@ import { Route as ApiCronRouteImport } from './routes/api/cron'
 import { Route as ApiCostRouteImport } from './routes/api/cost'
 import { Route as ApiContextUsageRouteImport } from './routes/api/context-usage'
 import { Route as ApiConfigPatchRouteImport } from './routes/api/config-patch'
+import { Route as ApiConfigGetRouteImport } from './routes/api/config-get'
 import { Route as ApiCliAgentsRouteImport } from './routes/api/cli-agents'
 import { Route as ApiChatEventsRouteImport } from './routes/api/chat-events'
 import { Route as ApiChatAbortRouteImport } from './routes/api/chat-abort'
@@ -355,6 +356,11 @@ const ApiConfigPatchRoute = ApiConfigPatchRouteImport.update({
   path: '/api/config-patch',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiConfigGetRoute = ApiConfigGetRouteImport.update({
+  id: '/api/config-get',
+  path: '/api/config-get',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCliAgentsRoute = ApiCliAgentsRouteImport.update({
   id: '/api/cli-agents',
   path: '/api/cli-agents',
@@ -520,6 +526,7 @@ export interface FileRoutesByFullPath {
   '/api/chat-abort': typeof ApiChatAbortRoute
   '/api/chat-events': typeof ApiChatEventsRoute
   '/api/cli-agents': typeof ApiCliAgentsRoute
+  '/api/config-get': typeof ApiConfigGetRoute
   '/api/config-patch': typeof ApiConfigPatchRoute
   '/api/context-usage': typeof ApiContextUsageRoute
   '/api/cost': typeof ApiCostRoute
@@ -601,6 +608,7 @@ export interface FileRoutesByTo {
   '/api/chat-abort': typeof ApiChatAbortRoute
   '/api/chat-events': typeof ApiChatEventsRoute
   '/api/cli-agents': typeof ApiCliAgentsRoute
+  '/api/config-get': typeof ApiConfigGetRoute
   '/api/config-patch': typeof ApiConfigPatchRoute
   '/api/context-usage': typeof ApiContextUsageRoute
   '/api/cost': typeof ApiCostRoute
@@ -684,6 +692,7 @@ export interface FileRoutesById {
   '/api/chat-abort': typeof ApiChatAbortRoute
   '/api/chat-events': typeof ApiChatEventsRoute
   '/api/cli-agents': typeof ApiCliAgentsRoute
+  '/api/config-get': typeof ApiConfigGetRoute
   '/api/config-patch': typeof ApiConfigPatchRoute
   '/api/context-usage': typeof ApiContextUsageRoute
   '/api/cost': typeof ApiCostRoute
@@ -768,6 +777,7 @@ export interface FileRouteTypes {
     | '/api/chat-abort'
     | '/api/chat-events'
     | '/api/cli-agents'
+    | '/api/config-get'
     | '/api/config-patch'
     | '/api/context-usage'
     | '/api/cost'
@@ -849,6 +859,7 @@ export interface FileRouteTypes {
     | '/api/chat-abort'
     | '/api/chat-events'
     | '/api/cli-agents'
+    | '/api/config-get'
     | '/api/config-patch'
     | '/api/context-usage'
     | '/api/cost'
@@ -931,6 +942,7 @@ export interface FileRouteTypes {
     | '/api/chat-abort'
     | '/api/chat-events'
     | '/api/cli-agents'
+    | '/api/config-get'
     | '/api/config-patch'
     | '/api/context-usage'
     | '/api/cost'
@@ -1014,6 +1026,7 @@ export interface RootRouteChildren {
   ApiChatAbortRoute: typeof ApiChatAbortRoute
   ApiChatEventsRoute: typeof ApiChatEventsRoute
   ApiCliAgentsRoute: typeof ApiCliAgentsRoute
+  ApiConfigGetRoute: typeof ApiConfigGetRoute
   ApiConfigPatchRoute: typeof ApiConfigPatchRoute
   ApiContextUsageRoute: typeof ApiContextUsageRoute
   ApiCostRoute: typeof ApiCostRoute
@@ -1428,6 +1441,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiConfigPatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/config-get': {
+      id: '/api/config-get'
+      path: '/api/config-get'
+      fullPath: '/api/config-get'
+      preLoaderRoute: typeof ApiConfigGetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/cli-agents': {
       id: '/api/cli-agents'
       path: '/api/cli-agents'
@@ -1725,6 +1745,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatAbortRoute: ApiChatAbortRoute,
   ApiChatEventsRoute: ApiChatEventsRoute,
   ApiCliAgentsRoute: ApiCliAgentsRoute,
+  ApiConfigGetRoute: ApiConfigGetRoute,
   ApiConfigPatchRoute: ApiConfigPatchRoute,
   ApiContextUsageRoute: ApiContextUsageRoute,
   ApiCostRoute: ApiCostRoute,

@@ -29,5 +29,5 @@ Browser UI → /api/* routes → Server-side Gateway Client → OpenClaw Gateway
 ## Supported Versions
 
 | Version | Supported |
-|---------|-----------|
+| ------- | --------- |
 | 1.x     | ✅        |

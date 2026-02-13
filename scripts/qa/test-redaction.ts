@@ -1,7 +1,7 @@
 /**
  * Test script for diagnostics bundle redaction
  * Phase 2.4-001: Verify no sensitive patterns leak through
- * 
+ *
  * Run: npx tsx scripts/qa/test-redaction.ts
  */
 
@@ -11,32 +11,100 @@ import {
   extractFolderName,
 } from '../../src/lib/diagnostics'
 
-const SENSITIVE_TEST_CASES: Array<{ input: string; shouldRedact: boolean; description: string }> = [
+const SENSITIVE_TEST_CASES: Array<{
+  input: string
+  shouldRedact: boolean
+  description: string
+}> = [
   // OpenAI keys
-  { input: 'sk-abc123def456ghi789jkl012mno345pqr678', shouldRedact: true, description: 'OpenAI API key' },
-  { input: 'Bearer sk-ant-api03-abc123', shouldRedact: true, description: 'Anthropic API key with Bearer' },
-  
+  {
+    input: 'sk-abc123def456ghi789jkl012mno345pqr678',
+    shouldRedact: true,
+    description: 'OpenAI API key',
+  },
+  {
+    input: 'Bearer sk-ant-api03-abc123',
+    shouldRedact: true,
+    description: 'Anthropic API key with Bearer',
+  },
+
   // GitHub tokens
-  { input: 'ghp_abc123def456ghi789jkl012mno345pqr678stu', shouldRedact: true, description: 'GitHub PAT' },
-  { input: 'github_pat_11ABC123_xyz789', shouldRedact: true, description: 'GitHub fine-grained PAT' },
-  
+  {
+    input: 'ghp_abc123def456ghi789jkl012mno345pqr678stu',
+    shouldRedact: true,
+    description: 'GitHub PAT',
+  },
+  {
+    input: 'github_pat_11ABC123_xyz789',
+    shouldRedact: true,
+    description: 'GitHub fine-grained PAT',
+  },
+
   // Generic patterns
-  { input: 'token=abc123def456', shouldRedact: true, description: 'Generic token' },
-  { input: 'secret: mysecretvalue123', shouldRedact: true, description: 'Generic secret' },
-  { input: 'password=hunter2verysecure', shouldRedact: true, description: 'Password' },
-  { input: 'api_key="sk-proj-12345"', shouldRedact: true, description: 'API key in quotes' },
-  { input: 'Authorization: Bearer xyz.abc.123', shouldRedact: true, description: 'Auth header' },
-  
+  {
+    input: 'token=abc123def456',
+    shouldRedact: true,
+    description: 'Generic token',
+  },
+  {
+    input: 'secret: mysecretvalue123',
+    shouldRedact: true,
+    description: 'Generic secret',
+  },
+  {
+    input: 'password=hunter2verysecure',
+    shouldRedact: true,
+    description: 'Password',
+  },
+  {
+    input: 'api_key="sk-proj-12345"',
+    shouldRedact: true,
+    description: 'API key in quotes',
+  },
+  {
+    input: 'Authorization: Bearer xyz.abc.123',
+    shouldRedact: true,
+    description: 'Auth header',
+  },
+
   // Paths
-  { input: '/Users/eric/secret/project', shouldRedact: true, description: 'macOS user path' },
-  { input: '/home/eric/.config/tokens', shouldRedact: true, description: 'Linux user path' },
-  { input: 'C:\\Users\\Eric\\Documents\\secrets', shouldRedact: true, description: 'Windows user path' },
-  
+  {
+    input: '/Users/eric/secret/project',
+    shouldRedact: true,
+    description: 'macOS user path',
+  },
+  {
+    input: '/home/eric/.config/tokens',
+    shouldRedact: true,
+    description: 'Linux user path',
+  },
+  {
+    input: 'C:\\Users\\Eric\\Documents\\secrets',
+    shouldRedact: true,
+    description: 'Windows user path',
+  },
+
   // Safe values
-  { input: 'Gateway connected', shouldRedact: false, description: 'Normal status' },
-  { input: 'Session started', shouldRedact: false, description: 'Normal event' },
-  { input: 'Error: connection refused', shouldRedact: false, description: 'Error message' },
-  { input: 'ws://127.0.0.1:18789', shouldRedact: false, description: 'Local URL' },
+  {
+    input: 'Gateway connected',
+    shouldRedact: false,
+    description: 'Normal status',
+  },
+  {
+    input: 'Session started',
+    shouldRedact: false,
+    description: 'Normal event',
+  },
+  {
+    input: 'Error: connection refused',
+    shouldRedact: false,
+    description: 'Error message',
+  },
+  {
+    input: 'ws://127.0.0.1:18789',
+    shouldRedact: false,
+    description: 'Local URL',
+  },
 ]
 
 let passed = 0
@@ -47,7 +115,7 @@ console.log('🔒 Testing diagnostics redaction...\n')
 for (const testCase of SENSITIVE_TEST_CASES) {
   const result = redactSensitiveData(testCase.input)
   const wasRedacted = result.includes('[REDACTED]')
-  
+
   if (wasRedacted === testCase.shouldRedact) {
     console.log(`✅ ${testCase.description}`)
     passed++
@@ -92,7 +160,9 @@ if (redactedObject.token === '[REDACTED]') {
   failed++
 }
 
-if ((redactedObject.nested as Record<string, unknown>).secretKey === '[REDACTED]') {
+if (
+  (redactedObject.nested as Record<string, unknown>).secretKey === '[REDACTED]'
+) {
   console.log('✅ nested secretKey field redacted')
   passed++
 } else {
@@ -124,7 +194,9 @@ for (const test of pathTests) {
     console.log(`✅ extractFolderName("${test.input}") = "${result}"`)
     passed++
   } else {
-    console.log(`❌ extractFolderName("${test.input}") = "${result}", expected "${test.expected}"`)
+    console.log(
+      `❌ extractFolderName("${test.input}") = "${result}", expected "${test.expected}"`,
+    )
     failed++
   }
 }

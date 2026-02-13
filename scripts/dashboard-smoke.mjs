@@ -50,7 +50,8 @@ await check('GET /api/sessions', `${BASE}/api/sessions`, (d) => {
 await check('GET /api/session-status', `${BASE}/api/session-status`, (d) => {
   if (!d.payload) return 'missing payload'
   if (!d.payload.sessions) return 'missing payload.sessions'
-  if (typeof d.payload.sessions.count !== 'number') return 'missing sessions.count'
+  if (typeof d.payload.sessions.count !== 'number')
+    return 'missing sessions.count'
   return true
 })
 

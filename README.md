@@ -17,6 +17,7 @@
 ## ✨ Features
 
 ### 💬 **Intelligent Chat**
+
 - Real-time conversations with AI agents powered by OpenClaw
 - Multi-session management with session history
 - Inline message editing and regeneration
@@ -25,6 +26,7 @@
 - Message search (Cmd+F)
 
 ### 🤖 **Agent Hub**
+
 - Browse and manage AI agent instances
 - Launch CLI agents directly from the UI
 - View active sessions and agent status
@@ -32,6 +34,7 @@
 - Real-time agent performance metrics
 
 ### 📊 **Dashboard & Monitoring**
+
 - Live usage and cost tracking across all providers
 - Interactive charts showing API consumption
 - Provider-specific breakdowns (OpenAI, Anthropic, Google, etc.)
@@ -39,18 +42,21 @@
 - Gateway health monitoring
 
 ### 🌐 **Built-in Browser**
+
 - Headed Chromium with stealth anti-detection
 - Agent handoff — share pages directly with your AI
 - Persistent sessions (login once, cookies survive restarts)
 - Control panel for web automation tasks
 
 ### 🛒 **Skills Marketplace**
+
 - Browse 2,000+ skills from ClawdHub registry
 - One-click install with dependency resolution
 - **Security scanning** — every skill scanned for suspicious patterns before install
 - Auto-discovery of locally installed skills
 
 ### 🛠️ **Developer Tools**
+
 - **Terminal**: Integrated terminal with cross-platform support
 - **File Explorer**: Browse workspace files with Monaco code editor
 - **Debug Console**: Gateway diagnostics with pattern-based troubleshooter
@@ -58,6 +64,7 @@
 - **Cron Manager**: Schedule recurring tasks and automation
 
 ### 🔍 **Power User Features**
+
 - **Global Search** (Cmd+K): Quick navigation across all screens
 - **Browser Automation**: Control panel for web scraping and browser tasks
 - **Activity Feed**: Real-time event stream from Gateway WebSocket
@@ -65,6 +72,7 @@
 - **Keyboard Shortcuts**: Press `?` to see all shortcuts
 
 ### 🎨 **Customization**
+
 - Dynamic accent color system (pick any color)
 - 3-way theme toggle (System / Light / Dark)
 - Settings popup dialog with 6 tabs
@@ -72,6 +80,7 @@
 - Model switcher — always accessible, never disabled
 
 ### 🔒 **Security-First**
+
 - Server-side API routes (keys never exposed to browser)
 - Rate limiting on all endpoints
 - Zod validation on all inputs
@@ -166,6 +175,7 @@ tauri build
 ClawSuite connects to your OpenClaw gateway. Set the gateway URL in:
 
 1. **Environment Variable** (recommended):
+
    ```bash
    # Create .env file
    echo "CLAWDBOT_GATEWAY_URL=ws://127.0.0.1:18789" > .env
@@ -286,16 +296,16 @@ clawsuite/
 
 ## ⌨️ Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| **Cmd+K** (Ctrl+K) | Open global search |
+| Shortcut           | Action                  |
+| ------------------ | ----------------------- |
+| **Cmd+K** (Ctrl+K) | Open global search      |
 | **Cmd+F** (Ctrl+F) | Search messages in chat |
-| **Cmd+`** (Ctrl+`) | Toggle terminal |
-| **Cmd+Enter** | Send message |
-| **Cmd+N** | New chat session |
-| **Cmd+/** | Toggle chat panel |
-| **?** | Show all shortcuts |
-| **Esc** | Close dialogs/modals |
+| **Cmd+`** (Ctrl+`) | Toggle terminal         |
+| **Cmd+Enter**      | Send message            |
+| **Cmd+N**          | New chat session        |
+| **Cmd+/**          | Toggle chat panel       |
+| **?**              | Show all shortcuts      |
+| **Esc**            | Close dialogs/modals    |
 
 ---
 
@@ -321,6 +331,7 @@ git push origin feature/your-feature-name
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines, including:
+
 - Code style and conventions (TypeScript strict, Tailwind, **no portals/ScrollArea**)
 - PR checklist and review process
 - Architecture decisions
