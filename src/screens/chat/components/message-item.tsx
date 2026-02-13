@@ -490,6 +490,11 @@ function MessageItemComponent({
     }
   }, [expandAllToolSections])
 
+  // Check if this message is queued (optimistic and not yet confirmed by server)
+  const isQueued = Boolean(
+    (message as any).__optimisticId || message.status === 'sending'
+  )
+
   return (
     <div
       ref={wrapperRef}
@@ -579,6 +584,7 @@ function MessageItemComponent({
               !isUser
                 ? 'bg-transparent w-full'
                 : 'bg-primary-100 max-w-[75%] rounded-2xl px-4 py-2.5',
+              isQueued && isUser && 'opacity-70',
               bubbleClassName,
             )}
           >
@@ -696,6 +702,7 @@ function MessageItemComponent({
           timestamp={timestamp}
           align={isUser ? 'end' : 'start'}
           forceVisible={forceActionsVisible}
+          isQueued={isUser && isQueued}
         />
       )}
     </div>

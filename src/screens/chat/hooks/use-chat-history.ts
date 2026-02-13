@@ -241,11 +241,12 @@ function mergeOptimisticHistoryMessages(
 ): Array<GatewayMessage> {
   if (!optimisticMessages.length) return serverMessages
 
-  const now = Date.now()
   const merged = [...serverMessages]
   
   for (const optimisticMessage of optimisticMessages) {
+    // Check if this optimistic message has been confirmed by the server
     const hasMatch = serverMessages.some((serverMessage) => {
+      // Primary match: clientId (most reliable)
       if (
         optimisticMessage.clientId &&
         serverMessage.clientId &&
@@ -253,6 +254,8 @@ function mergeOptimisticHistoryMessages(
       ) {
         return true
       }
+      
+      // Secondary match: __optimisticId
       if (
         optimisticMessage.__optimisticId &&
         serverMessage.__optimisticId &&
@@ -260,6 +263,8 @@ function mergeOptimisticHistoryMessages(
       ) {
         return true
       }
+      
+      // Fallback match: same text content + role + timestamp within 10s
       if (optimisticMessage.role && serverMessage.role) {
         if (optimisticMessage.role !== serverMessage.role) return false
       }
@@ -272,13 +277,11 @@ function mergeOptimisticHistoryMessages(
     })
 
     if (!hasMatch) {
-      // Preserve optimistic messages that are still "sending" or created within the last 10 seconds
-      const createdAt = (optimisticMessage as any).__createdAt || optimisticMessage.timestamp || 0
-      const age = now - createdAt
-      const isRecent = age < 10000
+      // Preserve unconfirmed optimistic messages regardless of age
+      // They will be shown with a "queued" indicator
       const isSending = optimisticMessage.status === 'sending' || Boolean(optimisticMessage.__optimisticId)
       
-      if (isSending && isRecent) {
+      if (isSending) {
         merged.push(optimisticMessage)
       }
     }

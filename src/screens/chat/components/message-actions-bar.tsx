@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { Copy01Icon, Tick02Icon } from '@hugeicons/core-free-icons'
+import { Copy01Icon, Tick02Icon, Clock02Icon } from '@hugeicons/core-free-icons'
 import { MessageTimestamp } from './message-timestamp'
 import {
   TooltipContent,
@@ -15,6 +15,7 @@ type MessageActionsBarProps = {
   align: 'start' | 'end'
   timestamp: number
   forceVisible?: boolean
+  isQueued?: boolean
 }
 
 export function MessageActionsBar({
@@ -22,6 +23,7 @@ export function MessageActionsBar({
   align,
   timestamp,
   forceVisible = false,
+  isQueued = false,
 }: MessageActionsBarProps) {
   const [copied, setCopied] = useState(false)
 
@@ -41,10 +43,31 @@ export function MessageActionsBar({
     <div
       className={cn(
         'flex items-center gap-2 text-xs text-primary-600 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 duration-100 ease-out',
-        forceVisible ? 'opacity-100' : 'opacity-0',
+        forceVisible || isQueued ? 'opacity-100' : 'opacity-0',
         positionClass,
       )}
     >
+      {isQueued && (
+        <TooltipProvider>
+          <TooltipRoot>
+            <TooltipTrigger
+              type="button"
+              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-primary-500 cursor-default"
+            >
+              <HugeiconsIcon
+                icon={Clock02Icon}
+                size={14}
+                strokeWidth={1.6}
+                className="opacity-70"
+              />
+              <span className="text-[11px] font-medium">Queued</span>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              Waiting for agent to process
+            </TooltipContent>
+          </TooltipRoot>
+        </TooltipProvider>
+      )}
       <TooltipProvider>
         <TooltipRoot>
           <TooltipTrigger
