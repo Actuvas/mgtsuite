@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { DialogClose, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 
@@ -238,6 +239,7 @@ export function UsageDetailsModal({
   providerUpdatedAt,
   onRefreshProviders,
 }: UsageDetailsModalProps) {
+  const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<'session' | 'providers'>('providers')
   const [defaultModel, setDefaultModel] = useState<string | null>(null)
   const [isSettingDefault, setIsSettingDefault] = useState(false)
@@ -287,6 +289,8 @@ export function UsageDetailsModal({
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ model: modelString }),
           })
+          // Invalidate session-status queries to refresh UI
+          queryClient.invalidateQueries({ queryKey: ['gateway'] })
         } catch { /* best effort — session switch is secondary */ }
       }
     } catch (error) {
