@@ -161,17 +161,24 @@ function TaskReminderRunner() {
 }
 
 function RootLayout() {
-  // Register service worker (production only — dev mode causes fetch errors)
+  // Unregister any existing service workers — they cause stale asset issues
+  // after Docker image updates and behind reverse proxies (Pangolin, Cloudflare, etc.)
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && import.meta.env.PROD) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((registration) => {
-          console.log('[PWA] Service Worker registered:', registration.scope)
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const registration of registrations) {
+          registration.unregister()
+          console.log('[PWA] Service Worker unregistered:', registration.scope)
+        }
+      })
+      // Also clear any stale caches
+      if ('caches' in window) {
+        caches.keys().then((names) => {
+          for (const name of names) {
+            caches.delete(name)
+          }
         })
-        .catch((error) => {
-          console.error('[PWA] Service Worker registration failed:', error)
-        })
+      }
     }
   }, [])
 

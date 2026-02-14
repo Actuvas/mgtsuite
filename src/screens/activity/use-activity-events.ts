@@ -176,6 +176,15 @@ export function useActivityEvents(options: UseActivityEventsOptions) {
         const parsed = parseSsePayload(event.data)
         if (!parsed) return
 
+        // Update connection status based on gateway connect/disconnect events
+        if (parsed.type === 'gateway') {
+          if (parsed.title === 'Gateway connected') {
+            setIsConnected(true)
+          } else if (parsed.title === 'Gateway disconnected') {
+            setIsConnected(false)
+          }
+        }
+
         appendIncoming([parsed])
       })
 
@@ -186,7 +195,13 @@ export function useActivityEvents(options: UseActivityEventsOptions) {
         try {
           const payload = JSON.parse(event.data) as Record<string, unknown>
           if (typeof payload.connected === 'boolean') {
-            setIsConnected(payload.connected)
+            // Only update to disconnected if EventSource itself is still open
+            // (onopen already set connected=true if the SSE stream is healthy)
+            if (payload.connected) {
+              setIsConnected(true)
+            }
+            // Don't set false here — the SSE ready event fires before the gateway
+            // WS fully connects, so it would override the onopen=true with false
           }
         } catch {
           // ignore malformed payloads

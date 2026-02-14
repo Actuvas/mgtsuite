@@ -30,12 +30,27 @@ type UpdateCheckResult = {
   changelog: Array<CommitEntry>
 }
 
+let gitAvailable: boolean | null = null
+
+function isGitAvailable(): boolean {
+  if (gitAvailable !== null) return gitAvailable
+  try {
+    execSync('git --version', { timeout: 5_000, stdio: 'pipe' })
+    gitAvailable = true
+  } catch {
+    gitAvailable = false
+  }
+  return gitAvailable
+}
+
 function runGit(args: string, cwd: string): string {
+  if (!isGitAvailable()) return ''
   try {
     return execSync(`git ${args}`, {
       cwd,
       timeout: 15_000,
       encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
     }).trim()
   } catch {
     return ''
@@ -129,6 +144,10 @@ function checkForUpdates(): UpdateCheckResult {
 }
 
 function runUpdate(): { ok: boolean; output: string } {
+  if (!isGitAvailable()) {
+    return { ok: false, output: 'git is not available in this environment' }
+  }
+
   const repoPath = path.resolve(process.cwd())
   const remote = detectRemote(repoPath)
   const currentBranch =
@@ -140,6 +159,7 @@ function runUpdate(): { ok: boolean; output: string } {
       cwd: repoPath,
       timeout: 30_000,
       encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
     }).trim()
 
     // Install deps
