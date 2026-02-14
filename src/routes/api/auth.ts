@@ -8,6 +8,11 @@ import {
   createSessionCookie,
   isPasswordProtectionEnabled,
 } from '../../server/auth-middleware'
+import {
+  getClientIp,
+  rateLimit,
+  rateLimitResponse,
+} from '../../server/rate-limit'
 
 const AuthSchema = z.object({
   password: z.string().max(1000),
@@ -23,6 +28,12 @@ export const Route = createFileRoute('/api/auth')({
             { ok: false, error: 'Authentication not required' },
             { status: 400 },
           )
+        }
+
+        // Rate limit: max 5 auth attempts per minute per IP
+        const ip = getClientIp(request)
+        if (!rateLimit(`auth:${ip}`, 5, 60_000)) {
+          return rateLimitResponse()
         }
 
         try {

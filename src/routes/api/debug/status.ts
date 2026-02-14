@@ -5,6 +5,7 @@ import {
   getActivityStreamDiagnostics,
   sanitizeText,
 } from '../../../server/activity-stream'
+import { isAuthenticated } from '../../../server/auth-middleware'
 
 const DEFAULT_GATEWAY_URL = 'ws://127.0.0.1:18789'
 
@@ -39,7 +40,11 @@ function maskGatewayUrl(rawUrl: string): string {
 export const Route = createFileRoute('/api/debug/status')({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async ({ request }) => {
+        if (!isAuthenticated(request)) {
+          return json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
         void ensureActivityStreamStarted().catch(function ignoreStartError() {
           // endpoint still returns diagnostics while disconnected
         })

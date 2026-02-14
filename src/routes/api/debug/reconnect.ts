@@ -5,6 +5,7 @@ import {
   reconnectActivityStream,
   sanitizeText,
 } from '../../../server/activity-stream'
+import { isAuthenticated } from '../../../server/auth-middleware'
 
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error) return sanitizeText(error.message)
@@ -14,7 +15,11 @@ function toErrorMessage(error: unknown): string {
 export const Route = createFileRoute('/api/debug/reconnect')({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        if (!isAuthenticated(request)) {
+          return json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
         try {
           await reconnectActivityStream()
           return json({

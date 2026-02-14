@@ -264,8 +264,22 @@ function fallbackForNoApiKey(): DebugAnalysis {
   }
 }
 
+function maskApiKeys(value: string): string {
+  const patterns = [
+    /\bBearer\s+[A-Za-z0-9._~+/=-]{8,}\b/gi,
+    /\bsk-[A-Za-z0-9_-]{8,}\b/gi,
+    /\bkey-[A-Za-z0-9_-]{8,}\b/gi,
+    /\b[A-Za-z0-9]{20,}\b/g,
+  ]
+
+  return patterns.reduce(function redact(masked, pattern) {
+    return masked.replace(pattern, '[REDACTED]')
+  }, value)
+}
+
 function fallbackForFailure(error: unknown): DebugAnalysis {
-  const message = error instanceof Error ? error.message : String(error)
+  const rawMessage = error instanceof Error ? error.message : String(error)
+  const message = maskApiKeys(rawMessage)
   return {
     summary: 'Debug analysis request failed.',
     rootCause: message,
