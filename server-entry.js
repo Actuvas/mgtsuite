@@ -1,16 +1,89 @@
 import { createServer } from 'node:http'
+import { readFile, stat } from 'node:fs/promises'
+import { join, extname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import server from './dist/server/server.js'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
+const CLIENT_DIR = join(__dirname, 'dist', 'client')
 
 const port = parseInt(process.env.PORT || '3000', 10)
 const host = process.env.HOST || '0.0.0.0'
 
+const MIME_TYPES = {
+  '.js': 'application/javascript',
+  '.mjs': 'application/javascript',
+  '.css': 'text/css',
+  '.html': 'text/html',
+  '.json': 'application/json',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.gif': 'image/gif',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.eot': 'application/vnd.ms-fontobject',
+  '.map': 'application/json',
+  '.txt': 'text/plain',
+  '.xml': 'application/xml',
+  '.webmanifest': 'application/manifest+json',
+}
+
+async function tryServeStatic(req, res) {
+  const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`)
+  const pathname = decodeURIComponent(url.pathname)
+
+  // Prevent directory traversal
+  if (pathname.includes('..')) return false
+
+  const filePath = join(CLIENT_DIR, pathname)
+
+  // Make sure the resolved path is within CLIENT_DIR
+  if (!filePath.startsWith(CLIENT_DIR)) return false
+
+  try {
+    const fileStat = await stat(filePath)
+    if (!fileStat.isFile()) return false
+
+    const ext = extname(filePath).toLowerCase()
+    const contentType = MIME_TYPES[ext] || 'application/octet-stream'
+    const data = await readFile(filePath)
+
+    const headers = {
+      'Content-Type': contentType,
+      'Content-Length': data.length,
+    }
+
+    // Cache hashed assets aggressively (they have content hashes in filenames)
+    if (pathname.startsWith('/assets/')) {
+      headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    }
+
+    res.writeHead(200, headers)
+    res.end(data)
+    return true
+  } catch {
+    return false
+  }
+}
+
 const httpServer = createServer(async (req, res) => {
+  // Try static files first (client assets)
+  if (req.method === 'GET' || req.method === 'HEAD') {
+    const served = await tryServeStatic(req, res)
+    if (served) return
+  }
+
+  // Fall through to SSR handler
   const url = new URL(
     req.url || '/',
     `http://${req.headers.host || 'localhost'}`,
   )
 
-  // Build a standard Request object
   const headers = new Headers()
   for (const [key, value] of Object.entries(req.headers)) {
     if (value) headers.set(key, Array.isArray(value) ? value.join(', ') : value)
