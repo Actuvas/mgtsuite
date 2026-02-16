@@ -25,7 +25,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import type { CSSProperties, Ref } from 'react'
+import type { Ref } from 'react'
 
 import {
   PromptInput,
@@ -33,7 +33,7 @@ import {
   PromptInputActions,
   PromptInputTextarea,
 } from '@/components/prompt-kit/prompt-input'
-import { MOBILE_TAB_BAR_OFFSET } from '@/components/mobile-tab-bar'
+// Tab bar is hidden on chat routes — no offset needed in composer
 import { useWorkspaceStore } from '@/stores/workspace-store'
 import { Button } from '@/components/ui/button'
 import { fetchModels, switchModel } from '@/lib/gateway-api'
@@ -100,10 +100,7 @@ type ModelSwitchNotice = {
   retryModel?: string
 }
 
-const COMPOSER_WRAPPER_STYLE = {
-  maxWidth: 'min(768px, 100%)',
-  '--mobile-tab-bar-offset': MOBILE_TAB_BAR_OFFSET,
-} as CSSProperties
+// Composer wrapper style — tab bar hidden on chat, no offset needed
 
 function formatFileSize(size: number): string {
   if (!Number.isFinite(size) || size <= 0) return ''
@@ -310,7 +307,6 @@ function ChatComposerComponent({
   focusKey,
 }: ChatComposerProps) {
   const setMobileKeyboardOpen = useWorkspaceStore((s) => s.setMobileKeyboardOpen)
-  const mobileKeyboardOpen = useWorkspaceStore((s) => s.mobileKeyboardOpen)
   const [value, setValue] = useState('')
   const [attachments, setAttachments] = useState<Array<ChatComposerAttachment>>(
     [],
@@ -976,13 +972,10 @@ function ChatComposerComponent({
     <div
       className={cn(
         'z-40 mx-auto w-full shrink-0 bg-surface px-3 pt-2 sm:px-5 md:bg-surface/95 md:backdrop-blur',
-        mobileKeyboardOpen
-          ? 'pb-[max(env(safe-area-inset-bottom),0.25rem)]'
-          : 'pb-[calc(env(safe-area-inset-bottom)+var(--mobile-tab-bar-offset))]',
+        'pb-[max(env(safe-area-inset-bottom),0.25rem)]',
         'md:pb-[calc(env(safe-area-inset-bottom)+0.75rem)]',
-        'md:transition-[padding-bottom] md:duration-150 md:ease-out',
       )}
-      style={COMPOSER_WRAPPER_STYLE}
+      style={{ maxWidth: 'min(768px, 100%)' }}
       ref={setWrapperRefs}
     >
       <input
