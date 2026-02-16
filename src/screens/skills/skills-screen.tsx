@@ -290,16 +290,16 @@ export function SkillsScreen() {
           <Tabs value={tab} onValueChange={handleTabChange}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <TabsList
-                className="rounded-xl border border-primary-200 bg-primary-100/60 p-1"
+                className="w-full overflow-x-auto rounded-xl border border-primary-200 bg-primary-100/60 p-1 scrollbar-none sm:w-auto"
                 variant="default"
               >
-                <TabsTab value="installed" className="min-w-[132px]">
-                  Installed Skills
+                <TabsTab value="installed" className="min-w-0 shrink-0 px-3 text-xs sm:min-w-[132px] sm:text-sm">
+                  Installed
                 </TabsTab>
-                <TabsTab value="marketplace" className="min-w-[168px]">
-                  ClawHub Marketplace
+                <TabsTab value="marketplace" className="min-w-0 shrink-0 px-3 text-xs sm:min-w-[168px] sm:text-sm">
+                  Marketplace
                 </TabsTab>
-                <TabsTab value="featured" className="min-w-[120px]">
+                <TabsTab value="featured" className="min-w-0 shrink-0 px-3 text-xs sm:min-w-[120px] sm:text-sm">
                   Featured
                 </TabsTab>
               </TabsList>
@@ -308,8 +308,8 @@ export function SkillsScreen() {
                 <input
                   value={searchInput}
                   onChange={(event) => handleSearchChange(event.target.value)}
-                  placeholder="Search by name, tags, or description"
-                  className="h-9 min-w-[220px] rounded-lg border border-primary-200 bg-primary-100/60 px-3 text-sm text-ink outline-none transition-colors focus:border-primary"
+                  placeholder="Search skills..."
+                  className="h-9 w-full rounded-lg border border-primary-200 bg-primary-100/60 px-3 text-sm text-ink outline-none transition-colors focus:border-primary sm:min-w-[220px] sm:w-auto"
                 />
 
                 {tab === 'marketplace' ? (
@@ -401,25 +401,27 @@ export function SkillsScreen() {
         </section>
 
         {tab !== 'featured' ? (
-          <footer className="flex items-center justify-between rounded-xl border border-primary-200 bg-primary-50/80 px-3 py-2.5 text-sm text-primary-500 tabular-nums">
+          <footer className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-primary-200 bg-primary-50/80 px-3 py-2.5 text-xs text-primary-500 tabular-nums sm:text-sm">
             <span>
-              {(skillsQuery.data?.total || 0).toLocaleString()} total skills
+              {(skillsQuery.data?.total || 0).toLocaleString()} skills
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <Button
                 variant="outline"
                 size="sm"
+                className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
                 disabled={page <= 1 || skillsQuery.isPending}
                 onClick={() => setPage((current) => Math.max(1, current - 1))}
               >
-                Previous
+                Prev
               </Button>
-              <span className="min-w-[82px] text-center">
+              <span className="min-w-[50px] text-center sm:min-w-[82px]">
                 {page} / {totalPages}
               </span>
               <Button
                 variant="outline"
                 size="sm"
+                className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
                 disabled={page >= totalPages || skillsQuery.isPending}
                 onClick={() =>
                   setPage((current) => Math.min(totalPages, current + 1))
