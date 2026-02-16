@@ -121,6 +121,15 @@ export function DashboardScreen() {
     useVisibleWidgets()
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState<number | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsMobile(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -248,14 +257,14 @@ export function DashboardScreen() {
 
   return (
     <>
-      <main className="h-full overflow-y-auto bg-primary-100/45 px-4 py-6 text-primary-900 md:px-6 md:py-8">
+      <main className="h-full overflow-x-hidden overflow-y-auto bg-primary-100/45 px-3 py-4 text-primary-900 md:px-6 md:py-8">
         <section className="mx-auto w-full max-w-[1600px]">
-          <header className="relative z-20 mb-4 rounded-xl border border-primary-200 bg-primary-50/95 px-4 py-3 shadow-sm md:mb-5 md:px-5">
-            <div className="flex items-center justify-between gap-4">
+          <header className="relative z-20 mb-4 rounded-xl border border-primary-200 bg-primary-50/95 px-3 py-3 shadow-sm md:mb-5 md:px-5">
+            <div className="flex items-center justify-between gap-3">
               {/* Left: Logo + name + status */}
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 items-center gap-2.5">
                 <OpenClawStudioIcon className="size-8 shrink-0 rounded-xl shadow-sm" />
-                <div className="flex items-center gap-2.5">
+                <div className="flex min-w-0 items-center gap-2.5">
                   <h1 className="text-base font-semibold text-ink text-balance">
                     ClawSuite
                   </h1>
@@ -283,7 +292,7 @@ export function DashboardScreen() {
               </div>
 
               {/* Right: Clock → Theme → Bell → Gear */}
-              <div className="ml-auto flex items-center gap-3">
+              <div className="ml-auto flex items-center gap-2">
                 <HeaderAmbientStatus />
                 <ThemeToggle />
                 <div className="flex items-center gap-1 rounded-full border border-primary-200 bg-primary-100/65 p-1">
@@ -324,7 +333,7 @@ export function DashboardScreen() {
             <button
               type="button"
               onClick={handleResetLayout}
-              className="inline-flex items-center gap-1 rounded-lg border border-primary-200 dark:border-gray-700 bg-primary-50 dark:bg-gray-800 px-2.5 py-1 text-[11px] text-primary-600 dark:text-primary-400 transition-colors hover:border-accent-200 dark:hover:border-accent-600 hover:text-accent-600 dark:hover:text-accent-400"
+              className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-[11px] text-primary-600 transition-colors hover:border-accent-200 hover:text-accent-600 md:min-h-0 md:px-2.5 md:py-1 dark:border-gray-700 dark:bg-gray-800 dark:text-primary-400 dark:hover:border-accent-600 dark:hover:text-accent-400"
               aria-label="Reset Layout"
               title="Reset Layout"
             >
@@ -334,84 +343,138 @@ export function DashboardScreen() {
           </div>
 
           <div ref={containerRef}>
-            {containerWidth != null && containerWidth > 0 ? (
-            <ResponsiveGridLayout
-              className="layout"
-              layouts={gridLayouts}
-              breakpoints={GRID_BREAKPOINTS}
-              cols={GRID_COLS}
-              rowHeight={GRID_ROW_HEIGHT}
-              width={containerWidth}
-              onLayoutChange={handleLayoutChange}
-              draggableHandle=".widget-drag-handle"
-              isResizable={false}
-              isDraggable
-              compactType="vertical"
-              margin={GRID_MARGIN}
-            >
-              {visibleIds.includes('skills') ? (
-                <div key="skills" className="h-full">
-                  <SkillsWidget
-                    draggable
-                    onRemove={() => removeWidget('skills')}
-                  />
-                </div>
-              ) : null}
-              {visibleIds.includes('usage-meter') ? (
-                <div key="usage-meter" className="h-full">
-                  <UsageMeterWidget
-                    draggable
-                    onRemove={() => removeWidget('usage-meter')}
-                  />
-                </div>
-              ) : null}
-              {visibleIds.includes('tasks') ? (
-                <div key="tasks" className="h-full">
-                  <TasksWidget
-                    draggable
-                    onRemove={() => removeWidget('tasks')}
-                  />
-                </div>
-              ) : null}
-              {visibleIds.includes('agent-status') ? (
-                <div key="agent-status" className="h-full">
-                  <AgentStatusWidget
-                    draggable
-                    onRemove={() => removeWidget('agent-status')}
-                  />
-                </div>
-              ) : null}
-              {visibleIds.includes('recent-sessions') ? (
-                <div key="recent-sessions" className="h-full">
-                  <RecentSessionsWidget
-                    onOpenSession={(sessionKey) =>
-                      navigate({
-                        to: '/chat/$sessionKey',
-                        params: { sessionKey },
-                      })
-                    }
-                    draggable
-                    onRemove={() => removeWidget('recent-sessions')}
-                  />
-                </div>
-              ) : null}
-              {visibleIds.includes('notifications') ? (
-                <div key="notifications" className="h-full">
-                  <NotificationsWidget
-                    draggable
-                    onRemove={() => removeWidget('notifications')}
-                  />
-                </div>
-              ) : null}
-              {visibleIds.includes('activity-log') ? (
-                <div key="activity-log" className="h-full">
-                  <ActivityLogWidget
-                    draggable
-                    onRemove={() => removeWidget('activity-log')}
-                  />
-                </div>
-              ) : null}
-            </ResponsiveGridLayout>
+            {isMobile ? (
+              <div className="space-y-3">
+                {visibleIds.includes('skills') ? (
+                  <div key="skills" className="w-full">
+                    <SkillsWidget onRemove={() => removeWidget('skills')} />
+                  </div>
+                ) : null}
+                {visibleIds.includes('usage-meter') ? (
+                  <div key="usage-meter" className="w-full">
+                    <UsageMeterWidget
+                      onRemove={() => removeWidget('usage-meter')}
+                    />
+                  </div>
+                ) : null}
+                {visibleIds.includes('tasks') ? (
+                  <div key="tasks" className="w-full">
+                    <TasksWidget onRemove={() => removeWidget('tasks')} />
+                  </div>
+                ) : null}
+                {visibleIds.includes('agent-status') ? (
+                  <div key="agent-status" className="w-full">
+                    <AgentStatusWidget
+                      onRemove={() => removeWidget('agent-status')}
+                    />
+                  </div>
+                ) : null}
+                {visibleIds.includes('recent-sessions') ? (
+                  <div key="recent-sessions" className="w-full">
+                    <RecentSessionsWidget
+                      onOpenSession={(sessionKey) =>
+                        navigate({
+                          to: '/chat/$sessionKey',
+                          params: { sessionKey },
+                        })
+                      }
+                      onRemove={() => removeWidget('recent-sessions')}
+                    />
+                  </div>
+                ) : null}
+                {visibleIds.includes('notifications') ? (
+                  <div key="notifications" className="w-full">
+                    <NotificationsWidget
+                      onRemove={() => removeWidget('notifications')}
+                    />
+                  </div>
+                ) : null}
+                {visibleIds.includes('activity-log') ? (
+                  <div key="activity-log" className="w-full">
+                    <ActivityLogWidget
+                      onRemove={() => removeWidget('activity-log')}
+                    />
+                  </div>
+                ) : null}
+              </div>
+            ) : containerWidth != null && containerWidth > 0 ? (
+              <ResponsiveGridLayout
+                className="layout"
+                layouts={gridLayouts}
+                breakpoints={GRID_BREAKPOINTS}
+                cols={GRID_COLS}
+                rowHeight={GRID_ROW_HEIGHT}
+                width={containerWidth}
+                onLayoutChange={handleLayoutChange}
+                draggableHandle=".widget-drag-handle"
+                isResizable={false}
+                isDraggable
+                compactType="vertical"
+                margin={GRID_MARGIN}
+              >
+                {visibleIds.includes('skills') ? (
+                  <div key="skills" className="h-full">
+                    <SkillsWidget
+                      draggable
+                      onRemove={() => removeWidget('skills')}
+                    />
+                  </div>
+                ) : null}
+                {visibleIds.includes('usage-meter') ? (
+                  <div key="usage-meter" className="h-full">
+                    <UsageMeterWidget
+                      draggable
+                      onRemove={() => removeWidget('usage-meter')}
+                    />
+                  </div>
+                ) : null}
+                {visibleIds.includes('tasks') ? (
+                  <div key="tasks" className="h-full">
+                    <TasksWidget
+                      draggable
+                      onRemove={() => removeWidget('tasks')}
+                    />
+                  </div>
+                ) : null}
+                {visibleIds.includes('agent-status') ? (
+                  <div key="agent-status" className="h-full">
+                    <AgentStatusWidget
+                      draggable
+                      onRemove={() => removeWidget('agent-status')}
+                    />
+                  </div>
+                ) : null}
+                {visibleIds.includes('recent-sessions') ? (
+                  <div key="recent-sessions" className="h-full">
+                    <RecentSessionsWidget
+                      onOpenSession={(sessionKey) =>
+                        navigate({
+                          to: '/chat/$sessionKey',
+                          params: { sessionKey },
+                        })
+                      }
+                      draggable
+                      onRemove={() => removeWidget('recent-sessions')}
+                    />
+                  </div>
+                ) : null}
+                {visibleIds.includes('notifications') ? (
+                  <div key="notifications" className="h-full">
+                    <NotificationsWidget
+                      draggable
+                      onRemove={() => removeWidget('notifications')}
+                    />
+                  </div>
+                ) : null}
+                {visibleIds.includes('activity-log') ? (
+                  <div key="activity-log" className="h-full">
+                    <ActivityLogWidget
+                      draggable
+                      onRemove={() => removeWidget('activity-log')}
+                    />
+                  </div>
+                ) : null}
+              </ResponsiveGridLayout>
             ) : (
               <div className="flex h-64 items-center justify-center text-primary-400">
                 Loading dashboard…

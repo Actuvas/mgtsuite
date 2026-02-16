@@ -25,7 +25,7 @@ import {
   UserMultipleIcon,
 } from '@hugeicons/core-free-icons'
 import { AnimatePresence, motion } from 'motion/react'
-import { memo, useEffect, useMemo, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useChatSettings as useSidebarSettings } from '../hooks/use-chat-settings'
@@ -168,7 +168,7 @@ function NavItem({
 }) {
   const cls = cn(
     buttonVariants({ variant: 'ghost', size: 'sm' }),
-    'w-full h-auto gap-2.5 py-2',
+    'w-full h-auto min-h-11 gap-2.5 py-2 md:min-h-0',
     isCollapsed ? 'justify-center px-0' : 'justify-start px-3',
     item.active
       ? 'bg-accent-500/10 text-accent-500 hover:bg-accent-500/15'
@@ -211,6 +211,10 @@ function NavItem({
     </AnimatePresence>
   )
 
+  const handleSelect = () => {
+    onSelectSession?.()
+  }
+
   if (item.kind === 'link') {
     if (isCollapsed) {
       return (
@@ -220,7 +224,7 @@ function NavItem({
               render={
                 <Link
                   to={item.to!}
-                  onMouseUp={onSelectSession}
+                  onClick={handleSelect}
                   className={cls}
                   data-tour={item.dataTour}
                 >
@@ -236,7 +240,7 @@ function NavItem({
     return (
       <Link
         to={item.to!}
-        onMouseUp={onSelectSession}
+        onClick={handleSelect}
         className={cls}
         data-tour={item.dataTour}
       >
@@ -256,8 +260,10 @@ function NavItem({
                 disabled={item.disabled}
                 variant="ghost"
                 size="sm"
-                onClick={item.onClick}
-                onMouseUp={onSelectSession}
+                onClick={() => {
+                  item.onClick?.()
+                  handleSelect()
+                }}
                 className={cls}
                 data-tour={item.dataTour}
               >
@@ -276,8 +282,10 @@ function NavItem({
       disabled={item.disabled}
       variant="ghost"
       size="sm"
-      onClick={item.onClick}
-      onMouseUp={onSelectSession}
+      onClick={() => {
+        item.onClick?.()
+        handleSelect()
+      }}
       className={cls}
       data-tour={item.dataTour}
     >
@@ -611,6 +619,9 @@ function ChatSidebarComponent({
   const [deleteFriendlyId, setDeleteFriendlyId] = useState<string | null>(null)
   const [deleteSessionTitle, setDeleteSessionTitle] = useState('')
   const [providersOpen, setProvidersOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const sidebarRef = useRef<HTMLElement | null>(null)
+  const swipeStartRef = useRef<{ x: number; y: number } | null>(null)
 
   function handleOpenRename(session: SessionMeta) {
     setRenameSessionKey(session.key)
@@ -655,15 +666,56 @@ function ChatSidebarComponent({
     setDeleteFriendlyId(null)
   }
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsMobile(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
 
   const asideProps = {
     className: cn(
       'border-r border-primary-200 h-full overflow-hidden bg-primary-50 dark:bg-primary-100 flex flex-col',
-      isMobile && 'fixed inset-y-0 left-0 z-50 shadow-xl',
+      isMobile && 'fixed inset-y-0 left-0 z-50 shadow-2xl',
       isMobile && isCollapsed && 'pointer-events-none',
     ),
   }
+
+  useEffect(() => {
+    if (!isMobile || isCollapsed) return
+    const node = sidebarRef.current
+    if (!node) return
+
+    const SWIPE_CLOSE_PX = 64
+    const MAX_VERTICAL_DRIFT_PX = 72
+
+    function handleTouchStart(event: TouchEvent) {
+      if (event.touches.length !== 1) return
+      const touch = event.touches[0]
+      swipeStartRef.current = { x: touch.clientX, y: touch.clientY }
+    }
+
+    function handleTouchEnd(event: TouchEvent) {
+      const start = swipeStartRef.current
+      swipeStartRef.current = null
+      if (!start || event.changedTouches.length !== 1) return
+      const touch = event.changedTouches[0]
+      const dx = touch.clientX - start.x
+      const dy = touch.clientY - start.y
+      if (Math.abs(dy) > MAX_VERTICAL_DRIFT_PX) return
+      if (dx <= -SWIPE_CLOSE_PX) {
+        onToggleCollapse()
+      }
+    }
+
+    node.addEventListener('touchstart', handleTouchStart, { passive: true })
+    node.addEventListener('touchend', handleTouchEnd, { passive: true })
+    return () => {
+      node.removeEventListener('touchstart', handleTouchStart)
+      node.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [isCollapsed, isMobile, onToggleCollapse])
 
   useEffect(() => {
     function handleOpenSettingsFromSearch() {
@@ -829,11 +881,18 @@ function ChatSidebarComponent({
 
   return (
     <motion.aside
+      ref={(node) => {
+        sidebarRef.current = node
+      }}
       initial={false}
-      animate={{ width: isCollapsed ? (isMobile ? 0 : 48) : 300 }}
+      animate={{
+        width: isCollapsed ? (isMobile ? 0 : 48) : isMobile ? '85vw' : 300,
+      }}
       transition={transition}
       className={asideProps.className}
       data-tour="sidebar-container"
+      style={isMobile ? { maxWidth: 360 } : undefined}
+      aria-hidden={isMobile && isCollapsed ? true : undefined}
     >
       {/* ── Header ──────────────────────────────────────────────────── */}
       <motion.div

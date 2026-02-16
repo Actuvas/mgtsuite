@@ -36,6 +36,7 @@ type ChatHeaderProps = {
   dataUpdatedAt?: number
   /** Callback to manually refresh history */
   onRefresh?: () => void
+  mobileStatus?: 'connected' | 'connecting' | 'disconnected'
 }
 
 function ChatHeaderComponent({
@@ -48,6 +49,7 @@ function ChatHeaderComponent({
   onToggleFileExplorer,
   dataUpdatedAt = 0,
   onRefresh,
+  mobileStatus = 'connecting',
 }: ChatHeaderProps) {
   const [syncLabel, setSyncLabel] = useState('')
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -61,6 +63,14 @@ function ChatHeaderComponent({
   }, [dataUpdatedAt])
 
   const isStale = dataUpdatedAt > 0 && Date.now() - dataUpdatedAt > 15000
+  const isCompactMobileHeader = showSidebarButton && !showFileExplorerButton
+
+  const mobileStatusLabel =
+    mobileStatus === 'connected'
+      ? 'Online'
+      : mobileStatus === 'disconnected'
+        ? 'Offline'
+        : 'Connecting'
 
   const handleRefresh = useCallback(() => {
     if (!onRefresh) return
@@ -79,7 +89,7 @@ function ChatHeaderComponent({
           size="icon-sm"
           variant="ghost"
           onClick={onOpenSidebar}
-          className="mr-2 text-primary-800 hover:bg-primary-100"
+          className="mr-2 h-11 w-11 text-primary-800 hover:bg-primary-100 md:h-8 md:w-8"
           aria-label="Open sidebar"
         >
           <HugeiconsIcon icon={Menu01Icon} size={20} strokeWidth={1.5} />
@@ -114,53 +124,82 @@ function ChatHeaderComponent({
         </TooltipProvider>
       ) : null}
       <div
-        className="text-sm font-medium flex-1 text-balance"
+        className={cn(
+          'min-w-0 flex-1 text-sm font-medium text-balance',
+          isCompactMobileHeader && 'truncate',
+        )}
         suppressHydrationWarning
       >
         {activeTitle}
       </div>
-      {syncLabel ? (
+      {isCompactMobileHeader ? (
         <span
           className={cn(
-            'mr-1 text-[11px] tabular-nums transition-colors',
-            isStale ? 'text-amber-500' : 'text-primary-400',
+            'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium tabular-nums',
+            mobileStatus === 'connected' &&
+              'border-emerald-200 bg-emerald-100/70 text-emerald-700',
+            mobileStatus === 'disconnected' &&
+              'border-red-200 bg-red-100/70 text-red-700',
+            mobileStatus === 'connecting' &&
+              'border-amber-200 bg-amber-100/70 text-amber-700',
           )}
-          title={
-            dataUpdatedAt > 0
-              ? `Last synced: ${new Date(dataUpdatedAt).toLocaleTimeString()}`
-              : undefined
-          }
         >
-          {isStale ? '⚠ ' : ''}
-          {syncLabel}
+          <span
+            className={cn(
+              'size-1.5 rounded-full',
+              mobileStatus === 'connected' && 'bg-emerald-500',
+              mobileStatus === 'disconnected' && 'bg-red-500',
+              mobileStatus === 'connecting' && 'bg-amber-500',
+            )}
+          />
+          {mobileStatusLabel}
         </span>
-      ) : null}
-      {onRefresh ? (
-        <TooltipProvider>
-          <TooltipRoot>
-            <TooltipTrigger
-              onClick={handleRefresh}
-              render={
-                <Button
-                  size="icon-sm"
-                  variant="ghost"
-                  className="mr-1 text-primary-500 hover:bg-primary-100 hover:text-primary-700"
-                  aria-label="Refresh chat"
-                >
-                  <HugeiconsIcon
-                    icon={ReloadIcon}
-                    size={20}
-                    strokeWidth={1.5}
-                    className={cn(isRefreshing && 'animate-spin')}
-                  />
-                </Button>
+      ) : (
+        <>
+          {syncLabel ? (
+            <span
+              className={cn(
+                'mr-1 text-[11px] tabular-nums transition-colors',
+                isStale ? 'text-amber-500' : 'text-primary-400',
+              )}
+              title={
+                dataUpdatedAt > 0
+                  ? `Last synced: ${new Date(dataUpdatedAt).toLocaleTimeString()}`
+                  : undefined
               }
-            />
-            <TooltipContent side="bottom">Sync messages</TooltipContent>
-          </TooltipRoot>
-        </TooltipProvider>
-      ) : null}
-      <UsageMeter />
+            >
+              {isStale ? '⚠ ' : ''}
+              {syncLabel}
+            </span>
+          ) : null}
+          {onRefresh ? (
+            <TooltipProvider>
+              <TooltipRoot>
+                <TooltipTrigger
+                  onClick={handleRefresh}
+                  render={
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      className="mr-1 text-primary-500 hover:bg-primary-100 hover:text-primary-700"
+                      aria-label="Refresh chat"
+                    >
+                      <HugeiconsIcon
+                        icon={ReloadIcon}
+                        size={20}
+                        strokeWidth={1.5}
+                        className={cn(isRefreshing && 'animate-spin')}
+                      />
+                    </Button>
+                  }
+                />
+                <TooltipContent side="bottom">Sync messages</TooltipContent>
+              </TooltipRoot>
+            </TooltipProvider>
+          ) : null}
+          <UsageMeter />
+        </>
+      )}
     </div>
   )
 }

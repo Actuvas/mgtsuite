@@ -118,6 +118,7 @@ type ChatMessageListProps = {
   isStreaming?: boolean
   bottomOffset?: number
   activeToolCalls?: Array<{ id: string; name: string; phase: string }>
+  hideSystemMessages?: boolean
 }
 
 function ChatMessageListComponent({
@@ -140,6 +141,7 @@ function ChatMessageListComponent({
   isStreaming = false,
   bottomOffset = 0,
   activeToolCalls = [],
+  hideSystemMessages = false,
 }: ChatMessageListProps) {
   const anchorRef = useRef<HTMLDivElement | null>(null)
   const lastUserRef = useRef<HTMLDivElement | null>(null)
@@ -226,6 +228,7 @@ function ChatMessageListComponent({
         if (cleanedText.length === 0) return false
 
         const isSystemPrefixed = /^System:/i.test(rawText)
+        if (hideSystemMessages && isSystemPrefixed) return false
         if (!isSystemPrefixed) return true
 
         const normalizedText = cleanedText.toLowerCase()
@@ -264,7 +267,7 @@ function ChatMessageListComponent({
       seenUserFingerprints.set(fingerprint, timestamp)
       return true
     })
-  }, [messages])
+  }, [hideSystemMessages, messages])
 
   const normalizedMessageSearch = useMemo(
     function getNormalizedMessageSearch() {
@@ -1148,7 +1151,8 @@ function areChatMessageListEqual(
     prev.streamingText === next.streamingText &&
     prev.streamingThinking === next.streamingThinking &&
     prev.isStreaming === next.isStreaming &&
-    prev.activeToolCalls === next.activeToolCalls
+    prev.activeToolCalls === next.activeToolCalls &&
+    prev.hideSystemMessages === next.hideSystemMessages
   )
 }
 

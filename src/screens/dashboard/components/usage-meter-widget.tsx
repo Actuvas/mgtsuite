@@ -344,7 +344,7 @@ export function UsageMeterWidget({
                 Provider usage limits and quotas will appear here once
                 authenticated.
               </p>
-              <p className="mt-2 font-mono text-xs text-primary-500">
+              <p className="mt-2 hidden font-mono text-xs text-primary-500 sm:block">
                 Tip: Run{' '}
                 <code className="rounded bg-primary-200/70 px-1 py-0.5">
                   claude
