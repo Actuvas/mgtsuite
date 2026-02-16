@@ -25,7 +25,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import type { Ref } from 'react'
+import type { CSSProperties, Ref } from 'react'
 
 import {
   PromptInput,
@@ -33,7 +33,7 @@ import {
   PromptInputActions,
   PromptInputTextarea,
 } from '@/components/prompt-kit/prompt-input'
-// MOBILE_TAB_BAR_OFFSET no longer needed — keyboard handled via --app-height
+import { MOBILE_TAB_BAR_OFFSET } from '@/components/mobile-tab-bar'
 import { useWorkspaceStore } from '@/stores/workspace-store'
 import { Button } from '@/components/ui/button'
 import { fetchModels, switchModel } from '@/lib/gateway-api'
@@ -99,6 +99,11 @@ type ModelSwitchNotice = {
   message: string
   retryModel?: string
 }
+
+const COMPOSER_WRAPPER_STYLE = {
+  maxWidth: 'min(768px, 100%)',
+  '--mobile-tab-bar-offset': MOBILE_TAB_BAR_OFFSET,
+} as CSSProperties
 
 function formatFileSize(size: number): string {
   if (!Number.isFinite(size) || size <= 0) return ''
@@ -953,24 +958,6 @@ function ChatComposerComponent({
     [addAttachments],
   )
 
-  const handleComposerWrapperClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      if (disabled) return
-      const target = event.target
-      if (!(target instanceof HTMLElement)) return
-      if (
-        target.closest('button') ||
-        target.closest('select') ||
-        target.closest('input') ||
-        target.closest('[role="button"]')
-      ) {
-        return
-      }
-      promptRef.current?.focus()
-    },
-    [disabled],
-  )
-
   // Combine internal ref with external wrapperRef
   const setWrapperRefs = useCallback(
     (node: HTMLDivElement | null) => {
@@ -988,16 +975,15 @@ function ChatComposerComponent({
   return (
     <div
       className={cn(
-        'z-40 mx-auto w-full shrink-0 bg-surface/95 px-3 pt-2 backdrop-blur sm:px-5',
+        'z-40 mx-auto w-full shrink-0 bg-surface px-3 pt-2 sm:px-5 md:bg-surface/95 md:backdrop-blur',
         mobileKeyboardOpen
-          ? 'pb-1'
-          : 'pb-[calc(env(safe-area-inset-bottom)+3.75rem)]',
+          ? 'pb-[max(env(safe-area-inset-bottom),0.25rem)]'
+          : 'pb-[calc(env(safe-area-inset-bottom)+var(--mobile-tab-bar-offset))]',
         'md:pb-[calc(env(safe-area-inset-bottom)+0.75rem)]',
-        'transition-[padding-bottom] duration-150 ease-out',
+        'md:transition-[padding-bottom] md:duration-150 md:ease-out',
       )}
-      style={{ maxWidth: 'min(768px, 100%)' }}
+      style={COMPOSER_WRAPPER_STYLE}
       ref={setWrapperRefs}
-      onClick={handleComposerWrapperClick}
     >
       <input
         ref={attachmentInputRef}
@@ -1077,13 +1063,15 @@ function ChatComposerComponent({
           autoFocus
           inputRef={promptRef}
           onFocus={() => {
-            // VisualViewport hook handles mobileKeyboardOpen state now,
-            // but set it eagerly on focus for immediate tab bar hide
-            setMobileKeyboardOpen(true)
+            // Keep fallback behavior for browsers without visualViewport.
+            if (!window.visualViewport) {
+              setMobileKeyboardOpen(true)
+            }
           }}
           onBlur={() => {
-            // Let VisualViewport hook handle the close detection —
-            // it's more reliable than a fixed timeout on iOS
+            if (!window.visualViewport) {
+              setMobileKeyboardOpen(false)
+            }
           }}
           className="min-h-[44px]"
         />
