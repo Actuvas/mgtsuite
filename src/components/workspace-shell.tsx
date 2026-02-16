@@ -48,7 +48,7 @@ export function WorkspaceShell() {
   const sidebarCollapsed = useWorkspaceStore((s) => s.sidebarCollapsed)
   const toggleSidebar = useWorkspaceStore((s) => s.toggleSidebar)
   const setSidebarCollapsed = useWorkspaceStore((s) => s.setSidebarCollapsed)
-  const { onTouchStart, onTouchEnd } = useSwipeNavigation()
+  const { onTouchStart, onTouchMove, onTouchEnd } = useSwipeNavigation()
 
   const [creatingSession, setCreatingSession] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -226,6 +226,7 @@ export function WorkspaceShell() {
         {/* Main content area — renders the matched route */}
         <main
           onTouchStart={isMobile ? onTouchStart : undefined}
+          onTouchMove={isMobile ? onTouchMove : undefined}
           onTouchEnd={isMobile ? onTouchEnd : undefined}
           className={[
             'h-full min-h-0 min-w-0 overflow-x-hidden',
@@ -234,7 +235,9 @@ export function WorkspaceShell() {
           ].join(' ')}
           data-tour="chat-area"
         >
-          <Outlet />
+          <div key={pathname} className="page-transition h-full">
+            <Outlet />
+          </div>
         </main>
 
         {/* Chat panel — visible on non-chat routes */}

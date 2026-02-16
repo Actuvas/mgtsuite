@@ -492,12 +492,31 @@ code {
   }
 }
 
+@keyframes page-fade-in {
+  from {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page-transition {
+  animation: page-fade-in 0.15s ease-out;
+}
+
 /* Chat panel: force all content to respect panel width */
 .chat-panel-content,
 .chat-panel-content [data-chat-scroll-viewport],
 .chat-panel-content [data-chat-scroll-viewport] > div {
   max-width: 420px !important;
   overflow-x: hidden !important;
+}
+
+@media (max-width: 767px) {
+  main {
+    touch-action: pan-y;
+  }
 }
 
 @media (hover: none) and (pointer: coarse) {

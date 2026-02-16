@@ -880,7 +880,6 @@ function ChatSidebarComponent({
   ]
 
   // Auto-expand sections if any child route is active
-  const primarySuiteLabels = ['Dashboard', 'Agent Hub', 'Skills']
   const mobileSystemLabels = [
     'Files',
     'Memory',
@@ -891,9 +890,6 @@ function ChatSidebarComponent({
     'Logs',
     'Debug',
   ]
-  const mobilePrimarySuite = suiteItems.filter((item) =>
-    primarySuiteLabels.includes(item.label),
-  )
   const mobileSecondarySuite = mobileSystemLabels
     .map((label) => suiteItems.find((item) => item.label === label))
     .filter((item): item is NavItemDef => Boolean(item))
@@ -1024,23 +1020,27 @@ function ChatSidebarComponent({
       <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col">
         {/* Navigation sections */}
         <div className={cn('shrink-0 space-y-0.5 px-2', isMobile && 'order-2')}>
-          {/* SUITE */}
-          <SectionLabel
-            label="Suite"
-            isCollapsed={isCollapsed}
-            transition={transition}
-            collapsible={!isMobile}
-            expanded={isMobile ? true : suiteExpanded || isAnySuiteActive}
-            onToggle={isMobile ? undefined : toggleSuite}
-            navigateTo={suiteNav}
-          />
-          <CollapsibleSection
-            expanded={isMobile || suiteExpanded || isAnySuiteActive || isCollapsed}
-            items={isMobile ? mobilePrimarySuite : suiteItems}
-            isCollapsed={isCollapsed}
-            transition={transition}
-            onSelectSession={onSelectSession}
-          />
+          {!isMobile && (
+            <>
+              {/* SUITE */}
+              <SectionLabel
+                label="Suite"
+                isCollapsed={isCollapsed}
+                transition={transition}
+                collapsible
+                expanded={suiteExpanded || isAnySuiteActive}
+                onToggle={toggleSuite}
+                navigateTo={suiteNav}
+              />
+              <CollapsibleSection
+                expanded={suiteExpanded || isAnySuiteActive || isCollapsed}
+                items={suiteItems}
+                isCollapsed={isCollapsed}
+                transition={transition}
+                onSelectSession={onSelectSession}
+              />
+            </>
+          )}
 
           {isMobile && mobileSecondarySuite.length > 0 && (
             <>
