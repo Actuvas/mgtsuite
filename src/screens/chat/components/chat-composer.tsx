@@ -33,7 +33,7 @@ import {
   PromptInputActions,
   PromptInputTextarea,
 } from '@/components/prompt-kit/prompt-input'
-import { MOBILE_TAB_BAR_OFFSET } from '@/components/mobile-tab-bar'
+// MOBILE_TAB_BAR_OFFSET no longer needed — keyboard handled via --app-height
 import { useWorkspaceStore } from '@/stores/workspace-store'
 import { Button } from '@/components/ui/button'
 import { fetchModels, switchModel } from '@/lib/gateway-api'
@@ -989,18 +989,13 @@ function ChatComposerComponent({
     <div
       className={cn(
         'z-40 mx-auto w-full shrink-0 bg-surface/95 px-3 pt-2 backdrop-blur sm:px-5',
-        'pb-[calc(env(safe-area-inset-bottom)+var(--mobile-tab-bar-offset))]',
+        mobileKeyboardOpen
+          ? 'pb-1'
+          : 'pb-[calc(env(safe-area-inset-bottom)+3.75rem)]',
         'md:pb-[calc(env(safe-area-inset-bottom)+0.75rem)]',
-        'transition-[padding-bottom] duration-200 ease-out',
+        'transition-[padding-bottom] duration-150 ease-out',
       )}
-      style={
-        {
-          maxWidth: 'min(768px, 100%)',
-          '--mobile-tab-bar-offset': mobileKeyboardOpen
-            ? '0.25rem'
-            : MOBILE_TAB_BAR_OFFSET,
-        } as React.CSSProperties
-      }
+      style={{ maxWidth: 'min(768px, 100%)' }}
       ref={setWrapperRefs}
       onClick={handleComposerWrapperClick}
     >

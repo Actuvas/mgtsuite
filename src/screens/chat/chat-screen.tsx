@@ -41,7 +41,6 @@ import { useChatMeasurements } from './hooks/use-chat-measurements'
 import { useChatHistory } from './hooks/use-chat-history'
 import { useRealtimeChatHistory } from './hooks/use-realtime-chat-history'
 import { useChatMobile } from './hooks/use-chat-mobile'
-import { useMobileKeyboard } from '@/hooks/use-mobile-keyboard'
 import { useChatSessions } from './hooks/use-chat-sessions'
 import { useAutoSessionTitle } from './hooks/use-auto-session-title'
 import { ContextBar } from './components/context-bar'
@@ -169,8 +168,6 @@ export function ChatScreen({
     return stored === null ? true : stored === 'true'
   })
   const { isMobile } = useChatMobile(queryClient)
-  // ChatGPT-style keyboard tracking via VisualViewport API
-  useMobileKeyboard()
   const isAgentViewOpen = useAgentViewStore((state) => state.isOpen)
   const isTerminalPanelOpen = useTerminalPanelStore(
     (state) => state.isPanelOpen,

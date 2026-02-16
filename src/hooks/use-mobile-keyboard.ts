@@ -1,66 +1,64 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { useWorkspaceStore } from '@/stores/workspace-store'
 
 /**
- * ChatGPT-style mobile keyboard handler using the VisualViewport API.
+ * ChatGPT-style mobile keyboard handler.
  *
- * On iOS Safari, when the keyboard opens, `window.visualViewport.height`
- * shrinks while `window.innerHeight` stays the same. This hook tracks
- * the keyboard height and sets a CSS custom property on the document
- * so the chat layout can adjust smoothly.
+ * Strategy: `interactive-widget=resizes-visual` in viewport meta means
+ * the layout viewport does NOT change when the keyboard opens. Instead,
+ * `window.visualViewport.height` shrinks. We listen to that and set
+ * a CSS custom property `--app-height` on <html> that tracks the actual
+ * usable screen height. The app shell uses this instead of `h-dvh`.
  *
- * Sets:
- *   --mobile-keyboard-height: Npx  (0 when closed)
- *   mobileKeyboardOpen store state
+ * This is exactly how ChatGPT handles keyboard on iOS Safari:
+ * - Visual viewport shrinks → app container shrinks → composer stays
+ *   pinned to bottom → messages scroll area shrinks → everything stays
+ *   in view without any scroll/overlap bugs.
  */
 export function useMobileKeyboard() {
-  const [keyboardHeight, setKeyboardHeight] = useState(0)
   const setMobileKeyboardOpen = useWorkspaceStore(
     (s) => s.setMobileKeyboardOpen,
   )
-  const prevHeightRef = useRef(0)
 
   useEffect(() => {
     const vv = window.visualViewport
-    if (!vv) return
+    if (!vv) {
+      // Fallback: just use innerHeight
+      document.documentElement.style.setProperty(
+        '--app-height',
+        `${window.innerHeight}px`,
+      )
+      return
+    }
 
-    // Threshold to consider keyboard "open" (soft keyboards are typically > 150px)
     const KEYBOARD_THRESHOLD = 100
 
-    function handleResize() {
+    function update() {
       if (!vv) return
-
-      // The keyboard height is the difference between the layout viewport
-      // and the visual viewport
-      const layoutHeight = window.innerHeight
-      const visualHeight = vv.height
-      const kbHeight = Math.max(0, Math.round(layoutHeight - visualHeight))
-
-      // Only update if meaningfully changed (avoid micro-jitter)
-      if (Math.abs(kbHeight - prevHeightRef.current) < 10) return
-      prevHeightRef.current = kbHeight
-
-      setKeyboardHeight(kbHeight)
+      const height = vv.height
       document.documentElement.style.setProperty(
-        '--mobile-keyboard-height',
-        `${kbHeight}px`,
+        '--app-height',
+        `${height}px`,
       )
 
+      const kbHeight = window.innerHeight - height
       const isOpen = kbHeight > KEYBOARD_THRESHOLD
       setMobileKeyboardOpen(isOpen)
     }
 
-    vv.addEventListener('resize', handleResize)
-    // Also listen to scroll — iOS Safari sometimes scrolls the viewport
-    // instead of resizing it
-    vv.addEventListener('scroll', handleResize)
+    // Set initial value
+    update()
+
+    vv.addEventListener('resize', update)
+    // iOS Safari sometimes needs scroll event too
+    vv.addEventListener('scroll', update)
+    // Also handle orientation changes
+    window.addEventListener('resize', update)
 
     return () => {
-      vv.removeEventListener('resize', handleResize)
-      vv.removeEventListener('scroll', handleResize)
-      document.documentElement.style.removeProperty('--mobile-keyboard-height')
+      vv.removeEventListener('resize', update)
+      vv.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
     }
   }, [setMobileKeyboardOpen])
-
-  return { keyboardHeight }
 }

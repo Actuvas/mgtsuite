@@ -23,6 +23,7 @@ import { ChatPanel } from '@/components/chat-panel'
 import { ChatPanelToggle } from '@/components/chat-panel-toggle'
 import { LoginScreen } from '@/components/auth/login-screen'
 import { MobileTabBar } from '@/components/mobile-tab-bar'
+import { useMobileKeyboard } from '@/hooks/use-mobile-keyboard'
 // ActivityTicker moved to dashboard-only (too noisy for global header)
 import type { SessionMeta } from '@/screens/chat/types'
 
@@ -49,6 +50,9 @@ export function WorkspaceShell() {
   const toggleSidebar = useWorkspaceStore((s) => s.toggleSidebar)
   const setSidebarCollapsed = useWorkspaceStore((s) => s.setSidebarCollapsed)
   const { onTouchStart, onTouchMove, onTouchEnd } = useSwipeNavigation()
+
+  // ChatGPT-style: track visual viewport height for keyboard-aware layout
+  useMobileKeyboard()
 
   const [creatingSession, setCreatingSession] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -147,7 +151,7 @@ export function WorkspaceShell() {
   }
 
   return (
-    <div className="relative h-dvh bg-surface text-primary-900">
+    <div className="relative bg-surface text-primary-900" style={{ height: 'var(--app-height, 100dvh)' }}>
       <div className="grid h-full grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden md:grid-cols-[auto_1fr]">
         {/* Activity ticker bar */}
         {/* Persistent sidebar */}

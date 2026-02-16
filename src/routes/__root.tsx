@@ -80,7 +80,7 @@ export const Route = createRootRoute({
       {
         name: 'viewport',
         content:
-          'width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content',
+          'width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no, interactive-widget=resizes-visual',
       },
       {
         title: 'ClawSuite',
