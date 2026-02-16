@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { BotIcon, Rocket01Icon } from '@hugeicons/core-free-icons'
+import { Menu01Icon, Rocket01Icon } from '@hugeicons/core-free-icons'
 import { AnimatePresence, motion } from 'motion/react'
 import type { SwarmSession } from '@/stores/agent-swarm-store'
 import { usePageTitle } from '@/hooks/use-page-title'
 import { useSwarmStore } from '@/stores/agent-swarm-store'
+import { useWorkspaceStore } from '@/stores/workspace-store'
 import { cn } from '@/lib/utils'
 import { assignPersona } from '@/lib/agent-personas'
 import { IsometricOffice } from '@/components/agent-swarm/isometric-office'
@@ -155,9 +156,19 @@ function AgentSwarmRoute() {
   const { sessions, isConnected, error, startPolling, stopPolling } =
     useSwarmStore()
   const [viewMode, setViewMode] = useState<ViewMode>('office')
+  const [isMobile, setIsMobile] = useState(false)
+  const setSidebarCollapsed = useWorkspaceStore((s) => s.setSidebarCollapsed)
 
   // Sound notifications for agent events
   useSounds({ autoPlay: true })
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsMobile(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
 
   useEffect(() => {
     startPolling(5000)
@@ -183,6 +194,16 @@ function AgentSwarmRoute() {
         <header className="mb-6 rounded-2xl border border-primary-200 bg-primary-50/85 p-4 shadow-sm backdrop-blur-xl sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3 sm:gap-4">
+              {isMobile && (
+                <button
+                  type="button"
+                  onClick={() => setSidebarCollapsed(false)}
+                  className="flex size-9 items-center justify-center rounded-lg text-primary-600 active:scale-95"
+                  aria-label="Open menu"
+                >
+                  <HugeiconsIcon icon={Menu01Icon} size={20} strokeWidth={1.5} />
+                </button>
+              )}
               <OrchestratorAvatar size={48} className="shrink-0 sm:size-14" />
               <div className="min-w-0">
                 <h1 className="text-lg font-semibold text-primary-900 sm:text-2xl">
@@ -271,7 +292,7 @@ function AgentSwarmRoute() {
         {viewMode === 'office' && (
           <div className="mb-6 flex flex-col gap-3 md:h-[550px] md:flex-row">
             {/* Office */}
-            <div className="h-[350px] overflow-hidden rounded-2xl border border-primary-200 md:h-auto md:flex-[7]">
+            <div className="h-[250px] overflow-hidden rounded-2xl border border-primary-200 md:h-auto md:flex-[7]">
               <IsometricOffice sessions={sessions} />
             </div>
             {/* Activity Panel */}

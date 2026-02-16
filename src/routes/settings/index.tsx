@@ -3,6 +3,7 @@ import {
   CheckmarkCircle02Icon,
   CloudIcon,
   ComputerIcon,
+  Menu01Icon,
   MessageMultiple01Icon,
   Moon01Icon,
   Notification03Icon,
@@ -34,6 +35,7 @@ import { LogoLoader } from '@/components/logo-loader'
 import { BrailleSpinner } from '@/components/ui/braille-spinner'
 import type { BrailleSpinnerPreset } from '@/components/ui/braille-spinner'
 import { ThreeDotsSpinner } from '@/components/ui/three-dots-spinner'
+import { useWorkspaceStore } from '@/stores/workspace-store'
 
 export const Route = createFileRoute('/settings/')({
   component: SettingsRoute,
@@ -115,9 +117,11 @@ function SettingsRoute() {
   usePageTitle('Settings')
   const { settings, updateSettings } = useSettings()
   const gatewaySetup = useGatewaySetupStore()
+  const setSidebarCollapsed = useWorkspaceStore((s) => s.setSidebarCollapsed)
   const [connectionStatus, setConnectionStatus] = useState<
     'idle' | 'testing' | 'connected' | 'failed'
   >('idle')
+  const [isMobile, setIsMobile] = useState(false)
 
   // Phase 4.2: Fetch models for preferred model dropdowns
   const [availableModels, setAvailableModels] = useState<
@@ -148,6 +152,14 @@ function SettingsRoute() {
       }
     }
     void fetchModels()
+  }, [])
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsMobile(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
   }, [])
 
   async function handleTestConnection() {
@@ -209,7 +221,7 @@ function SettingsRoute() {
       <div className="pointer-events-none fixed inset-0 bg-radial from-primary-400/20 via-transparent to-transparent" />
       <div className="pointer-events-none fixed inset-0 bg-gradient-to-br from-primary-100/25 via-transparent to-primary-300/20" />
 
-      <main className="relative mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 pt-6 pb-24 sm:px-6 md:flex-row md:gap-6 md:pb-0 lg:pt-8">
+      <main className="relative mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 pt-6 pb-24 sm:px-6 md:flex-row md:gap-6 md:pb-8 lg:pt-8">
         {/* Sidebar nav */}
         <nav className="hidden w-48 shrink-0 md:block">
           <div className="sticky top-8">
@@ -236,8 +248,23 @@ function SettingsRoute() {
           </div>
         </nav>
 
+        {/* Mobile header */}
+        <div className="flex items-center gap-2 md:hidden">
+          {isMobile && (
+            <button
+              type="button"
+              onClick={() => setSidebarCollapsed(false)}
+              className="flex size-9 items-center justify-center rounded-lg text-primary-600 active:scale-95"
+              aria-label="Open menu"
+            >
+              <HugeiconsIcon icon={Menu01Icon} size={20} strokeWidth={1.5} />
+            </button>
+          )}
+          <h1 className="text-lg font-semibold text-primary-900">Settings</h1>
+        </div>
+
         {/* Mobile section pills */}
-        <div className="flex gap-1.5 overflow-x-auto pb-2 md:hidden">
+        <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none md:hidden">
           {SETTINGS_NAV_ITEMS.map((item) => (
             <button
               key={item.id}

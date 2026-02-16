@@ -2,7 +2,7 @@ import { ArrowRight01Icon, Wrench01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { DashboardGlassCard } from './dashboard-glass-card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -76,6 +76,7 @@ export function SkillsWidget({
   onRemove,
 }: SkillsWidgetProps) {
   const navigate = useNavigate()
+  const [isMobile, setIsMobile] = useState(false)
   const skillsQuery = useQuery({
     queryKey: ['dashboard', 'skills'],
     queryFn: fetchInstalledSkills,
@@ -83,12 +84,20 @@ export function SkillsWidget({
     refetchInterval: 60_000,
   })
 
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsMobile(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
+
   const skills = useMemo(
     function resolveSkills() {
       const source = Array.isArray(skillsQuery.data) ? skillsQuery.data : []
-      return source.slice(0, 6)
+      return source.slice(0, isMobile ? 3 : 6)
     },
-    [skillsQuery.data],
+    [isMobile, skillsQuery.data],
   )
 
   return (

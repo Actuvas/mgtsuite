@@ -18,6 +18,7 @@ import { ChatSidebar } from '@/screens/chat/components/chat-sidebar'
 import { chatQueryKeys } from '@/screens/chat/chat-queries'
 import { useWorkspaceStore } from '@/stores/workspace-store'
 import { SIDEBAR_TOGGLE_EVENT } from '@/hooks/use-global-shortcuts'
+import { useSwipeNavigation } from '@/hooks/use-swipe-navigation'
 import { ChatPanel } from '@/components/chat-panel'
 import { ChatPanelToggle } from '@/components/chat-panel-toggle'
 import { LoginScreen } from '@/components/auth/login-screen'
@@ -47,6 +48,7 @@ export function WorkspaceShell() {
   const sidebarCollapsed = useWorkspaceStore((s) => s.sidebarCollapsed)
   const toggleSidebar = useWorkspaceStore((s) => s.toggleSidebar)
   const setSidebarCollapsed = useWorkspaceStore((s) => s.setSidebarCollapsed)
+  const { onTouchStart, onTouchEnd } = useSwipeNavigation()
 
   const [creatingSession, setCreatingSession] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -223,6 +225,8 @@ export function WorkspaceShell() {
 
         {/* Main content area — renders the matched route */}
         <main
+          onTouchStart={isMobile ? onTouchStart : undefined}
+          onTouchEnd={isMobile ? onTouchEnd : undefined}
           className={[
             'h-full min-h-0 min-w-0 overflow-x-hidden',
             isOnChatRoute ? 'overflow-hidden' : 'overflow-y-auto',

@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react'
+import { Menu01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { useEffect, useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
@@ -17,6 +19,7 @@ import {
   ScrollAreaViewport,
 } from '@/components/ui/scroll-area'
 import { Markdown } from '@/components/prompt-kit/markdown'
+import { useWorkspaceStore } from '@/stores/workspace-store'
 import { cn } from '@/lib/utils'
 import { toast } from '@/components/ui/toast'
 
@@ -110,6 +113,16 @@ export function SkillsScreen() {
   const [actionSkillId, setActionSkillId] = useState<string | null>(null)
   const [selectedSkill, setSelectedSkill] = useState<SkillSummary | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+  const setSidebarCollapsed = useWorkspaceStore((s) => s.setSidebarCollapsed)
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsMobile(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
 
   const skillsQuery = useQuery({
     queryKey: ['skills-browser', tab, searchInput, category, page, sort],
@@ -265,21 +278,33 @@ export function SkillsScreen() {
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-surface text-ink">
+    <div className="h-full overflow-y-auto bg-surface pb-24 text-ink md:pb-8">
       <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-5 px-4 py-6 sm:px-6 lg:px-8">
         <header className="rounded-2xl border border-primary-200 bg-primary-50/85 p-4 backdrop-blur-xl">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="space-y-1.5">
-              <p className="text-xs font-medium uppercase text-primary-500 tabular-nums">
-                ClawSuite Marketplace
-              </p>
-              <h1 className="text-2xl font-medium text-ink text-balance sm:text-3xl">
-                Skills Browser
-              </h1>
-              <p className="text-sm text-primary-500 text-pretty sm:text-base">
-                Discover, install, and manage skills across your local workspace
-                and ClawHub registry.
-              </p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              {isMobile && (
+                <button
+                  type="button"
+                  onClick={() => setSidebarCollapsed(false)}
+                  className="mt-0.5 flex size-9 items-center justify-center rounded-lg text-primary-600 active:scale-95"
+                  aria-label="Open menu"
+                >
+                  <HugeiconsIcon icon={Menu01Icon} size={20} strokeWidth={1.5} />
+                </button>
+              )}
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium uppercase text-primary-500 tabular-nums">
+                  ClawSuite Marketplace
+                </p>
+                <h1 className="text-2xl font-medium text-ink text-balance sm:text-3xl">
+                  Skills Browser
+                </h1>
+                <p className="text-sm text-primary-500 text-pretty sm:text-base">
+                  Discover, install, and manage skills across your local
+                  workspace and ClawHub registry.
+                </p>
+              </div>
             </div>
           </div>
         </header>
