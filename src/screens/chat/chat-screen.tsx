@@ -493,7 +493,7 @@ export function ChatScreen({
   const terminalPanelInset =
     !isMobile && isTerminalPanelOpen ? terminalPanelHeight : 0
   const mobileMessageInset = isMobile
-    ? 'calc(env(safe-area-inset-bottom) + 5rem)'
+    ? '1rem'
     : null
   // Keep message list clear of the mobile tab bar and desktop terminal panel.
   const stableContentStyle = useMemo<React.CSSProperties>(() => {
@@ -1101,7 +1101,7 @@ export function ChatScreen({
           compact
             ? 'flex flex-col w-full'
             : isMobile
-              ? 'relative'
+              ? 'flex flex-col'
               : 'grid grid-cols-[auto_1fr] grid-rows-[minmax(0,1fr)]',
         )}
       >

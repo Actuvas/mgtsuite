@@ -73,7 +73,7 @@ type RowProps = {
 
 function SettingsRow({ label, description, children }: RowProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-primary-900 text-balance">
           {label}
@@ -82,7 +82,9 @@ function SettingsRow({ label, description, children }: RowProps) {
           <p className="text-xs text-primary-600 text-pretty">{description}</p>
         ) : null}
       </div>
-      <div className="flex items-center gap-2">{children}</div>
+      <div className="flex w-full items-center gap-2 md:w-auto md:justify-end">
+        {children}
+      </div>
     </div>
   )
 }
@@ -207,7 +209,7 @@ function SettingsRoute() {
       <div className="pointer-events-none fixed inset-0 bg-radial from-primary-400/20 via-transparent to-transparent" />
       <div className="pointer-events-none fixed inset-0 bg-gradient-to-br from-primary-100/25 via-transparent to-primary-300/20" />
 
-      <main className="relative mx-auto flex w-full max-w-5xl gap-6 px-4 py-6 sm:px-6 lg:py-8">
+      <main className="relative mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 pt-6 pb-24 sm:px-6 md:flex-row md:gap-6 md:pb-0 lg:pt-8">
         {/* Sidebar nav */}
         <nav className="hidden w-48 shrink-0 md:block">
           <div className="sticky top-8">
@@ -356,7 +358,7 @@ function SettingsRoute() {
                 label="Font size"
                 description="Adjust editor font size between 12 and 20."
               >
-                <div className="flex w-full max-w-xs items-center gap-2">
+                <div className="flex w-full items-center gap-2 md:max-w-xs">
                   <input
                     type="range"
                     min={12}
@@ -426,7 +428,7 @@ function SettingsRoute() {
                 label="Usage threshold"
                 description="Set usage warning trigger between 50% and 100%."
               >
-                <div className="flex w-full max-w-xs items-center gap-2">
+                <div className="flex w-full items-center gap-2 md:max-w-xs">
                   <input
                     type="range"
                     min={50}
@@ -462,7 +464,7 @@ function SettingsRoute() {
                   label="Gateway URL"
                   description="Used by ClawSuite for provider connectivity checks."
                 >
-                  <div className="flex-1 max-w-md">
+                  <div className="w-full md:max-w-md">
                     <input
                       type="url"
                       placeholder="https://api.openclaw.ai"
@@ -490,7 +492,7 @@ function SettingsRoute() {
                   label="Gateway Token"
                   description="Authentication token for your gateway (optional)."
                 >
-                  <div className="flex-1 max-w-md">
+                  <div className="w-full md:max-w-md">
                     <input
                       type="password"
                       placeholder="Enter your gateway token..."
@@ -585,7 +587,7 @@ function SettingsRoute() {
                     onChange={(e) =>
                       updateSettings({ preferredBudgetModel: e.target.value })
                     }
-                    className="h-9 w-full max-w-xs rounded-lg border border-primary-200 dark:border-gray-600 bg-primary-50 dark:bg-gray-800 px-3 text-sm text-primary-900 dark:text-gray-100 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary-400 dark:focus-visible:ring-primary-500"
+                    className="h-9 w-full rounded-lg border border-primary-200 dark:border-gray-600 bg-primary-50 dark:bg-gray-800 px-3 text-sm text-primary-900 dark:text-gray-100 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary-400 dark:focus-visible:ring-primary-500 md:max-w-xs"
                     aria-label="Preferred budget model"
                   >
                     <option value="">Auto-detect</option>
@@ -608,7 +610,7 @@ function SettingsRoute() {
                     onChange={(e) =>
                       updateSettings({ preferredPremiumModel: e.target.value })
                     }
-                    className="h-9 w-full max-w-xs rounded-lg border border-primary-200 dark:border-gray-600 bg-primary-50 dark:bg-gray-800 px-3 text-sm text-primary-900 dark:text-gray-100 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary-400 dark:focus-visible:ring-primary-500"
+                    className="h-9 w-full rounded-lg border border-primary-200 dark:border-gray-600 bg-primary-50 dark:bg-gray-800 px-3 text-sm text-primary-900 dark:text-gray-100 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary-400 dark:focus-visible:ring-primary-500 md:max-w-xs"
                     aria-label="Preferred premium model"
                   >
                     <option value="">Auto-detect</option>
@@ -742,7 +744,7 @@ function ProfileSection() {
         </div>
       </div>
       <SettingsRow label="Display name" description="Leave blank for default.">
-        <div className="flex-1 max-w-xs">
+        <div className="w-full md:max-w-xs">
           <Input
             value={chatSettings.displayName}
             onChange={(e) => handleNameChange(e.target.value)}
@@ -777,7 +779,7 @@ function ProfileSection() {
                 onChange={handleAvatarUpload}
                 disabled={profileProcessing}
                 aria-label="Upload profile picture"
-                className="block max-w-xs cursor-pointer text-xs text-primary-700 dark:text-gray-300 file:mr-2 file:cursor-pointer file:rounded-md file:border file:border-primary-200 dark:file:border-gray-600 file:bg-primary-100 dark:file:bg-gray-700 file:px-2.5 file:py-1.5 file:text-xs file:font-medium file:text-primary-900 dark:file:text-gray-100 file:transition-colors hover:file:bg-primary-200 dark:hover:file:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="block w-full cursor-pointer text-xs text-primary-700 dark:text-gray-300 md:max-w-xs file:mr-2 file:cursor-pointer file:rounded-md file:border file:border-primary-200 dark:file:border-gray-600 file:bg-primary-100 dark:file:bg-gray-700 file:px-2.5 file:py-1.5 file:text-xs file:font-medium file:text-primary-900 dark:file:text-gray-100 file:transition-colors hover:file:bg-primary-200 dark:hover:file:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </label>
             <Button

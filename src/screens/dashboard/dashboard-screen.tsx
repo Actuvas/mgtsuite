@@ -257,15 +257,15 @@ export function DashboardScreen() {
 
   return (
     <>
-      <main className="h-full overflow-x-hidden overflow-y-auto bg-primary-100/45 px-3 py-4 text-primary-900 md:px-6 md:py-8">
+      <main className="h-full overflow-x-hidden overflow-y-auto bg-primary-100/45 px-3 pt-4 pb-24 text-primary-900 md:px-6 md:pt-8 md:pb-8">
         <section className="mx-auto w-full max-w-[1600px]">
-          <header className="relative z-20 mb-4 rounded-xl border border-primary-200 bg-primary-50/95 px-3 py-3 shadow-sm md:mb-5 md:px-5">
+          <header className="relative z-20 mb-4 rounded-xl border border-primary-200 bg-primary-50/95 px-3 py-2 shadow-sm md:mb-5 md:px-5 md:py-3">
             <div className="flex items-center justify-between gap-3">
               {/* Left: Logo + name + status */}
               <div className="flex min-w-0 items-center gap-2.5">
                 <OpenClawStudioIcon className="size-8 shrink-0 rounded-xl shadow-sm" />
                 <div className="flex min-w-0 items-center gap-2.5">
-                  <h1 className="text-base font-semibold text-ink text-balance">
+                  <h1 className="text-sm font-semibold text-ink text-balance md:text-base">
                     ClawSuite
                   </h1>
                   <span
@@ -292,8 +292,8 @@ export function DashboardScreen() {
               </div>
 
               {/* Right: Clock → Theme → Bell → Gear */}
-              <div className="ml-auto flex items-center gap-2">
-                <HeaderAmbientStatus />
+              <div className="ml-auto flex flex-col items-end gap-1 md:flex-row md:items-center md:gap-2">
+                {!isMobile ? <HeaderAmbientStatus /> : null}
                 <ThemeToggle />
                 <div className="flex items-center gap-1 rounded-full border border-primary-200 bg-primary-100/65 p-1">
                   <NotificationsPopover />

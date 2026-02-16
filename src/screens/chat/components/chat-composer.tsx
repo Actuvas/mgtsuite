@@ -953,7 +953,7 @@ function ChatComposerComponent({
   return (
     <div
       className={cn(
-        'z-30 mx-auto w-full shrink-0 bg-surface/95 px-3 pb-[calc(env(safe-area-inset-bottom)+5rem)] pt-2 backdrop-blur md:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:px-5',
+        'z-30 mx-auto w-full shrink-0 bg-surface/95 px-3 pb-[calc(env(safe-area-inset-bottom)+4.5rem)] pt-2 backdrop-blur md:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:px-5',
       )}
       style={{ maxWidth: 'min(768px, 100%)' }}
       ref={setWrapperRefs}
