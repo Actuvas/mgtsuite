@@ -101,6 +101,13 @@ export function WorkspaceShell() {
     navigate({ to: '/chat/$sessionKey', params: { sessionKey: 'main' } })
   }, [navigate])
 
+  // Auto-collapse sidebar on mobile (initial load)
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setSidebarCollapsed(true)
+    }
+  }, [setSidebarCollapsed])
+
   // Listen for global sidebar toggle shortcut
   useEffect(() => {
     function handleToggleEvent() {
@@ -147,6 +154,14 @@ export function WorkspaceShell() {
           sessionsError={sessionsError}
           onRetrySessions={refetchSessions}
         />
+
+        {/* Mobile backdrop overlay when sidebar is open */}
+        {!sidebarCollapsed && (
+          <div
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            onClick={() => setSidebarCollapsed(true)}
+          />
+        )}
 
         {/* Main content area — renders the matched route */}
         <main

@@ -655,9 +655,14 @@ function ChatSidebarComponent({
     setDeleteFriendlyId(null)
   }
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+
   const asideProps = {
-    className:
+    className: cn(
       'border-r border-primary-200 h-full overflow-hidden bg-primary-50 dark:bg-primary-100 flex flex-col',
+      isMobile && 'fixed inset-y-0 left-0 z-50 shadow-xl',
+      isMobile && isCollapsed && 'pointer-events-none',
+    ),
   }
 
   useEffect(() => {
@@ -825,7 +830,7 @@ function ChatSidebarComponent({
   return (
     <motion.aside
       initial={false}
-      animate={{ width: isCollapsed ? 48 : 300 }}
+      animate={{ width: isCollapsed ? (isMobile ? 0 : 48) : 300 }}
       transition={transition}
       className={asideProps.className}
       data-tour="sidebar-container"
