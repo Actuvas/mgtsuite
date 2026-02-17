@@ -71,13 +71,12 @@ export function MobileTabBar() {
   return (
     <nav
       className={cn(
-        'fixed inset-x-0 bottom-0 z-[60] bg-primary-50/95 pb-[var(--safe-b)] md:hidden transform-gpu will-change-transform transition-all duration-200',
+        'fixed inset-x-0 bottom-0 z-[60] isolate bg-primary-50/95 pb-[var(--safe-b)] md:hidden transition-all duration-200',
         hideForChat
           ? 'translate-y-[110%] opacity-0 pointer-events-none'
           : 'translate-y-0 opacity-100',
       )}
       aria-label="Mobile navigation"
-      style={{ WebkitTransform: 'translateZ(0)' }}
     >
       <div className="mx-2 mb-0 grid grid-cols-5 gap-1 rounded-2xl border border-primary-200/60 px-1 py-1.5 shadow-[0_2px_20px_rgba(0,0,0,0.08)]">
         {TABS.map((tab) => {

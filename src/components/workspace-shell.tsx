@@ -169,55 +169,57 @@ export function WorkspaceShell() {
   }
 
   return (
-    <div
-      className="relative overflow-hidden bg-surface text-primary-900"
-      style={{ height: 'calc(var(--vvh, 100dvh) + var(--kb-inset, 0px))' }}
-    >
-      <div className="grid h-full grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden md:grid-cols-[auto_1fr]">
-        {/* Activity ticker bar */}
-        {/* Persistent sidebar */}
-        {!isMobile && (
-          <ChatSidebar
-            sessions={sessions}
-            activeFriendlyId={activeFriendlyId}
-            creatingSession={creatingSession}
-            onCreateSession={startNewChat}
-            isCollapsed={sidebarCollapsed}
-            onToggleCollapse={toggleSidebar}
-            onSelectSession={handleSelectSession}
-            onActiveSessionDelete={handleActiveSessionDelete}
-            sessionsLoading={sessionsLoading}
-            sessionsFetching={sessionsFetching}
-            sessionsError={sessionsError}
-            onRetrySessions={refetchSessions}
-          />
-        )}
+    <>
+      <div
+        className="relative overflow-hidden bg-surface text-primary-900"
+        style={{ height: 'calc(var(--vvh, 100dvh) + var(--kb-inset, 0px))' }}
+      >
+        <div className="grid h-full grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden md:grid-cols-[auto_1fr]">
+          {/* Activity ticker bar */}
+          {/* Persistent sidebar */}
+          {!isMobile && (
+            <ChatSidebar
+              sessions={sessions}
+              activeFriendlyId={activeFriendlyId}
+              creatingSession={creatingSession}
+              onCreateSession={startNewChat}
+              isCollapsed={sidebarCollapsed}
+              onToggleCollapse={toggleSidebar}
+              onSelectSession={handleSelectSession}
+              onActiveSessionDelete={handleActiveSessionDelete}
+              sessionsLoading={sessionsLoading}
+              sessionsFetching={sessionsFetching}
+              sessionsError={sessionsError}
+              onRetrySessions={refetchSessions}
+            />
+          )}
 
-        {/* Main content area — renders the matched route */}
-        <main
-          onTouchStart={isMobile ? onTouchStart : undefined}
-          onTouchMove={isMobile ? onTouchMove : undefined}
-          onTouchEnd={isMobile ? onTouchEnd : undefined}
-          className={[
-            'h-full min-h-0 min-w-0 overflow-x-hidden',
-            isOnChatRoute ? 'overflow-hidden' : 'overflow-y-auto',
-            isMobile && !isOnChatRoute ? 'pb-16' : '',
-          ].join(' ')}
-          data-tour="chat-area"
-        >
-          <div key={pathname} className="page-transition h-full">
-            <Outlet />
-          </div>
-        </main>
+          {/* Main content area — renders the matched route */}
+          <main
+            onTouchStart={isMobile ? onTouchStart : undefined}
+            onTouchMove={isMobile ? onTouchMove : undefined}
+            onTouchEnd={isMobile ? onTouchEnd : undefined}
+            className={[
+              'h-full min-h-0 min-w-0 overflow-x-hidden',
+              isOnChatRoute ? 'overflow-hidden' : 'overflow-y-auto',
+              isMobile && !isOnChatRoute ? 'pb-16' : '',
+            ].join(' ')}
+            data-tour="chat-area"
+          >
+            <div key={pathname} className="page-transition h-full">
+              <Outlet />
+            </div>
+          </main>
 
-        {/* Chat panel — visible on non-chat routes */}
-        {!isOnChatRoute && !isMobile && <ChatPanel />}
+          {/* Chat panel — visible on non-chat routes */}
+          {!isOnChatRoute && !isMobile && <ChatPanel />}
+        </div>
+
+        {/* Floating chat toggle — visible on non-chat routes */}
+        {!isOnChatRoute && !isMobile && <ChatPanelToggle />}
       </div>
 
-      {/* Floating chat toggle — visible on non-chat routes */}
-      {!isOnChatRoute && !isMobile && <ChatPanelToggle />}
-
       {isMobile ? <MobileTabBar /> : null}
-    </div>
+    </>
   )
 }
