@@ -5,6 +5,7 @@ import {
   ReloadIcon,
 } from '@hugeicons/core-free-icons'
 import { OpenClawStudioIcon } from '@/components/icons/clawsuite'
+import { OrchestratorAvatar } from '@/components/orchestrator-avatar'
 import { Button } from '@/components/ui/button'
 import { UsageMeter } from '@/components/usage-meter'
 import {
@@ -14,6 +15,56 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+
+function toTitleCase(value: string): string {
+  return value
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
+function formatMobileSessionTitle(rawTitle: string): string {
+  const title = rawTitle.trim()
+  if (!title) return 'New Chat'
+
+  const normalized = title.toLowerCase()
+
+  // Agent session patterns
+  if (normalized === 'agent:main:main' || normalized === 'agent:main') {
+    return 'Main Chat'
+  }
+  const parts = title.split(':').map((part) => part.trim()).filter(Boolean)
+  if (
+    parts.length >= 2 &&
+    parts[0].toLowerCase() === 'agent' &&
+    parts[1].length > 0
+  ) {
+    const candidate = parts[parts.length - 1]
+    if (candidate.toLowerCase() === 'main') return 'Main Chat'
+    return `${toTitleCase(candidate)} Chat`
+  }
+
+  // Common system prompts → friendly names
+  if (normalized.startsWith('read heartbeat')) return 'Main Chat'
+  if (normalized.startsWith('generate daily')) return 'Daily Brief'
+  if (normalized.startsWith('morning check')) return 'Morning Check-in'
+
+  // If it looks like a command/prompt (starts with a verb + long), summarize it
+  const MAX_LEN = 20
+  if (title.length > MAX_LEN) {
+    // Extract first few meaningful words
+    const words = title.split(/\s+/)
+    let result = ''
+    for (const word of words) {
+      if ((result + ' ' + word).trim().length > MAX_LEN) break
+      result = (result + ' ' + word).trim()
+    }
+    return result.length > 0 ? `${result}…` : `${title.slice(0, MAX_LEN)}…`
+  }
+
+  return title
+}
 
 function formatSyncAge(updatedAt: number): string {
   if (updatedAt <= 0) return ''
@@ -35,6 +86,14 @@ type ChatHeaderProps = {
   dataUpdatedAt?: number
   /** Callback to manually refresh history */
   onRefresh?: () => void
+  /** Current model id/name for compact mobile status */
+  agentModel?: string
+  /** Whether agent connection is healthy */
+  agentConnected?: boolean
+  /** Open agent details panel on mobile status tap */
+  onOpenAgentDetails?: () => void
+  /** Pull-to-refresh offset in px — header slides down */
+  pullOffset?: number
 }
 
 function ChatHeaderComponent({
@@ -46,6 +105,10 @@ function ChatHeaderComponent({
   onToggleFileExplorer,
   dataUpdatedAt = 0,
   onRefresh,
+  agentModel: _agentModel = '',
+  agentConnected = true,
+  onOpenAgentDetails,
+  pullOffset = 0,
 }: ChatHeaderProps) {
   const [syncLabel, setSyncLabel] = useState('')
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -68,6 +131,8 @@ function ChatHeaderComponent({
   }, [])
 
   const isStale = dataUpdatedAt > 0 && Date.now() - dataUpdatedAt > 15000
+  const mobileTitle = formatMobileSessionTitle(activeTitle)
+  void _agentModel; void agentConnected // kept for prop compat
 
   const handleRefresh = useCallback(() => {
     if (!onRefresh) return
@@ -76,13 +141,22 @@ function ChatHeaderComponent({
     setTimeout(() => setIsRefreshing(false), 600)
   }, [onRefresh])
 
+  const handleOpenAgentDetails = useCallback(() => {
+    if (onOpenAgentDetails) {
+      onOpenAgentDetails()
+      return
+    }
+    window.dispatchEvent(new CustomEvent('clawsuite:chat-agent-details'))
+  }, [onOpenAgentDetails])
+
   if (isMobile) {
     return (
       <div
         ref={wrapperRef}
-        className="shrink-0 border-b border-primary-200 px-4 h-12 flex items-center justify-between bg-surface"
+        className="shrink-0 border-b border-primary-200 px-4 h-12 flex items-center justify-between bg-surface transition-transform"
+        style={pullOffset > 0 ? { transform: `translateY(${pullOffset}px)` } : undefined}
       >
-        <div className="flex min-w-0 items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           <button
             type="button"
             onClick={onOpenSessions}
@@ -91,44 +165,20 @@ function ChatHeaderComponent({
           >
             <OpenClawStudioIcon className="size-8 rounded-lg" />
           </button>
-          <div className="truncate text-sm font-semibold tracking-tight text-ink">
-            ClawSuite
+          <div className="min-w-0 max-w-[45vw] overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold tracking-tight text-ink">
+            {mobileTitle}
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
-          {syncLabel ? (
-            <span
-              className={cn(
-                'text-[11px] tabular-nums transition-colors',
-                isStale ? 'text-amber-500' : 'text-primary-400',
-              )}
-              title={
-                dataUpdatedAt > 0
-                  ? `Last synced: ${new Date(dataUpdatedAt).toLocaleTimeString()}`
-                  : undefined
-              }
-            >
-              {isStale ? '⚠ ' : ''}
-              {syncLabel}
-            </span>
-          ) : null}
-          {onRefresh ? (
-            <Button
-              size="icon-sm"
-              variant="ghost"
-              onClick={handleRefresh}
-              className="h-10 w-10 text-primary-500 hover:bg-primary-100 hover:text-primary-700"
-              aria-label="Refresh chat"
-            >
-              <HugeiconsIcon
-                icon={ReloadIcon}
-                size={20}
-                strokeWidth={1.5}
-                className={cn(isRefreshing && 'animate-spin')}
-              />
-            </Button>
-          ) : null}
+        <div className="ml-2 flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            onClick={handleOpenAgentDetails}
+            className="relative rounded-full transition-transform active:scale-90"
+            aria-label="Open agent details"
+          >
+            <OrchestratorAvatar size={28} compact />
+          </button>
         </div>
       </div>
     )

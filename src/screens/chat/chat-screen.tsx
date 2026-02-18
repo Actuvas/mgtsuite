@@ -49,7 +49,7 @@ import type {
   ChatComposerHandle,
   ChatComposerHelpers,
 } from './components/chat-composer'
-import type { GatewayAttachment, GatewayMessage } from './types'
+import type { GatewayAttachment, GatewayMessage, SessionMeta } from './types'
 import { cn } from '@/lib/utils'
 import { toast } from '@/components/ui/toast'
 import { FileExplorerSidebar } from '@/components/file-explorer'
@@ -175,6 +175,7 @@ export function ChatScreen({
   const mobileComposerFocused = useWorkspaceStore((s) => s.mobileComposerFocused)
   const mobileKeyboardActive = mobileKeyboardInset > 0 || mobileComposerFocused
   const isAgentViewOpen = useAgentViewStore((state) => state.isOpen)
+  const setAgentViewOpen = useAgentViewStore((state) => state.setOpen)
   const isTerminalPanelOpen = useTerminalPanelStore(
     (state) => state.isPanelOpen,
   )
@@ -196,7 +197,6 @@ export function ChatScreen({
   const {
     historyQuery,
     historyMessages,
-    displayMessages,
     messageCount,
     historyError,
     resolvedSessionKey,
@@ -222,7 +222,6 @@ export function ChatScreen({
     realtimeStreamingText,
     realtimeStreamingThinking,
     activeToolCalls,
-    streamingRunId,
   } = useRealtimeChatHistory({
       sessionKey: resolvedSessionKey || activeCanonicalKey,
       friendlyId: activeFriendlyId,
@@ -481,7 +480,6 @@ export function ChatScreen({
     staleTime: 30_000,
     refetchInterval: 60_000, // Re-check every 60s to clear stale errors
   })
-  const gatewayStatusMountRef = useRef(Date.now())
   // Don't show gateway errors for new chats or when SSE is connected (proves gateway works)
   const gatewayStatusError =
     !isNewChat && connectionState !== 'connected' &&
@@ -497,6 +495,20 @@ export function ChatScreen({
     void sessionsQuery.refetch()
     void historyQuery.refetch()
   }, [gatewayStatusQuery, sessionsQuery, historyQuery])
+
+  const handleRefreshHistory = useCallback(() => {
+    void historyQuery.refetch()
+  }, [historyQuery])
+
+  useEffect(() => {
+    const handleRefreshRequest = () => {
+      void historyQuery.refetch()
+    }
+    window.addEventListener('clawsuite:chat-refresh', handleRefreshRequest)
+    return () => {
+      window.removeEventListener('clawsuite:chat-refresh', handleRefreshRequest)
+    }
+  }, [historyQuery])
 
   const terminalPanelInset =
     !isMobile && isTerminalPanelOpen ? terminalPanelHeight : 0
@@ -935,38 +947,90 @@ export function ChatScreen({
     }
   }, [flushRetryableMessages, handleGatewayRefetch])
 
-  const createSessionForMessage = useCallback(async () => {
-    setCreatingSession(true)
-    try {
-      const res = await fetch('/api/sessions', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({}),
-      })
-      if (!res.ok) throw new Error(await readError(res))
+  const createSessionForMessage = useCallback(
+    async (preferredFriendlyId?: string) => {
+      setCreatingSession(true)
+      try {
+        const res = await fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(
+            preferredFriendlyId && preferredFriendlyId.trim().length > 0
+              ? { friendlyId: preferredFriendlyId }
+              : {},
+          ),
+        })
+        if (!res.ok) throw new Error(await readError(res))
 
-      const data = (await res.json()) as {
-        sessionKey?: string
-        friendlyId?: string
+        const data = (await res.json()) as {
+          sessionKey?: string
+          friendlyId?: string
+        }
+
+        const sessionKey =
+          typeof data.sessionKey === 'string' ? data.sessionKey : ''
+        const friendlyId =
+          typeof data.friendlyId === 'string' &&
+          data.friendlyId.trim().length > 0
+            ? data.friendlyId.trim()
+            : (preferredFriendlyId?.trim() ?? '') ||
+              deriveFriendlyIdFromKey(sessionKey)
+
+        if (!sessionKey || !friendlyId) {
+          throw new Error('Invalid session response')
+        }
+
+        queryClient.invalidateQueries({ queryKey: chatQueryKeys.sessions })
+        return { sessionKey, friendlyId }
+      } finally {
+        setCreatingSession(false)
       }
+    },
+    [queryClient],
+  )
 
-      const sessionKey =
-        typeof data.sessionKey === 'string' ? data.sessionKey : ''
-      const friendlyId =
-        typeof data.friendlyId === 'string' && data.friendlyId.trim().length > 0
-          ? data.friendlyId.trim()
-          : deriveFriendlyIdFromKey(sessionKey)
+  const upsertSessionInCache = useCallback(
+    (friendlyId: string, lastMessage: GatewayMessage) => {
+      if (!friendlyId) return
+      queryClient.setQueryData(
+        chatQueryKeys.sessions,
+        function upsert(existing: unknown) {
+          const sessions = Array.isArray(existing)
+            ? (existing as Array<SessionMeta>)
+            : []
+          const now = Date.now()
+          const existingIndex = sessions.findIndex((session) => {
+            return (
+              session.friendlyId === friendlyId || session.key === friendlyId
+            )
+          })
 
-      if (!sessionKey || !friendlyId) {
-        throw new Error('Invalid session response')
-      }
+          if (existingIndex === -1) {
+            return [
+              {
+                key: friendlyId,
+                friendlyId,
+                updatedAt: now,
+                lastMessage,
+                titleStatus: 'idle',
+              },
+              ...sessions,
+            ]
+          }
 
-      queryClient.invalidateQueries({ queryKey: chatQueryKeys.sessions })
-      return { sessionKey, friendlyId }
-    } finally {
-      setCreatingSession(false)
-    }
-  }, [queryClient])
+          return sessions.map((session, index) => {
+            if (index !== existingIndex) return session
+            return {
+              ...session,
+              updatedAt: now,
+              lastMessage,
+            }
+          })
+        },
+      )
+    },
+    [queryClient],
+  )
 
   const send = useCallback(
     (
@@ -987,20 +1051,29 @@ export function ChatScreen({
       )
 
       if (isNewChat) {
+        const threadId = crypto.randomUUID()
         const { optimisticMessage } = createOptimisticMessage(
           trimmedBody,
           attachmentPayload,
         )
-        appendHistoryMessage(queryClient, 'new', 'new', optimisticMessage)
+        appendHistoryMessage(queryClient, threadId, threadId, optimisticMessage)
+        upsertSessionInCache(threadId, optimisticMessage)
         setPendingGeneration(true)
         setSending(true)
         setWaitingForResponse(true)
 
-        // Send directly to main session — gateway routes all chat.send to main anyway
+        void createSessionForMessage(threadId).catch((err: unknown) => {
+          if (import.meta.env.DEV) {
+            console.warn('[chat] failed to register new thread', err)
+          }
+          void queryClient.invalidateQueries({ queryKey: chatQueryKeys.sessions })
+        })
+
+        // Send using the new thread id — gateway can still resolve/reroute under the hood
         // Fire send BEFORE navigate — navigating unmounts the component and can cancel the fetch
         sendMessage(
-          'main',
-          'main',
+          threadId,
+          threadId,
           trimmedBody,
           attachmentPayload,
           true,
@@ -1011,7 +1084,7 @@ export function ChatScreen({
         // Navigate after send is fired (fetch is in-flight, won't be cancelled)
         navigate({
           to: '/chat/$sessionKey',
-          params: { sessionKey: 'main' },
+          params: { sessionKey: threadId },
           replace: true,
         })
         return
@@ -1034,21 +1107,17 @@ export function ChatScreen({
       isNewChat,
       navigate,
       onSessionResolved,
+      upsertSessionInCache,
       queryClient,
       resolvedSessionKey,
     ],
   )
 
   const toggleSidebar = useWorkspaceStore((s) => s.toggleSidebar)
-  const setSidebarCollapsed = useWorkspaceStore((s) => s.setSidebarCollapsed)
 
   const handleToggleSidebarCollapse = useCallback(() => {
     toggleSidebar()
   }, [toggleSidebar])
-
-  const handleOpenSidebar = useCallback(() => {
-    setSidebarCollapsed(false)
-  }, [setSidebarCollapsed])
 
   const handleToggleFileExplorer = useCallback(() => {
     setFileExplorerCollapsed((prev) => {
@@ -1109,6 +1178,19 @@ export function ChatScreen({
         ? 'disconnected'
         : 'connecting'
 
+  // Pull-to-refresh offset removed
+
+  const handleOpenAgentDetails = useCallback(() => {
+    setAgentViewOpen(true)
+  }, [setAgentViewOpen])
+
+  // Listen for mobile header agent-details tap
+  useEffect(() => {
+    const handler = () => setAgentViewOpen(true)
+    window.addEventListener('clawsuite:chat-agent-details', handler)
+    return () => window.removeEventListener('clawsuite:chat-agent-details', handler)
+  }, [setAgentViewOpen])
+
   return (
     <div
       className={cn(
@@ -1154,11 +1236,15 @@ export function ChatScreen({
               fileExplorerCollapsed={fileExplorerCollapsed}
               onToggleFileExplorer={handleToggleFileExplorer}
               dataUpdatedAt={historyQuery.dataUpdatedAt}
-              onRefresh={() => void historyQuery.refetch()}
+              onRefresh={handleRefreshHistory}
+              agentModel={currentModel}
+              agentConnected={mobileHeaderStatus === 'connected'}
+              onOpenAgentDetails={handleOpenAgentDetails}
+              pullOffset={0}
             />
           )}
 
-          {!isMobile || compact ? <ContextBar compact={compact} /> : null}
+          <ContextBar compact={compact} />
 
           {gatewayNotice && <div className="sticky top-0 z-20 px-4 py-2">{gatewayNotice}</div>}
 
@@ -1166,6 +1252,7 @@ export function ChatScreen({
             <ChatMessageList
               messages={finalDisplayMessages}
               onRetryMessage={handleRetryMessage}
+              onRefresh={handleRefreshHistory}
               loading={historyLoading}
               empty={historyEmpty}
               emptyState={
@@ -1191,6 +1278,7 @@ export function ChatScreen({
               streamingText={realtimeStreamingText || undefined}
               streamingThinking={realtimeStreamingThinking || undefined}
               hideSystemMessages={isMobile}
+              activeToolCalls={activeToolCalls}
             />
           )}
           {showComposer ? (
