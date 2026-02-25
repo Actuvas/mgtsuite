@@ -1,6 +1,6 @@
 # ClawSuite Roadmap
 
-## Current: Agent Hub Completion (Feb 22-23, 2026)
+## Recently Shipped (v3.0.0)
 - [x] 3-tab restructure (Overview/Configure/Missions)
 - [x] Pixel robot avatars + avatar picker
 - [x] Enterprise light theme polish
@@ -35,7 +35,4 @@
 - [ ] Plugin marketplace (community agent templates)
 - [ ] Public cloud deployment option
 
-## Competitive Position (Feb 2026)
-**We're the only full-suite option** (chat + agents + terminal + browser).
-Gaps vs competitors: auth, cron UI, memory browser, cost charts.
-Unique advantages: agent orchestration, multi-model switching, voice input, integrated terminal.
+
