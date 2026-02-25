@@ -146,12 +146,14 @@ function ocFormatResetHint(resetsAt?: string): string | null {
 }
 
 function ocBarColor(pct: number): string {
-  if (pct >= 80) return 'bg-red-500'
+  if (pct >= 100) return 'bg-amber-400'  // full = amber (resets soon, not an error)
+  if (pct >= 80) return 'bg-red-400'
   if (pct >= 60) return 'bg-amber-400'
   return 'bg-emerald-500'
 }
 function ocTextColor(pct: number): string {
-  if (pct >= 80) return 'text-red-500'
+  if (pct >= 100) return 'text-amber-500'
+  if (pct >= 80) return 'text-red-400'
   if (pct >= 60) return 'text-amber-500'
   return 'text-emerald-600'
 }
@@ -411,16 +413,27 @@ function OrchestratorCard({
               </button>
             )}
           </div>
-          <p
-            className={cn(
+          {/* State indicator — dot + label */}
+          <div className={cn('flex items-center gap-1.5 mt-0.5', !compact && 'justify-center')}>
+            <span className={cn(
+              'inline-block h-1.5 w-1.5 rounded-full shrink-0',
+              state === 'idle' ? 'bg-primary-400' :
+              state === 'thinking' ? 'bg-yellow-400 animate-pulse' :
+              state === 'tool-use' ? 'bg-violet-400 animate-pulse' :
+              state === 'responding' ? 'bg-emerald-400 animate-pulse' :
+              state === 'reading' ? 'bg-blue-400 animate-pulse' :
+              'bg-accent-400 animate-pulse'
+            )} />
+            <p className={cn(
               'text-primary-600',
-              compact ? 'text-[9px]' : 'mt-0.5 text-[10px]',
-            )}
-          >
-            {label}
-          </p>
+              compact ? 'text-[9px]' : 'text-[10px]',
+              state !== 'idle' && 'font-medium text-primary-700',
+            )}>
+              {label}
+            </p>
+          </div>
           {!compact && model ? (
-            <p className="mt-0.5 truncate text-[9px] font-mono text-primary-500">
+            <p className="mt-0.5 truncate text-[9px] font-mono text-primary-400 text-center">
               {model}
             </p>
           ) : null}
@@ -472,7 +485,7 @@ function OrchestratorCard({
 
           {usageExpanded && (
             <div className="space-y-1.5">
-              {displayRows.map((row) => (
+              {displayRows.filter(row => !(row.label === 'Ctx' && row.pct === 0) && row.pct > 0).map((row) => (
                 <div key={row.label} className="space-y-0.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[9px] font-medium text-primary-500 leading-none">{row.label}</span>
@@ -780,7 +793,7 @@ export function AgentViewPanel() {
           animate={{ x: panelVisible ? 0 : panelWidth }}
           transition={{ duration: 0.22, ease: 'easeInOut' }}
           className={cn(
-            'fixed inset-y-0 right-0 z-40 w-80 border-l border-primary-300/70 bg-primary-100/92 backdrop-blur-xl',
+            'fixed inset-y-0 right-0 z-40 w-72 border-l border-primary-300/70 bg-primary-100/92 backdrop-blur-xl',
             panelVisible ? 'pointer-events-auto' : 'pointer-events-none',
           )}
         >
@@ -876,8 +889,8 @@ export function AgentViewPanel() {
                 {/* Main Agent Card (includes usage section) */}
                 <OrchestratorCard compact={false} />
 
-                {/* Swarm — agent cards */}
-                <section className="rounded-2xl border border-primary-300/70 bg-primary-200/35 p-1">
+                {/* Swarm — agent cards — only show when there's something */}
+                {(activeCount > 0 || queuedAgents.length > 0 || historyAgents.length > 0) && <section className="rounded-2xl border border-primary-300/70 bg-primary-200/35 p-1">
                   {/* Centered Swarm pill */}
                   <div className="mb-1 flex justify-center">
                     <span className="rounded-full border border-primary-300/70 bg-primary-100/80 px-3 py-0.5 text-[10px] font-medium text-primary-600 shadow-sm">
@@ -1095,7 +1108,7 @@ export function AgentViewPanel() {
                       </p>
                     )}
                   </LayoutGroup>
-                </section>
+                </section>}
 
                 {(cliAgentsQuery.isLoading || cliAgents.length > 0) ? (
                   <section className="rounded-2xl border border-primary-300/70 bg-primary-200/35 p-2">
