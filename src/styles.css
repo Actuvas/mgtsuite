@@ -335,14 +335,18 @@
   --theme-header-border: #6b3c1b;
 }
 
+[data-theme="paper-light"] html,
 [data-theme="paper-light"] body,
 [data-theme="paper-light"] #root,
+[data-theme="ops-dark"] html,
 [data-theme="ops-dark"] body,
 [data-theme="ops-dark"] #root,
 [data-theme="ops-dark"] .dark,
+[data-theme="premium-dark"] html,
 [data-theme="premium-dark"] body,
 [data-theme="premium-dark"] #root,
 [data-theme="premium-dark"] .dark,
+[data-theme="sunset-brand"] html,
 [data-theme="sunset-brand"] body,
 [data-theme="sunset-brand"] #root,
 [data-theme="sunset-brand"] .dark {

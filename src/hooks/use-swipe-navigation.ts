@@ -109,7 +109,10 @@ export function useSwipeNavigation() {
     }
 
     if (gesture.locked === 'horizontal') {
-      event.preventDefault()
+      // Don't preventDefault on interactive targets — kills composer focus on mobile
+      if (!shouldIgnoreTarget(event.target)) {
+        event.preventDefault()
+      }
     }
   }, [])
 
