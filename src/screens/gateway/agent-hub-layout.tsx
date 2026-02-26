@@ -5264,7 +5264,7 @@ export function AgentHubLayout({ agents }: AgentHubLayoutProps) {
 
   function renderConfigureContent() {
     return (
-      <div className="relative flex h-full min-h-0 flex-col bg-primary-100/45 p-4 dark:bg-[var(--theme-bg,#0b0e14)]">
+      <div className="relative flex h-full min-h-0 flex-col overflow-y-auto bg-primary-100/45 p-4 dark:bg-[var(--theme-bg,#0b0e14)]">
         <div aria-hidden className="absolute inset-0 bg-gradient-to-br from-neutral-100/60 to-white dark:from-slate-900/60 dark:to-[var(--theme-bg,#0b0e14)]" />
         <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-4">
 
