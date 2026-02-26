@@ -8,6 +8,7 @@ import {
 } from 'react'
 import { Robot01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
+import { hapticTap } from '@/lib/haptics'
 import {
   getMessageTimestamp,
   getToolCallsFromMessage,
@@ -866,9 +867,11 @@ function ChatMessageListComponent({
       isNearBottomRef.current = true
       setIsNearBottom(true)
       setUnreadCount(0)
+      // Haptic feedback on mobile scroll-to-bottom tap
+      if (isMobileViewport) hapticTap()
       scrollToBottom('smooth')
     },
-    [scrollToBottom],
+    [isMobileViewport, scrollToBottom],
   )
 
   useEffect(() => {

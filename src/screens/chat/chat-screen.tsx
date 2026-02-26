@@ -60,6 +60,7 @@ import type { ApprovalRequest } from '@/screens/gateway/lib/approvals-store'
 import type { GatewayAttachment, GatewayMessage, SessionMeta } from './types'
 import { cn } from '@/lib/utils'
 import { toast } from '@/components/ui/toast'
+import { hapticTap } from '@/lib/haptics'
 import { FileExplorerSidebar } from '@/components/file-explorer'
 import { SEARCH_MODAL_EVENTS } from '@/hooks/use-search-modal'
 import { SIDEBAR_TOGGLE_EVENT } from '@/hooks/use-global-shortcuts'
@@ -1482,6 +1483,9 @@ export function ChatScreen({
       if (sendKey === lastSendKeyRef.current && now - lastSendAtRef.current < 500) return
       lastSendKeyRef.current = sendKey
       lastSendAtRef.current = now
+
+      // Haptic feedback on mobile when message is sent
+      if (isMobile) hapticTap()
 
       helpers.reset()
 
