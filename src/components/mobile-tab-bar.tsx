@@ -81,13 +81,11 @@ export function MobileTabBar() {
   const [isDragging, setIsDragging] = useState(false)
 
   const { settings } = useSettings()
-  const chatNavMode = settings.mobileChatNavMode ?? 'dock'
+  void settings.mobileChatNavMode // reserved for future use
   const isOnChat = pathname.startsWith('/chat') || pathname === '/new' || pathname === '/'
 
-  // 'dock' mode: hide tab bar on all chat routes (iMessage style)
-  // 'scroll-hide': tab bar always present, composer floats above it
-  // 'integrated': tab bar always present, has mini input
-  const isChatRoute = chatNavMode === 'dock' ? isOnChat : false
+  // Always hide tab bar on chat routes — iMessage/Telegram pattern
+  const isChatRoute = isOnChat
 
   // Drag-to-switch: horizontal swipe across pill switches tabs
   const handlePillTouchStart = useCallback(
@@ -189,9 +187,9 @@ export function MobileTabBar() {
       ref={navRef}
       className={cn(
         // Pill: fixed bottom center, shrink to content width
-        'fixed bottom-0 left-0 right-0 mx-auto w-fit z-40 md:hidden',
+        'fixed bottom-0 left-0 right-0 mx-auto w-fit z-[80] md:hidden',
         // Vertical position: above home indicator
-        'mb-[calc(env(safe-area-inset-bottom,20px)+12px)]',
+        'mb-[calc(env(safe-area-inset-bottom,8px)+8px)]',
         // Frosted glass pill
         'bg-white/75 dark:bg-neutral-900/75 backdrop-blur-2xl',
         'rounded-full',
