@@ -1441,22 +1441,22 @@ function ChatComposerComponent({
 
   const composerWrapperStyle = useMemo(
     () => {
-      // Composer sits above tab bar (--tabbar-h) + safe area at rest.
-      // When keyboard active, tab bar hides itself so only lift by kb inset.
-      const tabBarH = 'var(--tabbar-h, 3.75rem)'
-      const safeAreaInset = 'env(safe-area-inset-bottom, 0px)'
+      if (!isMobileViewport) return { maxWidth: 'min(768px, 100%)' } as CSSProperties
+      // fixed bottom-0 composer — use paddingBottom to clear tab bar or keyboard
+      // never use translateY to lift, only to hide (scroll-hidden)
       const kbInset = 'var(--kb-inset, 0px)'
-      const hiddenOffset = effectiveScrollHidden ? '110%' : '0px'
-      const mobileTranslate = effectiveScrollHidden
-        ? `translateY(${hiddenOffset})`
-        : keyboardOrFocusActive
-          ? `translateY(calc(-1 * ${kbInset}))`
-          : `translateY(calc(-1 * (${tabBarH} + ${safeAreaInset})))`
+      const tabBarH = 'var(--tabbar-h, 3.75rem)'
+      const safeArea = 'env(safe-area-inset-bottom, 0px)'
+      const pb = keyboardOrFocusActive
+        ? `calc(${kbInset} + max(var(--safe-b, 0px), ${safeArea}))`
+        : `calc(${tabBarH} + max(var(--safe-b, 0px), ${safeArea}))`
+      const tf = effectiveScrollHidden ? 'translateY(110%)' : 'translateY(0)'
       return {
         maxWidth: 'min(768px, 100%)',
+        paddingBottom: pb,
+        transform: tf,
+        WebkitTransform: tf,
         '--mobile-tab-bar-offset': MOBILE_TAB_BAR_OFFSET,
-        transform: isMobileViewport ? mobileTranslate : undefined,
-        WebkitTransform: isMobileViewport ? mobileTranslate : undefined,
       } as CSSProperties
     },
     [isMobileViewport, keyboardOrFocusActive, effectiveScrollHidden],
@@ -1470,9 +1470,9 @@ function ChatComposerComponent({
           ? 'fixed inset-x-0 bottom-0 z-[70] transition-transform duration-200'
           : 'relative z-40 shrink-0',
         // Mobile: pin above tab bar + safe-area inset. Desktop: normal bottom padding.
-        isMobileViewport
-          ? 'pb-[calc(max(var(--safe-b),env(safe-area-inset-bottom))+0.25rem)]'
-          : 'pb-[max(var(--safe-b),0px)] md:pb-[calc(var(--safe-b)+0.75rem)]',
+        !isMobileViewport
+          ? 'pb-[max(var(--safe-b),0px)] md:pb-[calc(var(--safe-b)+0.75rem)]'
+          : '',
         'md:bg-surface/95 md:backdrop-blur md:transition-[padding-bottom,background-color,backdrop-filter] md:duration-200',
       )}
       style={composerWrapperStyle}
