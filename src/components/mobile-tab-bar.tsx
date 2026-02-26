@@ -175,9 +175,8 @@ export function MobileTabBar() {
     <nav
       ref={navRef}
       className={cn(
-        // Pill: fixed bottom center, auto width, not full-width
-        'fixed bottom-0 left-1/2 z-40 md:hidden',
-        '-translate-x-1/2',
+        // Pill: fixed bottom center, shrink to content width
+        'fixed bottom-0 left-0 right-0 mx-auto w-fit z-40 md:hidden',
         // Vertical position: above home indicator
         'mb-[calc(env(safe-area-inset-bottom,16px)+8px)]',
         // Frosted glass pill

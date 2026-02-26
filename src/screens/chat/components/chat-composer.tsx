@@ -1465,19 +1465,19 @@ function ChatComposerComponent({
   return (
     <div
       className={cn(
-        'no-swipe pointer-events-auto mx-auto w-full px-3 pt-2 sm:px-5 touch-manipulation',
+        'no-swipe pointer-events-auto touch-manipulation',
         isMobileViewport
           ? [
-              // Fixed position: left-3/right-3 instead of inset-x-0 so composer floats with margin
-              'fixed left-3 right-3 bottom-0 z-[70] transition-transform duration-200',
-              // Frosted glass background on mobile
-              'bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl',
-              // Floating shadow
-              'shadow-[0_4px_24px_rgba(0,0,0,0.12)]',
-              // Pill shape
-              'rounded-3xl',
+              // Fixed pill floating above nav bar — 16px side margins
+              'fixed left-4 right-4 bottom-0 z-[70] transition-transform duration-200',
+              // Inner spacing
+              'px-4 pt-3',
+              // Frosted glass pill
+              'bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl',
+              'shadow-[0_8px_32px_rgba(0,0,0,0.15)]',
+              'rounded-[28px]',
             ].join(' ')
-          : ['relative z-40 shrink-0', 'bg-surface'].join(' '),
+          : ['relative z-40 shrink-0 w-full mx-auto px-3 pt-2 sm:px-5', 'bg-surface'].join(' '),
         // Mobile: pin above tab bar + safe-area inset. Desktop: normal bottom padding.
         !isMobileViewport
           ? 'pb-[max(var(--safe-b),0px)] md:pb-[calc(var(--safe-b)+0.75rem)]'
