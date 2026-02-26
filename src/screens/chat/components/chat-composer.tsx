@@ -1379,6 +1379,12 @@ function ChatComposerComponent({
   // Scroll-hide: hide composer when user scrolls up (reading older messages).
   // Re-show when user scrolls down or reaches the bottom.
   const [scrollHidden, setScrollHidden] = useState(false)
+  // Reset scroll-hide state when session changes (prevents composer staying hidden when navigating)
+  const prevSessionKeyRef = useRef<string | undefined>(undefined)
+  if (prevSessionKeyRef.current !== sessionKey) {
+    prevSessionKeyRef.current = sessionKey
+    if (scrollHidden) setScrollHidden(false)
+  }
   useEffect(() => {
     if (!isMobileViewport) return
     let lastScrollTop = 0
