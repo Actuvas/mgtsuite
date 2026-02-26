@@ -253,7 +253,7 @@ export function WorkspaceShell() {
               'h-full min-h-0 min-w-0 overflow-x-hidden',
               isOnChatRoute ? 'overflow-hidden' : 'overflow-y-auto',
               isMobile && !isOnChatRoute
-                ? 'pb-[calc(var(--tabbar-h,120px)+0.5rem)]'
+                ? 'pb-[calc(var(--tabbar-h,120px)+0.5rem)] bg-white dark:bg-neutral-950'
                 : !isMobile && !isOnChatRoute
                   ? 'pb-[calc(1.5rem+1.75rem)]'
                   : '',
