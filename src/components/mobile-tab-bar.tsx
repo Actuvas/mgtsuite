@@ -189,7 +189,7 @@ export function MobileTabBar() {
         // Pill: fixed bottom center, shrink to content width
         'fixed bottom-0 left-0 right-0 mx-auto w-fit z-[80] md:hidden',
         // Vertical position: above home indicator
-        'mb-[calc(env(safe-area-inset-bottom,8px)+8px)]',
+        'mb-[max(env(safe-area-inset-bottom,8px),16px)]',
         // Frosted glass pill
         'bg-white/75 dark:bg-neutral-900/75 backdrop-blur-2xl',
         'rounded-full',
@@ -198,10 +198,10 @@ export function MobileTabBar() {
         // Inner padding
         'px-3 py-2',
         // Hide/show animation
-        'transition-transform duration-300 ease-in-out',
+        'transition-all duration-300 ease-in-out',
         isChatRoute
-          ? 'translate-y-[120%]'
-          : 'translate-y-0',
+          ? 'translate-y-[200%] opacity-0 pointer-events-none'
+          : 'translate-y-0 opacity-100',
         isDragging ? 'cursor-grabbing' : '',
       )}
       aria-label="Mobile navigation"
