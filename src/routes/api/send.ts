@@ -143,6 +143,12 @@ export const Route = createFileRoute('/api/send')({
               { status: 400 },
             )
           }
+          const gatewayMessage =
+            message.trim().length === 0 &&
+            attachments &&
+            attachments.length > 0
+              ? ' '
+              : message
 
           // Try to resolve session key — it might be a friendlyId that needs resolution
           const keysToResolve = [rawSessionKey, friendlyId].filter(
@@ -183,7 +189,7 @@ export const Route = createFileRoute('/api/send')({
 
           const sendPayload: Record<string, unknown> = {
             sessionKey,
-            message,
+            message: gatewayMessage,
             thinking,
             attachments,
             deliver: false,
