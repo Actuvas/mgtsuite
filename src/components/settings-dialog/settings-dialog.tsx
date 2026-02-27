@@ -6,6 +6,7 @@ import {
   CheckmarkCircle02Icon,
   CloudIcon,
   ComputerIcon,
+  ArrowLeft01Icon,
   Moon01Icon,
   Notification03Icon,
   PaintBoardIcon,
@@ -13,7 +14,7 @@ import {
   UserIcon,
   MessageMultiple01Icon,
 } from '@hugeicons/core-free-icons'
-import { useState, Component } from 'react'
+import { useState, useEffect, Component } from 'react'
 import type * as React from 'react'
 import type { AccentColor, SettingsThemeMode } from '@/hooks/use-settings'
 import { Button } from '@/components/ui/button'
@@ -814,13 +815,25 @@ type SettingsDialogProps = {
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const [active, setActive] = useState<SectionId>('profile')
+  const [mobileView, setMobileView] = useState<'nav' | 'content'>('nav')
   const ActiveContent = CONTENT_MAP[active]
+
+  useEffect(() => {
+    if (open) {
+      setMobileView('nav')
+    }
+  }, [open])
+
+  function handleSectionSelect(sectionId: SectionId) {
+    setActive(sectionId)
+    setMobileView('content')
+  }
 
   return (
     <DialogRoot open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="h-[min(88dvh,740px)] min-h-[520px] w-full max-w-3xl overflow-hidden rounded-2xl border border-primary-200 bg-white p-0 shadow-xl">
+      <DialogContent className="inset-0 h-full w-full max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-0 bg-white p-0 shadow-xl md:inset-auto md:h-[min(88dvh,740px)] md:min-h-[520px] md:w-full md:max-w-3xl md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-2xl md:border md:border-primary-200">
         <div className="flex h-full min-h-0 flex-col">
-          <div className="flex items-center justify-between rounded-t-2xl border-b border-primary-200 bg-primary-50/80 px-5 py-4">
+          <div className="flex items-center justify-between border-b border-primary-200 bg-primary-50/80 px-4 py-4 md:rounded-t-2xl md:px-5">
             <div>
               <DialogTitle className="text-base font-semibold text-primary-900 dark:text-neutral-100">
                 Settings
@@ -848,14 +861,19 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           </div>
 
           <SettingsErrorBoundary>
-            <div className="flex min-h-0 flex-1">
-              <aside className="w-44 shrink-0 border-r border-primary-200 bg-primary-50/60 p-2">
+            <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+              <aside
+                className={cn(
+                  'w-full bg-primary-50/60 p-2 md:w-44 md:shrink-0 md:border-r md:border-primary-200',
+                  mobileView === 'content' && 'hidden md:block',
+                )}
+              >
                 <nav className="space-y-1">
                   {SECTIONS.map((s) => (
                     <button
                       key={s.id}
                       type="button"
-                      onClick={() => setActive(s.id)}
+                      onClick={() => handleSectionSelect(s.id)}
                       className={cn(
                         'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-primary-600 transition-colors hover:bg-primary-100',
                         active === s.id && 'bg-accent-50 font-medium text-accent-700',
@@ -867,13 +885,34 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   ))}
                 </nav>
               </aside>
-              <div className="min-w-0 flex-1 overflow-y-auto p-5">
+              <div
+                className={cn(
+                  'min-w-0 flex-1 overflow-y-auto p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] md:p-5 md:pb-5',
+                  mobileView === 'nav' && 'hidden md:block',
+                )}
+              >
+                <div className="mb-3 md:hidden">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setMobileView('nav')}
+                    className="h-8 gap-1.5 rounded-lg px-2 text-primary-600 hover:bg-primary-100"
+                  >
+                    <HugeiconsIcon
+                      icon={ArrowLeft01Icon}
+                      size={16}
+                      strokeWidth={1.5}
+                    />
+                    Back
+                  </Button>
+                </div>
                 <ActiveContent />
               </div>
             </div>
           </SettingsErrorBoundary>
 
-          <div className="rounded-b-2xl border-t border-primary-200 bg-primary-50/60 px-5 py-3 text-xs text-primary-500 dark:text-neutral-400">
+          <div className="sticky bottom-0 z-10 border-t border-primary-200 bg-primary-50/60 px-4 py-3 text-xs text-primary-500 dark:text-neutral-400 md:rounded-b-2xl md:px-5">
             Changes saved automatically.
           </div>
         </div>
