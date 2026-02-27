@@ -118,7 +118,7 @@ export function OnboardingWizard() {
                     )}
                   >
                     {step.id === 'welcome' ? (
-                      <OpenClawStudioIcon className="size-16" />
+                      <OpenClawStudioIcon className="size-16 rounded-2xl overflow-hidden" />
                     ) : (
                       <HugeiconsIcon
                         icon={step.icon}

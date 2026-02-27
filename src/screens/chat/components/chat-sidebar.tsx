@@ -966,7 +966,7 @@ function ChatSidebarComponent({
                   'w-full pl-1.5 justify-start',
                 )}
               >
-                <OpenClawStudioIcon className="size-5 rounded-sm" />
+                <OpenClawStudioIcon className="size-5 rounded-lg overflow-hidden" />
                 ClawSuite
               </Link>
             </motion.div>

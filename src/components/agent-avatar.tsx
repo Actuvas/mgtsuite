@@ -35,9 +35,9 @@ function getEmojiSizeClassName(size: AgentAvatarSize): string {
 }
 
 function getLogoSizeClassName(size: AgentAvatarSize): string {
-  if (size === 'sm') return 'size-4'
-  if (size === 'lg') return 'size-6'
-  return 'size-5'
+  if (size === 'sm') return 'size-4 rounded overflow-hidden'
+  if (size === 'lg') return 'size-6 rounded-lg overflow-hidden'
+  return 'size-5 rounded-md overflow-hidden'
 }
 
 export function readAgentAvatarPreference(): AgentAvatarPreference {
