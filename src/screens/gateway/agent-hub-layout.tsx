@@ -6188,7 +6188,7 @@ export function AgentHubLayout({ agents }: AgentHubLayoutProps) {
                 <span className="md:hidden">Missions</span>
                 <span className="hidden md:inline">Mission Control</span>
               </h2>
-              <p className="hidden md:block text-xs text-neutral-500 dark:text-neutral-400">Track and manage all agent runs</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Track and manage all agent runs</p>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -6218,7 +6218,7 @@ export function AgentHubLayout({ agents }: AgentHubLayoutProps) {
           )}
 
           {/* ── Filter Bar — scrollable on mobile, full flex on desktop ── */}
-          <div className="flex w-full items-center gap-2 overflow-x-auto scrollbar-none">
+          <div className="flex w-full items-center gap-2 overflow-x-auto pr-3 scrollbar-none">
             {filterTabs.map((tab) => {
               const isActive = missionSubTab === tab.id
               return (
@@ -6233,7 +6233,7 @@ export function AgentHubLayout({ agents }: AgentHubLayoutProps) {
                       : 'border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700',
                   )}
                 >
-                  <span>{tab.label}</span>
+                  <span className="whitespace-nowrap">{tab.label}</span>
                   {tab.count > 0 && (
                     <span
                       className={cn(
