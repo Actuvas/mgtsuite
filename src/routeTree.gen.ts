@@ -55,6 +55,7 @@ import { Route as ApiSessionStatusRouteImport } from './routes/api/session-statu
 import { Route as ApiSendStreamRouteImport } from './routes/api/send-stream'
 import { Route as ApiSendRouteImport } from './routes/api/send'
 import { Route as ApiProviderUsageRouteImport } from './routes/api/provider-usage'
+import { Route as ApiPipelineStatusRouteImport } from './routes/api/pipeline-status'
 import { Route as ApiPingRouteImport } from './routes/api/ping'
 import { Route as ApiPathsRouteImport } from './routes/api/paths'
 import { Route as ApiOpenclawUpdateRouteImport } from './routes/api/openclaw-update'
@@ -344,6 +345,11 @@ const ApiSendRoute = ApiSendRouteImport.update({
 const ApiProviderUsageRoute = ApiProviderUsageRouteImport.update({
   id: '/api/provider-usage',
   path: '/api/provider-usage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPipelineStatusRoute = ApiPipelineStatusRouteImport.update({
+  id: '/api/pipeline-status',
+  path: '/api/pipeline-status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPingRoute = ApiPingRouteImport.update({
@@ -705,6 +711,7 @@ export interface FileRoutesByFullPath {
   '/api/openclaw-update': typeof ApiOpenclawUpdateRoute
   '/api/paths': typeof ApiPathsRoute
   '/api/ping': typeof ApiPingRoute
+  '/api/pipeline-status': typeof ApiPipelineStatusRoute
   '/api/provider-usage': typeof ApiProviderUsageRoute
   '/api/send': typeof ApiSendRoute
   '/api/send-stream': typeof ApiSendStreamRoute
@@ -812,6 +819,7 @@ export interface FileRoutesByTo {
   '/api/openclaw-update': typeof ApiOpenclawUpdateRoute
   '/api/paths': typeof ApiPathsRoute
   '/api/ping': typeof ApiPingRoute
+  '/api/pipeline-status': typeof ApiPipelineStatusRoute
   '/api/provider-usage': typeof ApiProviderUsageRoute
   '/api/send': typeof ApiSendRoute
   '/api/send-stream': typeof ApiSendStreamRoute
@@ -921,6 +929,7 @@ export interface FileRoutesById {
   '/api/openclaw-update': typeof ApiOpenclawUpdateRoute
   '/api/paths': typeof ApiPathsRoute
   '/api/ping': typeof ApiPingRoute
+  '/api/pipeline-status': typeof ApiPipelineStatusRoute
   '/api/provider-usage': typeof ApiProviderUsageRoute
   '/api/send': typeof ApiSendRoute
   '/api/send-stream': typeof ApiSendStreamRoute
@@ -1031,6 +1040,7 @@ export interface FileRouteTypes {
     | '/api/openclaw-update'
     | '/api/paths'
     | '/api/ping'
+    | '/api/pipeline-status'
     | '/api/provider-usage'
     | '/api/send'
     | '/api/send-stream'
@@ -1138,6 +1148,7 @@ export interface FileRouteTypes {
     | '/api/openclaw-update'
     | '/api/paths'
     | '/api/ping'
+    | '/api/pipeline-status'
     | '/api/provider-usage'
     | '/api/send'
     | '/api/send-stream'
@@ -1246,6 +1257,7 @@ export interface FileRouteTypes {
     | '/api/openclaw-update'
     | '/api/paths'
     | '/api/ping'
+    | '/api/pipeline-status'
     | '/api/provider-usage'
     | '/api/send'
     | '/api/send-stream'
@@ -1355,6 +1367,7 @@ export interface RootRouteChildren {
   ApiOpenclawUpdateRoute: typeof ApiOpenclawUpdateRoute
   ApiPathsRoute: typeof ApiPathsRoute
   ApiPingRoute: typeof ApiPingRoute
+  ApiPipelineStatusRoute: typeof ApiPipelineStatusRoute
   ApiProviderUsageRoute: typeof ApiProviderUsageRoute
   ApiSendRoute: typeof ApiSendRoute
   ApiSendStreamRoute: typeof ApiSendStreamRoute
@@ -1715,6 +1728,13 @@ declare module '@tanstack/react-router' {
       path: '/api/provider-usage'
       fullPath: '/api/provider-usage'
       preLoaderRoute: typeof ApiProviderUsageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/pipeline-status': {
+      id: '/api/pipeline-status'
+      path: '/api/pipeline-status'
+      fullPath: '/api/pipeline-status'
+      preLoaderRoute: typeof ApiPipelineStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ping': {
@@ -2286,6 +2306,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiOpenclawUpdateRoute: ApiOpenclawUpdateRoute,
   ApiPathsRoute: ApiPathsRoute,
   ApiPingRoute: ApiPingRoute,
+  ApiPipelineStatusRoute: ApiPipelineStatusRoute,
   ApiProviderUsageRoute: ApiProviderUsageRoute,
   ApiSendRoute: ApiSendRoute,
   ApiSendStreamRoute: ApiSendStreamRoute,

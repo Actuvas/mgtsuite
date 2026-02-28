@@ -44,12 +44,13 @@ function buildUpsertParams(
       schedule: { kind: 'cron', expr: schedule },
       payload: payload || { kind: 'systemEvent', text: name },
       delivery: deliveryConfig || undefined,
-      sessionTarget: 'main',
+      sessionTarget: readString(body.sessionTarget) || 'main',
       enabled,
     }
   }
 
   // cron.update format
+  const sessionTarget = readString(body.sessionTarget)
   return {
     jobId,
     patch: {
@@ -57,6 +58,7 @@ function buildUpsertParams(
       schedule: { kind: 'cron', expr: schedule },
       payload: payload || undefined,
       delivery: deliveryConfig || undefined,
+      ...(sessionTarget ? { sessionTarget } : {}),
       enabled,
     },
   }
