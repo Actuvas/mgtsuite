@@ -701,7 +701,7 @@ function buildTeamFromTemplate(templateId: TeamTemplateId): TeamMember[] {
 function buildTeamFromRuntime(
   agents: AgentHubLayoutProps['agents'],
 ): TeamMember[] {
-  return agents.slice(0, 5).map((agent, index) => ({
+  return agents.slice(0, 12).map((agent, index) => ({
     id: agent.id,
     name: agent.name,
     avatar: getAgentAvatarForSlot(index),
@@ -2724,8 +2724,13 @@ export function AgentHubLayout({ agents }: AgentHubLayoutProps) {
   const [steerInput, setSteerInput] = useState('')
   const [team, setTeam] = useState<TeamMember[]>(() => {
     const stored = readStoredTeam()
-    if (stored.length > 0) return stored
     const runtimeTeam = buildTeamFromRuntime(agents)
+    if (stored.length > 0) {
+      // Merge: keep stored team + add any new runtime agents not already present
+      const storedIds = new Set(stored.map((m) => m.id))
+      const newFromRuntime = runtimeTeam.filter((m) => !storedIds.has(m.id))
+      return newFromRuntime.length > 0 ? [...stored, ...newFromRuntime] : stored
+    }
     if (runtimeTeam.length > 0) return runtimeTeam
     return buildTeamFromTemplate('research')
   })
@@ -4381,9 +4386,11 @@ export function AgentHubLayout({ agents }: AgentHubLayoutProps) {
     }
 
     const hasSessions = Object.keys(agentSessionMap).length > 0
+    const hasTeam = teamRef.current.length > 0
 
-    // Only poll when we have sessions to roster or an active mission
-    if (!hasSessions && !isMissionRunning) return
+    // Poll when we have sessions, an active mission, or a configured team
+    // (team agents may be dispatched externally via cron/Discord/API)
+    if (!hasSessions && !isMissionRunning && !hasTeam) return
 
     // Build reverse lookup: sessionKey → agentId
     const sessionKeyToAgentId = new Map<string, string>()
@@ -4403,6 +4410,27 @@ export function AgentHubLayout({ agents }: AgentHubLayoutProps) {
           .catch(() => ({}))) as { sessions?: Array<SessionRecord> }
         const sessions = Array.isArray(payload.sessions) ? payload.sessions : []
         const now = Date.now()
+
+        // ── Auto-detect sessions for known team agents (cron/Discord/API dispatch) ──
+        if (!cancelled) {
+          const currentTeam = teamRef.current
+          for (const session of sessions) {
+            const sessionKey = readSessionId(session)
+            if (!sessionKey || sessionKeyToAgentId.has(sessionKey)) continue
+            const parts = sessionKey.split(':')
+            // Match dedicated agent sessions: agent:AGENTNAME:*
+            if (parts[0] !== 'agent' || parts.length < 3 || parts[1] === 'main') continue
+            const agentName = parts[1].toLowerCase()
+            const matched = currentTeam.find(m => m.id.toLowerCase() === agentName)
+            if (matched) {
+              sessionKeyToAgentId.set(sessionKey, matched.id)
+              setAgentSessionMap(prev => {
+                if (prev[matched.id]) return prev
+                return { ...prev, [matched.id]: sessionKey }
+              })
+            }
+          }
+        }
 
         // ── Session Roster Tracking ───────────────────────────────────────────
         if (hasSessions) {
@@ -4990,12 +5018,12 @@ export function AgentHubLayout({ agents }: AgentHubLayoutProps) {
     const insetCls = 'rounded-lg border border-neutral-100 bg-neutral-50/70 px-2.5 py-2 dark:border-slate-700 dark:bg-slate-800/50'
 
     return (
-      <div className="relative flex min-h-full flex-col overflow-x-hidden sm:h-full sm:min-h-0 sm:overflow-hidden dark:bg-[var(--theme-bg,#0b0e14)]">
+      <div className="relative flex min-h-full flex-col overflow-x-hidden sm:overflow-y-auto sm:overflow-x-hidden dark:bg-[var(--theme-bg,#0b0e14)]">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-neutral-100/60 to-white dark:from-slate-900/60 dark:to-[var(--theme-bg,#0b0e14)]" />
         {/* ── Virtual Office Hero — flex-1 fills all remaining space ── */}
-        <div className="relative mx-auto mt-3 sm:mt-5 w-full max-w-[1600px] shrink-0 sm:flex-1 sm:min-h-0 px-3 sm:px-4 flex flex-col">
+        <div className="relative mx-auto mt-3 sm:mt-5 w-full max-w-[1600px] shrink-0 px-3 sm:px-4 flex flex-col">
           {renderCompactionBanner()}
-          <div className="h-[240px] sm:flex-1 sm:h-auto sm:min-h-[420px] overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm">
+          <div className="h-[320px] sm:h-[520px] overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm">
             <PixelOfficeView
               agentRows={agentWorkingRows}
               missionRunning={isMissionRunning}
@@ -5014,13 +5042,13 @@ export function AgentHubLayout({ agents }: AgentHubLayoutProps) {
                 activeTemplateId ? TEMPLATE_DISPLAY_NAMES[activeTemplateId] : undefined
               }
               processType={processType}
-              containerHeight={520}
+              containerHeight={680}
             />
           </div>
         </div>
 
           {/* ── 3-card row — shrink-0, anchored at bottom ── */}
-          <section className="relative mx-auto mb-4 mt-3 w-full max-w-[1600px] shrink-0 grid grid-cols-1 gap-3 px-3 sm:grid-cols-2 sm:gap-4 sm:px-4 xl:grid-cols-3">
+          <section className="relative mx-auto mb-4 mt-6 w-full max-w-[1600px] shrink-0 grid grid-cols-1 gap-3 px-3 sm:grid-cols-2 sm:gap-4 sm:px-4 xl:grid-cols-3">
 
             {/* ─── Card 1: Active Team ─────────────────────────────────── */}
             <article className={cardCls}>

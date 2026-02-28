@@ -112,11 +112,16 @@ export const useSwarmStore = create<SwarmState>((set, get) => ({
       const rawSessions: GatewaySession[] =
         json?.data?.sessions ?? json?.sessions ?? []
 
-      // Only show subagent sessions in the swarm (not main chat, cron, etc.)
+      // Show subagent sessions AND dedicated agent sessions (not main chat, cron, etc.)
       const agentSessions = rawSessions.filter((s) => {
         const key = s.key ?? ''
-        // Must be a subagent session
-        if (!key.includes('subagent:')) return false
+        // Must be a subagent session or a dedicated agent session
+        if (!key.includes('subagent:')) {
+          // Accept dedicated agent sessions like agent:bossclaw:bossclaw
+          const parts = key.split(':')
+          const isDedicatedAgent = parts[0] === 'agent' && parts.length >= 3 && parts[1] !== 'main'
+          if (!isDedicatedAgent) return false
+        }
         // Skip sessions with zero tokens and very old (never ran)
         const tokens = s.totalTokens ?? s.tokenCount ?? 0
         const hasExplicitError =

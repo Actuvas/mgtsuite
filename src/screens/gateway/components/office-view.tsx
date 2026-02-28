@@ -86,9 +86,9 @@ export function getAgentStatusMeta(status: AgentWorkingStatus): {
 }
 
 const GRID_DESK_POSITIONS = [
-  { x: 120, y: 180 }, { x: 310, y: 180 }, { x: 500, y: 180 }, { x: 690, y: 180 },
-  { x: 120, y: 320 }, { x: 310, y: 320 }, { x: 500, y: 320 }, { x: 690, y: 320 },
-  { x: 215, y: 460 }, { x: 405, y: 460 }, { x: 595, y: 460 }, { x: 785, y: 460 },
+  { x: 110, y: 170 }, { x: 280, y: 170 }, { x: 450, y: 170 }, { x: 620, y: 170 }, { x: 790, y: 170 },
+  { x: 110, y: 330 }, { x: 280, y: 330 }, { x: 450, y: 330 }, { x: 620, y: 330 }, { x: 790, y: 330 },
+  { x: 215, y: 470 }, { x: 450, y: 470 }, { x: 685, y: 470 },
 ]
 
 const ROUNDTABLE_DESK_POSITIONS = Array.from({ length: 12 }, (_, i) => {
@@ -110,10 +110,10 @@ const WARROOM_DESK_POSITIONS = [
 ]
 
 const GRID_SOCIAL_SPOTS: SocialSpot[] = [
-  { x: 880, y: 140, type: 'coffee' as const },
-  { x: 880, y: 300, type: 'water' as const },
-  { x: 60, y: 440, type: 'plant' as const },
-  { x: 880, y: 460, type: 'snack' as const },
+  { x: 920, y: 140, type: 'coffee' as const },
+  { x: 920, y: 300, type: 'water' as const },
+  { x: 40, y: 300, type: 'plant' as const },
+  { x: 920, y: 440, type: 'snack' as const },
 ]
 
 const ROUNDTABLE_SOCIAL_SPOTS: SocialSpot[] = [
@@ -386,7 +386,7 @@ export function OfficeView({
     ? { x: 450, y: 108, text: 'Collaboration Ring' }
     : layoutTemplate === 'warroom'
       ? { x: 480, y: 112, text: 'Briefing Lounge' }
-      : { x: 880, y: 110, text: 'Break Area' }
+      : { x: 920, y: 110, text: 'Break Area' }
 
   const changeLayout = (nextTemplate: OfficeLayoutTemplate) => {
     setLayoutTemplate(nextTemplate)
@@ -576,7 +576,7 @@ export function OfficeView({
           )}
         </div>
       </div>
-      <div className={cn('relative hidden flex-1 md:flex', !compact && 'min-h-[440px]')}>
+      <div className={cn('relative hidden flex-1 overflow-hidden md:flex', !compact && 'min-h-[440px]')}>
         <style>{`
           @keyframes office-idle-float {
             0%, 100% { transform: translateY(-3px); }
@@ -634,11 +634,11 @@ export function OfficeView({
         <svg
           viewBox={`0 0 ${sceneW} ${sceneH}`}
           className="absolute inset-0 h-full w-full"
-          preserveAspectRatio="xMidYMid slice"
+          preserveAspectRatio="none"
           aria-hidden
         >
           {/* Floor zones */}
-          <rect x="80" y="140" width="680" height="420" rx="16" fill="#f8fafc" fillOpacity="0.34" stroke="#e4ecf4" strokeWidth="0.8" className="dark:fill-slate-800/20 dark:stroke-slate-700/60" />
+          <rect x="60" y="120" width="820" height="380" rx="16" fill="#f8fafc" fillOpacity="0.34" stroke="#e4ecf4" strokeWidth="0.8" className="dark:fill-slate-800/20 dark:stroke-slate-700/60" />
 
           {/* Social zone labels */}
           <text x={socialLabelPosition.x} y={socialLabelPosition.y} fontSize="9" fill="#94a3b8" textAnchor="middle" fontWeight="600" className="uppercase">{socialLabelPosition.text}</text>
@@ -652,8 +652,8 @@ export function OfficeView({
           ))}
 
           {/* Extra plants */}
-          <PlantSVG x={60} y={160} />
-          <PlantSVG x={60} y={560} />
+          <PlantSVG x={40} y={160} />
+          <PlantSVG x={40} y={440} />
 
           {/* All desks (empty ones too) */}
           {deskPositions.map((desk, i) => {
@@ -685,7 +685,8 @@ export function OfficeView({
           const statusMeta = getAgentStatusMeta(agent.status)
           const speechLine = getSpeechLine(agent, tick + index * 7)
           const showSpeech = Boolean(speechLine) && ((tick + index * 3) % 8 < 6)
-          const movementTransform = `translate3d(${pos.x}px, ${pos.y}px, 0) translate(-50%, -50%)`
+          const leftPct = `${(pos.x / sceneW) * 100}%`
+          const topPct = `${(pos.y / sceneH) * 100}%`
 
           return (
             <button
@@ -697,10 +698,10 @@ export function OfficeView({
                 isSelected && 'ring-2 ring-accent-300/80',
               )}
               style={{
-                left: 0,
-                top: 0,
-                transform: movementTransform,
-                transition: 'transform 0.8s ease-in-out',
+                left: leftPct,
+                top: topPct,
+                transform: 'translate(-50%, -50%)',
+                transition: 'left 0.8s ease-in-out, top 0.8s ease-in-out',
               }}
               title={`${agent.name} · ${statusMeta.label}`}
             >

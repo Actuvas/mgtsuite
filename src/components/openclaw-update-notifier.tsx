@@ -17,7 +17,9 @@ type UpdatePhase = 'idle' | 'updating' | 'restarting' | 'done' | 'error'
 
 const DISMISS_KEY = 'openclaw-update-dismissed-version'
 const AUTO_UPDATE_KEY = 'openclaw-auto-update'
+const AUTO_UPDATE_LAST_ATTEMPT = 'openclaw-auto-update-last-attempt'
 const CHECK_INTERVAL_MS = 30 * 60 * 1000
+const AUTO_UPDATE_COOLDOWN_MS = 5 * 60 * 1000 // 5 min cooldown between auto-update attempts
 
 function shouldShowUpdateBanner(
   data:
@@ -71,9 +73,15 @@ export function OpenClawUpdateNotifier() {
   // Auto-update when enabled (only for git installs)
   useEffect(() => {
     if (autoUpdate && data?.updateAvailable && data.installType !== 'npm' && phase === 'idle') {
+      // Cooldown guard: prevent reload loops when update endpoint fails
+      const lastAttempt = localStorage.getItem(AUTO_UPDATE_LAST_ATTEMPT)
+      if (lastAttempt && Date.now() - Number(lastAttempt) < AUTO_UPDATE_COOLDOWN_MS) {
+        return
+      }
+      localStorage.setItem(AUTO_UPDATE_LAST_ATTEMPT, String(Date.now()))
       void handleUpdate()
     }
-  }, [autoUpdate, data?.updateAvailable, data?.installType])
+  }, [autoUpdate, data?.updateAvailable, data?.installType, phase])
 
   const visible = shouldShowUpdateBanner(data, phase, dismissed)
 
@@ -144,14 +152,21 @@ export function OpenClawUpdateNotifier() {
       }
     } catch {
       clearInterval(progressTimer)
-      // Connection drop during update usually means it's working
-      setPhase('restarting')
-      setProgress(85)
-      setTimeout(() => {
-        setPhase('done')
-        setProgress(100)
-        setTimeout(() => window.location.reload(), 1500)
-      }, 5000)
+      if (progress > 10) {
+        // Connection drop AFTER request sent — likely server restarting from update
+        setPhase('restarting')
+        setProgress(85)
+        setTimeout(() => {
+          setPhase('done')
+          setProgress(100)
+          setTimeout(() => window.location.reload(), 1500)
+        }, 5000)
+      } else {
+        // Failed before request completed — endpoint unreachable, don't reload
+        setPhase('error')
+        setErrorMsg('Could not reach update endpoint')
+        setProgress(0)
+      }
     }
   }
 

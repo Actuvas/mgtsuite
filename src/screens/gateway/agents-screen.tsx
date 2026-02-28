@@ -60,7 +60,7 @@ type AgentsScreenProps = {
   variant?: AgentsScreenVariant
 }
 
-const CATEGORY_ORDER = ['Core', 'Coding', 'System', 'Integrations'] as const
+const CATEGORY_ORDER = ['Core', 'ClawFactory', 'Coding', 'System', 'Integrations'] as const
 
 const STATUS_SORT_ORDER: Record<AgentRegistryStatus, number> = {
   active: 0,
@@ -116,6 +116,55 @@ const FALLBACK_AGENT_REGISTRY: Array<AgentDefinition> = [
     role: 'Channel bridge',
     color: 'cyan',
     aliases: ['telegram-gateway', 'telegram'],
+  },
+  // ClawFactory agents — viral shorts empire
+  {
+    id: 'BossClaw',
+    name: 'BossClaw',
+    category: 'ClawFactory',
+    role: 'Factory CEO — orchestrates all agents',
+    color: 'orange',
+    aliases: ['bossclaw', 'boss', 'ceo'],
+  },
+  {
+    id: 'TrendScout',
+    name: 'TrendScout',
+    category: 'ClawFactory',
+    role: 'Trend scanner — daily viral discovery',
+    color: 'cyan',
+    aliases: ['trendscout', 'trends', 'scout'],
+  },
+  {
+    id: 'EditorClaw',
+    name: 'EditorClaw',
+    category: 'ClawFactory',
+    role: 'Video editor — SupoClip processing',
+    color: 'purple',
+    aliases: ['editorclaw', 'editor', 'video'],
+  },
+  {
+    id: 'CopyClaw',
+    name: 'CopyClaw',
+    category: 'ClawFactory',
+    role: 'Copywriter — hooks, titles, captions',
+    color: 'blue',
+    aliases: ['copyclaw', 'copy', 'captions', 'hooks'],
+  },
+  {
+    id: 'PosterClaw',
+    name: 'PosterClaw',
+    category: 'ClawFactory',
+    role: 'Social poster — multi-platform publishing',
+    color: 'violet',
+    aliases: ['posterclaw', 'poster', 'publish', 'post'],
+  },
+  {
+    id: 'SafetyClaw',
+    name: 'SafetyClaw',
+    category: 'ClawFactory',
+    role: 'Safety gate — content review & approval',
+    color: 'orange',
+    aliases: ['safetyclaw', 'safety', 'review', 'approve'],
   },
 ]
 

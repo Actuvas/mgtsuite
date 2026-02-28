@@ -19,6 +19,7 @@ async function dispatchViaGateway(payload: {
   sessionKey: string
   message: string
   idempotencyKey: string
+  timeoutMs: number
 }) {
   try {
     return await gatewayRpc<DispatchGatewayResponse>('sessions.send', {
@@ -26,7 +27,7 @@ async function dispatchViaGateway(payload: {
       message: payload.message,
       lane: 'subagent',
       deliver: false,
-      timeoutMs: 120_000,
+      timeoutMs: payload.timeoutMs,
       idempotencyKey: payload.idempotencyKey,
     })
   } catch (error) {
@@ -36,7 +37,7 @@ async function dispatchViaGateway(payload: {
       sessionKey: payload.sessionKey,
       message: payload.message,
       deliver: false,
-      timeoutMs: 120_000,
+      timeoutMs: payload.timeoutMs,
       idempotencyKey: payload.idempotencyKey,
     })
   }
@@ -80,10 +81,15 @@ export const Route = createFileRoute('/api/agent-dispatch')({
               ? body.idempotencyKey.trim()
               : randomUUID()
 
+          // Allow callers to specify timeout (default 2min, max 10min)
+          const rawTimeout = typeof body.timeoutMs === 'number' ? body.timeoutMs : 120_000
+          const timeoutMs = Math.min(Math.max(rawTimeout, 10_000), 600_000)
+
           const result = await dispatchViaGateway({
             sessionKey,
             message,
             idempotencyKey,
+            timeoutMs,
           })
 
           return json({
