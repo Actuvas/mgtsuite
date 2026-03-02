@@ -93,19 +93,23 @@ export function WorkspaceShell() {
   const authQuery = useQuery<AuthStatus>({
     queryKey: ['auth-status'],
     queryFn: async () => {
+      // Reduced from 5 s to 3 s: the server is local, so a 5 s per-attempt
+      // timeout causes the loading spinner to show for up to 15 s (3 attempts
+      // × 5 s) before the error UI appears. 3 s is still generous for a local
+      // server while keeping startup feedback snappy.
       const controller = new AbortController()
-      const timeout = globalThis.setTimeout(() => controller.abort(), 5_000)
+      const timeout = globalThis.setTimeout(() => controller.abort(), 3_000)
 
       let res: Response
       try {
         res = await fetch('/api/auth-check', { signal: controller.signal })
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') {
-          throw new Error('Request timed out after 5 seconds')
+          throw new Error('Request timed out after 3 seconds')
         }
         throw error instanceof Error
           ? error
-          : new Error('Failed to connect to ClawSuite server')
+          : new Error('Failed to connect to MGT Suite server')
       } finally {
         globalThis.clearTimeout(timeout)
       }
@@ -116,8 +120,12 @@ export function WorkspaceShell() {
       return data
     },
     staleTime: 60_000,
-    retry: 2,
-    retryDelay: 1_000,
+    // One fast retry with a short delay. If the server hasn't responded in
+    // 3 s on the first attempt it is unlikely to respond on a 2nd attempt
+    // either, so we fail fast and show the error UI rather than blocking the
+    // user for 15+ seconds.
+    retry: 1,
+    retryDelay: 500,
   })
 
   const authState = {
@@ -228,7 +236,7 @@ export function WorkspaceShell() {
       <div className="flex items-center justify-center h-screen bg-surface">
         <div className="text-center">
           <div className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-accent-500 border-r-transparent mb-4" />
-          <p className="text-sm text-primary-500">Initializing ClawSuite...</p>
+          <p className="text-sm text-primary-500">Initializing MGT Suite...</p>
         </div>
       </div>
     )
@@ -238,7 +246,7 @@ export function WorkspaceShell() {
     const errorMessage =
       authQuery.error instanceof Error
         ? authQuery.error.message
-        : 'Failed to connect to ClawSuite server'
+        : 'Failed to connect to MGT Suite server'
     const showGatewayTip = /gateway|websocket/i.test(errorMessage)
 
     return (
@@ -250,7 +258,7 @@ export function WorkspaceShell() {
             </span>
           </div>
           <h1 className="text-2xl font-semibold text-primary-100">
-            Could not connect to ClawSuite server
+            Could not connect to MGT Suite server
           </h1>
           <p className="mt-3 text-sm text-primary-300">
             The server may still be starting up. Wait a moment and try again.

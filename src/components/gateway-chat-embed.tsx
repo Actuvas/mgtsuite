@@ -2,7 +2,7 @@ import { memo, useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 
 const GATEWAY_UI_URL = '/gateway-ui/'
-const STORAGE_KEY = 'clawsuite-chat-mode'
+const STORAGE_KEY = 'mgtsuite-chat-mode'
 
 export type ChatMode = 'native' | 'gateway'
 

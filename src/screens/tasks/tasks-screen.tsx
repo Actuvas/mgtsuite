@@ -18,7 +18,7 @@ type TaskViewMode = 'list' | 'kanban'
 type StatusFilter = TaskStatus | 'all'
 type PriorityFilter = TaskPriority | 'all'
 
-const TASK_VIEW_STORAGE_KEY = 'clawsuite-task-view-mode'
+const TASK_VIEW_STORAGE_KEY = 'mgtsuite-task-view-mode'
 
 /* Helpers */
 

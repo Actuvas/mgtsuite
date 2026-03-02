@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to ClawSuite are documented here.
+All notable changes to MGT Suite are documented here.
 
 ---
 
@@ -82,7 +82,7 @@ All tool tabs verified and fixed:
 - Chat crash fix (motion.create + lazy loading)
 - Mobile Agent Hub sub-tabs restored
 - 38 QA bugs fixed (P0 auth, P1 streaming/mission, P2 polish)
-- 25 commits on `feat/clawsuite-upgrade-sprint-feb22`
+- 25 commits on `feat/mgtsuite-upgrade-sprint-feb22`
 
 ---
 

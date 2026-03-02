@@ -75,7 +75,7 @@ function getDeviceIdentity(): DeviceIdentity {
   if (_identity) return _identity
   const idPath = path.join(
     process.env.OPENCLAW_STATE_DIR || path.join(os.homedir(), '.openclaw', 'state'),
-    'identity', 'clawsuite-device.json')
+    'identity', 'mgtsuite-device.json')
   try {
     if (fs.existsSync(idPath)) {
       const p = JSON.parse(fs.readFileSync(idPath, 'utf8'))
@@ -140,7 +140,7 @@ export function buildConnectParams(
     maxProtocol: 3,
     client: {
       id: clientId,
-      displayName: 'clawsuite',
+      displayName: 'mgtsuite',
       version: 'dev',
       platform: process.platform,
       mode: clientMode,
@@ -635,8 +635,12 @@ function nextReconnectDelayMs(attempt: number) {
     return RECONNECT_DELAYS_MS[attempt]
   }
 
+  // Exponential backoff from the last fixed delay entry.
+  // Use (attempt - lastIndex) so the exponent is always relative to where
+  // the fixed table ends, regardless of how many entries are in the table.
+  const lastIndex = RECONNECT_DELAYS_MS.length - 1
   const doubled =
-    RECONNECT_DELAYS_MS[RECONNECT_DELAYS_MS.length - 1] * 2 ** (attempt - 2)
+    RECONNECT_DELAYS_MS[lastIndex] * 2 ** (attempt - lastIndex)
   return Math.min(doubled, MAX_RECONNECT_DELAY_MS)
 }
 
@@ -661,10 +665,10 @@ function readyStateName(readyState: number): string {
 }
 
 // Singleton guard: survive Vite SSR module reloads
-const GW_KEY = '__clawsuite_gateway_client__' as const
+const GW_KEY = '__mgtsuite_gateway_client__' as const
 declare global {
   // eslint-disable-next-line no-var
-  var __clawsuite_gateway_client__: GatewayClient | undefined
+  var __mgtsuite_gateway_client__: GatewayClient | undefined
 }
 const existingClient = (globalThis as any)[GW_KEY] as GatewayClient | undefined
 if (existingClient) {
@@ -677,7 +681,7 @@ if (existingClient) {
   // This prevents a race when two Vite SSR workers both load this module simultaneously —
   // both would see a healthy singleton and both would fire ensureConnected(), causing an
   // HTTPError on the first request before the doubled handshake settles.
-  const GW_LAST_RECONNECT_KEY = '__clawsuite_gateway_last_reconnect__' as const
+  const GW_LAST_RECONNECT_KEY = '__mgtsuite_gateway_last_reconnect__' as const
   const lastReconnect = (globalThis as any)[GW_LAST_RECONNECT_KEY] as number | undefined
   const cooldownMs = 5_000
   const now = Date.now()

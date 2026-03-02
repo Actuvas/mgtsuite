@@ -119,6 +119,26 @@ function formatDate(iso: string): string {
 // Simple markdown → HTML (no deps)
 // ──────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Allowlist only safe URL schemes for links.
+ * Rejects javascript:, data:, vbscript:, and other dangerous pseudo-protocols
+ * that could execute code when a link is clicked.
+ */
+function sanitizeLinkHref(href: string): string {
+  const trimmed = href.trim()
+  // Allow relative URLs and safe absolute schemes
+  if (
+    trimmed.startsWith('#') ||
+    trimmed.startsWith('/') ||
+    /^https?:\/\//i.test(trimmed) ||
+    /^mailto:/i.test(trimmed)
+  ) {
+    return trimmed
+  }
+  // Block everything else (javascript:, data:, vbscript:, etc.)
+  return '#'
+}
+
 function markdownToHtml(md: string): string {
   let html = md
     .replace(/&/g, '&amp;')
@@ -161,10 +181,13 @@ function markdownToHtml(md: string): string {
   html = html.replace(/^[-*+]\s+(.+)$/gm, '<li class="md-li">$1</li>')
   html = html.replace(/(<li[^>]*>.*<\/li>\n?)+/g, (m) => `<ul class="md-ul">${m}</ul>`)
 
-  // Links
+  // Links — sanitize the href to block javascript: and other dangerous schemes
   html = html.replace(
     /\[([^\]]+)\]\(([^)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener noreferrer" class="md-link">$1</a>',
+    (_match, text: string, rawHref: string) => {
+      const safeHref = sanitizeLinkHref(rawHref)
+      return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer" class="md-link">${text}</a>`
+    },
   )
 
   // Paragraphs

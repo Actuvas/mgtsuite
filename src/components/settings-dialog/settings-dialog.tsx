@@ -270,7 +270,7 @@ function AppearanceContent() {
     updateSettings({ theme })
     
     // If user switches to light/dark via the standard toggle, update enterprise theme too
-    const currentEnterpriseTheme = localStorage.getItem('clawsuite-theme')
+    const currentEnterpriseTheme = localStorage.getItem('mgtsuite-theme')
     if (
       theme === 'light' &&
       currentEnterpriseTheme &&
@@ -279,7 +279,7 @@ function AppearanceContent() {
       // Switch to Paper Light when going light
       const html = document.documentElement
       html.setAttribute('data-theme', 'paper-light')
-      localStorage.setItem('clawsuite-theme', 'paper-light')
+      localStorage.setItem('mgtsuite-theme', 'paper-light')
     } else if (
       theme === 'dark' &&
       (!currentEnterpriseTheme || !isDarkEnterpriseTheme(currentEnterpriseTheme))
@@ -287,7 +287,7 @@ function AppearanceContent() {
       // Switch to Ops Dark when going dark (default)
       const html = document.documentElement
       html.setAttribute('data-theme', 'ops-dark')
-      localStorage.setItem('clawsuite-theme', 'ops-dark')
+      localStorage.setItem('mgtsuite-theme', 'ops-dark')
     }
   }
 
@@ -299,7 +299,7 @@ function AppearanceContent() {
   }
 
   function handleAccentColorChange(selectedAccent: AccentColor) {
-    localStorage.setItem('clawsuite-accent', selectedAccent)
+    localStorage.setItem('mgtsuite-accent', selectedAccent)
     document.documentElement.setAttribute('data-accent', selectedAccent)
     applyAccentColor(selectedAccent)
     updateSettings({ accentColor: selectedAccent })
@@ -453,7 +453,7 @@ function EnterpriseThemePicker() {
   const { updateSettings } = useSettings()
   const [current, setCurrent] = useState(() => {
     if (typeof window === 'undefined') return 'paper-light'
-    const stored = localStorage.getItem('clawsuite-theme')
+    const stored = localStorage.getItem('mgtsuite-theme')
     return ENTERPRISE_THEMES.some((theme) => theme.id === stored)
       ? stored
       : 'paper-light'
@@ -473,7 +473,7 @@ function EnterpriseThemePicker() {
       // Sync with settings store
       updateSettings({ theme: 'light' })
     }
-    localStorage.setItem('clawsuite-theme', id)
+    localStorage.setItem('mgtsuite-theme', id)
     setCurrent(id)
   }
 
@@ -839,7 +839,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 Settings
               </DialogTitle>
               <DialogDescription className="sr-only">
-                Configure ClawSuite
+                Configure MGT Suite
               </DialogDescription>
             </div>
             <DialogClose

@@ -415,7 +415,7 @@ function normalizeDraftSessionKey(sessionKey?: string): string {
 }
 
 function toDraftStorageKey(sessionKey?: string): string {
-  return `clawsuite-draft-${normalizeDraftSessionKey(sessionKey)}`
+  return `mgtsuite-draft-${normalizeDraftSessionKey(sessionKey)}`
 }
 
 function readSlashCommandQuery(inputValue: string): string | null {

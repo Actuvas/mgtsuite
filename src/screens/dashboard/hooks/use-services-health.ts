@@ -125,7 +125,7 @@ export function useServicesHealth(gatewayConnected: boolean) {
 
     return [
       {
-        name: 'ClawSuite UI',
+        name: 'MGT Suite UI',
         status: isChecking ? 'checking' : (probe?.clawSuiteUi.status ?? 'down'),
         latencyMs: probe?.clawSuiteUi.latencyMs,
       },

@@ -15,9 +15,9 @@ const config = defineConfig(({ mode }) => {
   const gatewayUrl = env.CLAWDBOT_GATEWAY_URL?.trim() || 'ws://127.0.0.1:18789'
 
   // Allow access from Tailscale, LAN, or custom domains via env var
-  // e.g. CLAWSUITE_ALLOWED_HOSTS=my-server.tail1234.ts.net,192.168.1.50
-  const allowedHosts: string[] | true = env.CLAWSUITE_ALLOWED_HOSTS?.trim()
-    ? env.CLAWSUITE_ALLOWED_HOSTS.split(',')
+  // e.g. MGTSUITE_ALLOWED_HOSTS=my-server.tail1234.ts.net,192.168.1.50
+  const allowedHosts: string[] | true = env.MGTSUITE_ALLOWED_HOSTS?.trim()
+    ? env.MGTSUITE_ALLOWED_HOSTS.split(',')
         .map((h) => h.trim())
         .filter(Boolean)
     : []
@@ -65,7 +65,7 @@ const config = defineConfig(({ mode }) => {
       host: allowedHosts.length > 0 ? '0.0.0.0' : '127.0.0.1',
       allowedHosts: allowedHosts.length > 0 ? [...allowedHosts, '127.0.0.1', 'localhost'] : ['127.0.0.1', 'localhost'],
       proxy: {
-        // WebSocket proxy: clients connect to /ws-gateway on the ClawSuite
+        // WebSocket proxy: clients connect to /ws-gateway on the MGT Suite
         // server (any IP/port), which internally forwards to the local gateway.
         // This means phone/LAN/Docker users never need to reach port 18789 directly.
         '/ws-gateway': {
@@ -74,7 +74,7 @@ const config = defineConfig(({ mode }) => {
           ws: true,
           rewrite: (path) => path.replace(/^\/ws-gateway/, ''),
         },
-        // REST API proxy: all /api/gateway/* calls proxied through ClawSuite server
+        // REST API proxy: all /api/gateway/* calls proxied through MGT Suite server
         '/api/gateway-proxy': {
           target: proxyTarget,
           changeOrigin: true,
@@ -104,8 +104,15 @@ const config = defineConfig(({ mode }) => {
       tailwindcss(),
       tanstackStart(),
       viteReact(),
-      // Client-only: replace process.env references in client bundles
-      // Server bundles must keep real process.env for Docker runtime env vars
+      // Client-only: replace process.env references in client bundles.
+      // Server bundles must keep real process.env for Docker runtime env vars.
+      //
+      // SECURITY: only safe, non-secret values are injected into the client
+      // bundle here. Secret env vars (CLAWDBOT_GATEWAY_TOKEN,
+      // CLAWDBOT_GATEWAY_PASSWORD, MGTSUITE_PASSWORD) must NEVER be included —
+      // they would be visible to anyone who inspects the JavaScript bundle.
+      // The gateway token is a server-side credential; the client connects via
+      // the /ws-gateway proxy path and never needs the raw token.
       {
         name: 'client-process-env',
         enforce: 'pre',
@@ -114,10 +121,11 @@ const config = defineConfig(({ mode }) => {
           if (envName !== 'client') return null
           if (!code.includes('process.env') && !code.includes('process.platform')) return null
 
-          // Replace specific env vars first, then the generic fallback
+          // Replace specific non-secret env vars, then blank the rest.
+          // WARNING: Do NOT add CLAWDBOT_GATEWAY_TOKEN, CLAWDBOT_GATEWAY_PASSWORD,
+          // or MGTSUITE_PASSWORD here — those are server-only secrets.
           let result = code
           result = result.replace(/process\.env\.CLAWDBOT_GATEWAY_URL/g, JSON.stringify(gatewayUrl))
-          result = result.replace(/process\.env\.CLAWDBOT_GATEWAY_TOKEN/g, JSON.stringify(env.CLAWDBOT_GATEWAY_TOKEN || ''))
           result = result.replace(/process\.env\.NODE_ENV/g, JSON.stringify(mode))
           result = result.replace(/process\.env/g, '{}')
           result = result.replace(/process\.platform/g, '"browser"')

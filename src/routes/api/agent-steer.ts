@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { isAuthenticated } from '../../server/auth-middleware'
-import { requireJsonContentType } from '../../server/rate-limit'
+import { requireJsonContentType, safeErrorMessage } from '../../server/rate-limit'
 import { gatewayRpc } from '../../server/gateway'
 
 export const Route = createFileRoute('/api/agent-steer')({
@@ -52,7 +52,7 @@ export const Route = createFileRoute('/api/agent-steer')({
           return json(
             {
               ok: false,
-              error: err instanceof Error ? err.message : String(err),
+              error: safeErrorMessage(err),
             },
             { status: 500 },
           )

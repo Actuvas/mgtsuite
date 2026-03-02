@@ -259,7 +259,7 @@ export function ChatScreen({
   const lastSendAtRef = useRef(0)
   const [fileExplorerCollapsed, setFileExplorerCollapsed] = useState(() => {
     if (typeof window === 'undefined') return true
-    const stored = localStorage.getItem('clawsuite-file-explorer-collapsed')
+    const stored = localStorage.getItem('mgtsuite-file-explorer-collapsed')
     return stored === null ? true : stored === 'true'
   })
   const { isMobile } = useChatMobile(queryClient)
@@ -884,9 +884,9 @@ export function ChatScreen({
     const handleRefreshRequest = () => {
       void historyQuery.refetch()
     }
-    window.addEventListener('clawsuite:chat-refresh', handleRefreshRequest)
+    window.addEventListener('mgtsuite:chat-refresh', handleRefreshRequest)
     return () => {
-      window.removeEventListener('clawsuite:chat-refresh', handleRefreshRequest)
+      window.removeEventListener('mgtsuite:chat-refresh', handleRefreshRequest)
     }
   }, [historyQuery])
 
@@ -1575,7 +1575,7 @@ export function ChatScreen({
     setFileExplorerCollapsed((prev) => {
       const next = !prev
       if (typeof window !== 'undefined') {
-        localStorage.setItem('clawsuite-file-explorer-collapsed', String(next))
+        localStorage.setItem('mgtsuite-file-explorer-collapsed', String(next))
       }
       return next
     })
@@ -1660,8 +1660,8 @@ export function ChatScreen({
   // Listen for mobile header agent-details tap
   useEffect(() => {
     const handler = () => setAgentViewOpen(true)
-    window.addEventListener('clawsuite:chat-agent-details', handler)
-    return () => window.removeEventListener('clawsuite:chat-agent-details', handler)
+    window.addEventListener('mgtsuite:chat-agent-details', handler)
+    return () => window.removeEventListener('mgtsuite:chat-agent-details', handler)
   }, [setAgentViewOpen])
 
   return (

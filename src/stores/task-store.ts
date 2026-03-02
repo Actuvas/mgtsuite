@@ -249,7 +249,7 @@ export const useTaskStore = create<TaskStore>()(
       },
     }),
     {
-      name: 'clawsuite-tasks-v1',
+      name: 'mgtsuite-tasks-v1',
     },
   ),
 )

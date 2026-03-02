@@ -21,14 +21,16 @@ export const Route = createFileRoute('/api/auth-check')({
           })(),
           new Promise<Response>((resolve) => {
             setTimeout(() => {
+              // Fail-secure on timeout: treat auth as required and not
+              // authenticated so callers never accidentally grant access.
               resolve(
                 json(
                   {
                     authenticated: false,
-                    authRequired: false,
+                    authRequired: true,
                     error: 'server_timeout',
                   },
-                  { status: 200 },
+                  { status: 503 },
                 ),
               )
             }, 4_000)

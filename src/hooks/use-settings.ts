@@ -120,20 +120,20 @@ export function applyTheme(theme: SettingsThemeMode) {
     theme === 'dark' || (theme === 'system' && media.matches)
   if (resolvedDark) {
     // Preserve user's enterprise dark theme if set, otherwise default to ops-dark
-    const stored = localStorage.getItem('clawsuite-theme')
+    const stored = localStorage.getItem('mgtsuite-theme')
     const darkThemes = ['ops-dark', 'premium-dark', 'sunset-brand']
     root.setAttribute('data-theme', darkThemes.includes(stored ?? '') ? (stored as string) : 'ops-dark')
   } else {
     root.setAttribute('data-theme', 'paper-light')
   }
 
-  const storedAccent = resolveStoredAccent(localStorage.getItem('clawsuite-accent')) || 'orange'
+  const storedAccent = resolveStoredAccent(localStorage.getItem('mgtsuite-accent')) || 'orange'
   root.setAttribute('data-accent', storedAccent)
 }
 
 function applySettingsAppearance(settings: StudioSettings) {
   applyTheme(settings.theme)
-  const storedAccent = resolveStoredAccent(localStorage.getItem('clawsuite-accent'))
+  const storedAccent = resolveStoredAccent(localStorage.getItem('mgtsuite-accent'))
   applyAccentColor(storedAccent ?? settings.accentColor)
 }
 
@@ -160,7 +160,7 @@ export function initializeSettingsAppearance() {
       }
 
       if (nextSettings.accentColor !== previousSettings.accentColor) {
-        localStorage.setItem('clawsuite-accent', nextSettings.accentColor)
+        localStorage.setItem('mgtsuite-accent', nextSettings.accentColor)
         applyAccentColor(nextSettings.accentColor)
       }
     },

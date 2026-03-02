@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Cancel01Icon, Tick01Icon, Sent02Icon } from '@hugeicons/core-free-icons';
-import { OpenClawStudioIcon } from '@/components/icons/clawsuite';
+import { OpenClawStudioIcon } from '@/components/icons/mgtsuite';
 
-const STORAGE_KEY_SEEN = 'clawsuite-mobile-setup-seen';
+const STORAGE_KEY_SEEN = 'mgtsuite-mobile-setup-seen';
 
 interface MobileSetupModalProps {
   isOpen: boolean;
@@ -79,7 +79,7 @@ export function MobileSetupModal({ isOpen, onClose }: MobileSetupModalProps) {
   const steps = [
     {
       title: 'Install Tailscale on your desktop',
-      body: 'Install Tailscale on the machine running ClawSuite, then sign in.',
+      body: 'Install Tailscale on the machine running MGT Suite, then sign in.',
       showTailscaleIcon: true,
       action: (
         <a
@@ -148,7 +148,7 @@ export function MobileSetupModal({ isOpen, onClose }: MobileSetupModalProps) {
       ),
     },
     {
-      title: 'Open ClawSuite on your phone',
+      title: 'Open MGT Suite on your phone',
       body: networkUrl?.source === 'tailscale'
         ? 'Your Tailscale address — open this on your phone browser.'
         : networkUrl?.source === 'lan'
@@ -192,7 +192,7 @@ export function MobileSetupModal({ isOpen, onClose }: MobileSetupModalProps) {
     }
 
     localStorage.setItem(STORAGE_KEY_SEEN, 'true');
-    localStorage.setItem('clawsuite-mobile-prompt-dismissed', 'true');
+    localStorage.setItem('mgtsuite-mobile-prompt-dismissed', 'true');
     onClose();
   };
 

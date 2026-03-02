@@ -10,7 +10,7 @@ import {
 } from '../../server/auth-middleware'
 import {
   getClientIp,
-  rateLimit,
+  checkRateLimit,
   rateLimitResponse,
   requireJsonContentType,
 } from '../../server/rate-limit'
@@ -36,8 +36,9 @@ export const Route = createFileRoute('/api/auth')({
 
         // Rate limit: max 5 auth attempts per minute per IP
         const ip = getClientIp(request)
-        if (!rateLimit(`auth:${ip}`, 5, 60_000)) {
-          return rateLimitResponse()
+        const rl = checkRateLimit(`auth:${ip}`, 5, 60_000)
+        if (!rl.allowed) {
+          return rateLimitResponse(rl.retryAfterSec)
         }
 
         try {
@@ -69,13 +70,14 @@ export const Route = createFileRoute('/api/auth')({
           const token = generateSessionToken()
           storeSessionToken(token)
 
-          // Return success with Set-Cookie header
+          // Return success with Set-Cookie header.
+          // Pass request so createSessionCookie can detect HTTPS and add Secure flag.
           return json(
             { ok: true },
             {
               status: 200,
               headers: {
-                'Set-Cookie': createSessionCookie(token),
+                'Set-Cookie': createSessionCookie(token, request),
               },
             },
           )

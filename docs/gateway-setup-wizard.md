@@ -2,14 +2,14 @@
 
 ## Overview
 
-The Gateway Setup Wizard is a first-run onboarding flow that helps users configure their OpenClaw Gateway connection when ClawSuite is launched for the first time.
+The Gateway Setup Wizard is a first-run onboarding flow that helps users configure their OpenClaw Gateway connection when MGT Suite is launched for the first time.
 
 ## Features
 
 ### 1. **First-Run Detection**
 - Automatically checks if the gateway is configured and reachable on app load
 - Shows the setup wizard if gateway is not reachable or not configured
-- Stores completion state in `localStorage` (key: `clawsuite-gateway-configured`)
+- Stores completion state in `localStorage` (key: `mgtsuite-gateway-configured`)
 
 ### 2. **Auto-Detection**
 - Attempts to detect a local gateway running at `localhost:18789`
@@ -62,13 +62,13 @@ The wizard uses Zustand for state management with the following key features:
 
 ### Health Checking
 Gateway health is checked via:
-1. **App-level check**: `GET /api/ping` (proxied through ClawSuite server)
+1. **App-level check**: `GET /api/ping` (proxied through MGT Suite server)
 2. **Direct check**: `GET http://localhost:18789/health` (for auto-detection)
 
 Both use AbortSignal.timeout for fail-fast behavior (3-5 seconds).
 
 ### User Flow
-1. User opens ClawSuite for the first time
+1. User opens MGT Suite for the first time
 2. App checks if gateway is configured (`localStorage` key exists)
 3. If not configured:
    - Check if gateway is reachable via `/api/ping`
@@ -103,7 +103,7 @@ To test the wizard:
 1. **First-run test**:
    ```bash
    # Clear completion flag
-   localStorage.removeItem('clawsuite-gateway-configured')
+   localStorage.removeItem('mgtsuite-gateway-configured')
    # Reload page
    ```
 

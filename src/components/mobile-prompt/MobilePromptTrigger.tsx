@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Cancel01Icon } from '@hugeicons/core-free-icons';
 import { MobileSetupModal } from './MobileSetupModal';
-import { OpenClawStudioIcon } from '@/components/icons/clawsuite';
+import { OpenClawStudioIcon } from '@/components/icons/mgtsuite';
 
 export function MobilePromptTrigger() {
   const [showPrompt, setShowPrompt] = useState(false);
@@ -25,8 +25,8 @@ export function MobilePromptTrigger() {
       return;
     }
 
-    const isDismissed = localStorage.getItem('clawsuite-mobile-prompt-dismissed') === 'true';
-    const isSetup = localStorage.getItem('clawsuite-mobile-setup-seen') === 'true';
+    const isDismissed = localStorage.getItem('mgtsuite-mobile-prompt-dismissed') === 'true';
+    const isSetup = localStorage.getItem('mgtsuite-mobile-setup-seen') === 'true';
 
     if (isDismissed || isSetup) {
       return;
@@ -52,7 +52,7 @@ export function MobilePromptTrigger() {
   }, []);
 
   const dismissPrompt = () => {
-    localStorage.setItem('clawsuite-mobile-prompt-dismissed', 'true');
+    localStorage.setItem('mgtsuite-mobile-prompt-dismissed', 'true');
     setShowPrompt(false);
   };
 
@@ -64,7 +64,7 @@ export function MobilePromptTrigger() {
   const closeSetup = () => {
     setIsModalOpen(false);
     // Treat any close (including Finish) as dismissed so it never re-shows
-    localStorage.setItem('clawsuite-mobile-prompt-dismissed', 'true');
+    localStorage.setItem('mgtsuite-mobile-prompt-dismissed', 'true');
   };
 
   return (
@@ -100,7 +100,7 @@ export function MobilePromptTrigger() {
               <div className="min-w-0 flex-1 text-center">
                 <p className="text-sm font-semibold text-white">Set up mobile access</p>
                 <p className="text-xs text-primary-300">
-                  Connect your phone to this ClawSuite instance in a few steps.
+                  Connect your phone to this MGT Suite instance in a few steps.
                 </p>
               </div>
 

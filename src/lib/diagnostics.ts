@@ -151,7 +151,7 @@ export function downloadBundle(bundle: DiagnosticsBundle): void {
 }
 
 export function buildGitHubIssueUrl(bundle: DiagnosticsBundle): string {
-  const baseUrl = 'https://github.com/outsourc-e/clawsuite/issues/new'
+  const baseUrl = 'https://github.com/outsourc-e/mgtsuite/issues/new'
 
   const title = encodeURIComponent('Bug: [Brief description]')
 

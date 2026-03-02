@@ -28,7 +28,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Create non-root user
-RUN addgroup -S clawsuite && adduser -S clawsuite -G clawsuite
+RUN addgroup -S mgtsuite && adduser -S mgtsuite -G mgtsuite
 
 # Copy build output and package.json (for any runtime deps)
 COPY --from=builder /app/dist ./dist
@@ -42,6 +42,6 @@ COPY --from=skills /openclaw-skills ./openclaw-skills
 # Expose default port
 EXPOSE 3000
 
-USER clawsuite
+USER mgtsuite
 
 CMD ["node", "server-entry.js"]

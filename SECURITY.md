@@ -2,17 +2,17 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in ClawSuite, please report it responsibly.
+If you discover a security vulnerability in MGT Suite, please report it responsibly.
 
 **Do NOT open a public GitHub issue for security vulnerabilities.**
 
-Instead, email: **security@clawsuite.io**
+Instead, email: **security@mgtsuite.io**
 
 We will acknowledge your report within 48 hours and aim to provide a fix within 7 days for critical issues.
 
 ## Scope
 
-- ClawSuite web application code
+- MGT Suite web application code
 - API routes and gateway communication
 - Authentication and session management
 - Client-side data handling and rendering

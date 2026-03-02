@@ -1,4 +1,4 @@
-# ClawSuite - Complete Architecture
+# MGT Suite - Complete Architecture
 
 **Version:** 2.0.0  
 **Date:** 2026-02-06  
@@ -8,7 +8,7 @@
 
 ## 🎯 Vision
 
-Transform ClawSuite from a "better ChatGPT UI" into a **complete AI agent development environment** — the VSCode for AI agents.
+Transform MGT Suite from a "better ChatGPT UI" into a **complete AI agent development environment** — the VSCode for AI agents.
 
 ### Product Positioning
 
@@ -24,7 +24,7 @@ Transform ClawSuite from a "better ChatGPT UI" into a **complete AI agent develo
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│ Header: [Logo] ClawSuite    [Usage] [Settings] [User] │
+│ Header: [Logo] MGT Suite    [Usage] [Settings] [User] │
 ├──────────┬──────────────────────────────────────┬────────────┤
 │          │                                      │            │
 │  Left    │        Main Content Area            │   Right    │

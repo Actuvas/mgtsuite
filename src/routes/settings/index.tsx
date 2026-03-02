@@ -120,7 +120,7 @@ function EnterpriseThemePickerPage() {
   const { updateSettings } = useSettings()
   const [current, setCurrent] = useState<string>(() => {
     if (typeof window === 'undefined') return 'paper-light'
-    const stored = localStorage.getItem('clawsuite-theme')
+    const stored = localStorage.getItem('mgtsuite-theme')
     return ENTERPRISE_THEMES_PAGE.some((t) => t.id === stored) ? (stored as string) : 'paper-light'
   })
 
@@ -136,7 +136,7 @@ function EnterpriseThemePickerPage() {
       html.classList.remove('dark')
       updateSettings({ theme: 'light' })
     }
-    localStorage.setItem('clawsuite-theme', id)
+    localStorage.setItem('mgtsuite-theme', id)
     setCurrent(id)
   }
 
@@ -298,7 +298,7 @@ function SettingsRoute() {
     setConnectionStatus('testing')
 
     try {
-      // Test via ClawSuite's server-side /api/ping which does the real
+      // Test via MGT Suite's server-side /api/ping which does the real
       // WebSocket handshake to the gateway. Can't hit gateway directly
       // from browser — it's a WS server, not HTTP.
       const response = await fetch('/api/ping', {
@@ -336,12 +336,12 @@ function SettingsRoute() {
 
     // P1-1: Persist enterprise theme to localStorage, mirroring settings-dialog behaviour
     if (theme === 'light') {
-      localStorage.setItem('clawsuite-theme', 'paper-light')
+      localStorage.setItem('mgtsuite-theme', 'paper-light')
     } else if (theme === 'dark') {
-      const current = localStorage.getItem('clawsuite-theme')
+      const current = localStorage.getItem('mgtsuite-theme')
       const darkThemes = ['ops-dark', 'premium-dark', 'sunset-brand']
       if (!darkThemes.includes(current ?? '')) {
-        localStorage.setItem('clawsuite-theme', 'ops-dark')
+        localStorage.setItem('mgtsuite-theme', 'ops-dark')
       }
     }
   }
@@ -636,7 +636,7 @@ function SettingsRoute() {
               >
                 <SettingsRow
                   label="Gateway URL"
-                  description="Used by ClawSuite for provider connectivity checks."
+                  description="Used by MGT Suite for provider connectivity checks."
                 >
                   <div className="w-full md:max-w-md">
                     <input

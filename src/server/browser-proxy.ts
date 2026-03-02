@@ -1,6 +1,6 @@
 /**
  * Local web proxy that strips iframe-blocking headers (X-Frame-Options, CSP).
- * Allows any website to be embedded in an iframe inside ClawSuite.
+ * Allows any website to be embedded in an iframe inside MGT Suite.
  * Only runs locally — not exposed to the internet.
  */
 
@@ -59,15 +59,20 @@ export async function startProxy(): Promise<{ port: number; url: string }> {
         reqUrl.searchParams.get('url') ||
         (clientReq.headers['x-proxy-url'] as string)
 
-      // Handle CORS preflight
-      const appPort = process.env.PORT || '3001'
+      // Handle CORS preflight.
+      // The proxy only accepts connections from the MGT Suite app itself.
+      // Use process.env.PORT (default 3000) consistent with server-entry.js.
+      const appPort = process.env.PORT || '3000'
       const allowedOrigin = `http://localhost:${appPort}`
       if (clientReq.method === 'OPTIONS') {
         clientRes.writeHead(200, {
           'Access-Control-Allow-Origin': allowedOrigin,
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': '*',
-          'Access-Control-Max-Age': '86400',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          // Explicitly list allowed headers instead of wildcard '*'
+          // to avoid inadvertently echoing sensitive request headers
+          // to the proxied target.
+          'Access-Control-Allow-Headers': 'Content-Type, X-Proxy-Url',
+          'Access-Control-Max-Age': '3600',
         })
         clientRes.end()
         return

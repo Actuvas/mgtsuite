@@ -41,9 +41,9 @@ type AgentHubLayoutProps = {
   }>
 }
 
-const TEAM_STORAGE_KEY = 'clawsuite:hub-team'
-const TEAM_CONFIGS_STORAGE_KEY = 'clawsuite:hub-team-configs'
-const MISSION_REPORTS_STORAGE_KEY = 'clawsuite-mission-reports'
+const TEAM_STORAGE_KEY = 'mgtsuite:hub-team'
+const TEAM_CONFIGS_STORAGE_KEY = 'mgtsuite:hub-team-configs'
+const MISSION_REPORTS_STORAGE_KEY = 'mgtsuite-mission-reports'
 const MAX_MISSION_REPORTS = 10
 const ROUGH_COST_PER_1K_TOKENS_USD = 0.01
 
@@ -2671,7 +2671,7 @@ export function AgentHubLayout({ agents }: AgentHubLayoutProps) {
   const [agentSessionMap, setAgentSessionMap] = useState<Record<string, string>>(() => {
     if (typeof window === 'undefined') return {}
     try {
-      const stored = window.localStorage.getItem('clawsuite:hub-agent-sessions')
+      const stored = window.localStorage.getItem('mgtsuite:hub-agent-sessions')
       if (!stored) return {}
       const parsed = JSON.parse(stored) as Record<string, unknown>
       const result: Record<string, string> = {}
@@ -2692,7 +2692,7 @@ export function AgentHubLayout({ agents }: AgentHubLayoutProps) {
   const [agentSessionModelMap, setAgentSessionModelMap] = useState<Record<string, string>>(() => {
     if (typeof window === 'undefined') return {}
     try {
-      const stored = window.localStorage.getItem('clawsuite:hub-agent-sessions')
+      const stored = window.localStorage.getItem('mgtsuite:hub-agent-sessions')
       if (!stored) return {}
       const parsed = JSON.parse(stored) as Record<string, unknown>
       const result: Record<string, string> = {}
@@ -2904,7 +2904,7 @@ export function AgentHubLayout({ agents }: AgentHubLayoutProps) {
     setSpawnState({})
     setAgentSessionStatus({})
     if (typeof window !== 'undefined') {
-      window.localStorage.removeItem('clawsuite:hub-agent-sessions')
+      window.localStorage.removeItem('mgtsuite:hub-agent-sessions')
     }
     setMissionState('stopped')
     setMissionActive(false)
@@ -3132,7 +3132,7 @@ export function AgentHubLayout({ agents }: AgentHubLayoutProps) {
       const model = agentSessionModelMap[id]
       combined[id] = model ? { sessionKey, model } : { sessionKey }
     }
-    window.localStorage.setItem('clawsuite:hub-agent-sessions', JSON.stringify(combined))
+    window.localStorage.setItem('mgtsuite:hub-agent-sessions', JSON.stringify(combined))
   }, [agentSessionMap, agentSessionModelMap])
 
   useEffect(() => {

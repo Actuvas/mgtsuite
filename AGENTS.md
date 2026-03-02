@@ -1,4 +1,4 @@
-# AGENTS.md — ClawSuite Codebase Guide
+# AGENTS.md — MGT Suite Codebase Guide
 
 ## Stack
 - **Framework:** TanStack Start (React, file-based routing)

@@ -1,4 +1,4 @@
-# ClawSuite Architecture
+# MGT Suite Architecture
 
 ## Stack
 

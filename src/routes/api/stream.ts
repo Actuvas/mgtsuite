@@ -51,7 +51,7 @@ function buildConnectParams(token: string, password: string): ConnectParams {
     maxProtocol: 3,
     client: {
       id: 'gateway-client-stream',
-      displayName: 'clawsuite-stream',
+      displayName: 'mgtsuite-stream',
       version: 'dev',
       platform: process.platform,
       mode: 'ui',

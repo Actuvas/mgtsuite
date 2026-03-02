@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import { HugeiconsIcon } from '@hugeicons/react'
@@ -43,6 +43,7 @@ export function OpenClawUpdateNotifier() {
   const [phase, setPhase] = useState<UpdatePhase>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const [progress, setProgress] = useState(0)
+  const progressRef = useRef(0)
   const [autoUpdate, setAutoUpdate] = useState(false)
 
   useEffect(() => {
@@ -51,6 +52,12 @@ export function OpenClawUpdateNotifier() {
       setAutoUpdate(localStorage.getItem(AUTO_UPDATE_KEY) === 'true')
     }
   }, [])
+
+  // Track which latestVersion we have already attempted an auto-update for.
+  // This prevents the auto-update effect from re-firing when phase cycles back
+  // to 'idle' after a failed attempt (which would cause an infinite reload loop
+  // when the update endpoint keeps failing and resets phase to 'error' then 'idle').
+  const autoUpdateAttemptedVersionRef = useRef<string | null>(null)
 
   const { data } = useQuery({
     queryKey: ['openclaw-update-check'],
@@ -70,18 +77,31 @@ export function OpenClawUpdateNotifier() {
     retry: false,
   })
 
-  // Auto-update when enabled (only for git installs)
+  // Auto-update when enabled (only for git installs).
+  // Intentionally excludes 'phase' from the dependency array: we do NOT want
+  // this effect to re-run just because phase changed back to 'idle' after a
+  // failed update — that is the exact pattern that causes the reload loop.
+  // Instead we use a ref to track whether we have already attempted an update
+  // for the current latestVersion.
   useEffect(() => {
-    if (autoUpdate && data?.updateAvailable && data.installType !== 'npm' && phase === 'idle') {
-      // Cooldown guard: prevent reload loops when update endpoint fails
-      const lastAttempt = localStorage.getItem(AUTO_UPDATE_LAST_ATTEMPT)
-      if (lastAttempt && Date.now() - Number(lastAttempt) < AUTO_UPDATE_COOLDOWN_MS) {
-        return
-      }
-      localStorage.setItem(AUTO_UPDATE_LAST_ATTEMPT, String(Date.now()))
-      void handleUpdate()
+    if (!autoUpdate || !data?.updateAvailable || data.installType === 'npm') return
+    if (phase !== 'idle') return
+
+    const targetVersion = data.latestVersion
+    // Skip if we already kicked off an auto-update for this version.
+    if (autoUpdateAttemptedVersionRef.current === targetVersion) return
+
+    // Cooldown guard: prevent rapid retries across page reloads.
+    const lastAttempt = localStorage.getItem(AUTO_UPDATE_LAST_ATTEMPT)
+    if (lastAttempt && Date.now() - Number(lastAttempt) < AUTO_UPDATE_COOLDOWN_MS) {
+      return
     }
-  }, [autoUpdate, data?.updateAvailable, data?.installType, phase])
+
+    autoUpdateAttemptedVersionRef.current = targetVersion
+    localStorage.setItem(AUTO_UPDATE_LAST_ATTEMPT, String(Date.now()))
+    void handleUpdate()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoUpdate, data?.updateAvailable, data?.installType, data?.latestVersion])
 
   const visible = shouldShowUpdateBanner(data, phase, dismissed)
 
@@ -100,14 +120,20 @@ export function OpenClawUpdateNotifier() {
 
   async function handleUpdate() {
     setPhase('updating')
+    progressRef.current = 0
     setProgress(0)
     setErrorMsg('')
 
     const progressTimer = setInterval(() => {
-      setProgress((p) => Math.min(p + 2, 90))
+      setProgress((p) => {
+        const next = Math.min(p + 2, 90)
+        progressRef.current = next
+        return next
+      })
     }, 300)
 
     try {
+      progressRef.current = 10
       setProgress(10)
       await new Promise((r) => setTimeout(r, 400))
 
@@ -152,7 +178,10 @@ export function OpenClawUpdateNotifier() {
       }
     } catch {
       clearInterval(progressTimer)
-      if (progress > 10) {
+      // Read from ref rather than the stale state closure — setProgress is
+      // async so the 'progress' variable here may reflect the initial render
+      // value rather than the value accumulated during the update attempt.
+      if (progressRef.current > 10) {
         // Connection drop AFTER request sent — likely server restarting from update
         setPhase('restarting')
         setProgress(85)

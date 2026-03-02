@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useGatewaySetupStore } from '@/hooks/use-gateway-setup'
 import { cn } from '@/lib/utils'
 
-const BANNER_STORAGE_KEY = 'clawsuite-gateway-banner-dismissed'
+const BANNER_STORAGE_KEY = 'mgtsuite-gateway-banner-dismissed'
 const CHECK_INTERVAL_MS = 5_000 // Check every 5 seconds
 const DISMISS_ANIMATION_MS = 220
 

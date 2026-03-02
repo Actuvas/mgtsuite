@@ -1,4 +1,4 @@
-# ClawSuite Product Roadmap
+# MGT Suite Product Roadmap
 _Last updated: 2026-02-27_
 
 ---
@@ -67,7 +67,7 @@ Then guides them through each step — domain, framework, deployment — all via
 - User never loses work or context
 
 ### Why This Beats ChatGPT
-| ChatGPT | ClawSuite Goal Mode |
+| ChatGPT | MGT Suite Goal Mode |
 |---------|---------------------|
 | Blank box, figure it out | Goal-first, app guides you |
 | One model, always | Best model auto-selected per task |
@@ -77,12 +77,12 @@ Then guides them through each step — domain, framework, deployment — all via
 | No app integrations | Connect GitHub, Vercel, Notion, etc. |
 
 ### Tagline
-> "Set a goal. ClawSuite picks the best AI, walks you through every decision, and never forgets where you left off."
+> "Set a goal. MGT Suite picks the best AI, walks you through every decision, and never forgets where you left off."
 
 ---
 
 ## Build Order
-1. ✅ Core ClawSuite features (shipped in v3.0.0)
+1. ✅ Core MGT Suite features (shipped in v3.0.0)
 2. 🔄 Cloud install / hosted gateway (current)
 3. ⬜ Free tier + growth funnel
 4. ⬜ Goal-guided sessions + decision cards
@@ -96,7 +96,7 @@ Then guides them through each step — domain, framework, deployment — all via
 - **Hosting:** Hetzner VPS (CX32 ~€9/mo handles 50-200 users)
 - **Orchestration:** Coolify (open source PaaS, has REST API for programmatic deploys)
 - **Routing:** Traefik (built into Coolify) + wildcard SSL via Cloudflare DNS challenge
-- **Subdomain pattern:** `user123.gateway.clawsuite.app` per user
+- **Subdomain pattern:** `user123.gateway.mgtsuite.app` per user
 - **Auth:** Simple signup API → calls Coolify API → spins gateway container → returns URL
 - **Sizing:** 0-50 users CX22 (€4), 50-200 CX32 (€9), 200-500 CAX41 (€19)
 - **Also look at:** Elestio (managed hosting for OSS apps, could shortcut provisioning infra)
@@ -110,7 +110,7 @@ Then guides them through each step — domain, framework, deployment — all via
 ### Desktop + Mobile App Distribution
 - **Tauri v2** already configured: dmg (Mac), nsis (Windows), appimage (Linux)
 - **CI/CD:** `.github/workflows/release.yml` — push tag → builds all platforms → GitHub Release
-- **Identifier:** `io.buildingthefuture.clawsuite`
+- **Identifier:** `io.buildingthefuture.mgtsuite`
 - **Missing for cloud:** CSP needs `connect-src` updated to allow cloud gateway URLs (not just localhost)
 - **iOS/Android:** Tauri Mobile (beta) — needs `tauri-plugin-mobile`, separate build targets
 - **App Stores:** Mac App Store needs Apple signing certs + notarization. Windows needs code signing cert. iOS needs Apple Dev account ($99/yr). Android needs Google Play ($25 one-time).
@@ -118,10 +118,10 @@ Then guides them through each step — domain, framework, deployment — all via
 
 ### Next Steps (Cloud MVP)
 1. Hetzner CX32 + Coolify install
-2. Wildcard DNS `*.gateway.clawsuite.app` → Hetzner IP
+2. Wildcard DNS `*.gateway.mgtsuite.app` → Hetzner IP
 3. Verify OpenClaw gateway runs headless in Docker
 4. Simple provisioning API (Node/Bun)
-5. ClawSuite onboarding: "Connect to cloud" flow
+5. MGT Suite onboarding: "Connect to cloud" flow
 6. Update CSP to allow cloud URLs
 7. Desktop: update release workflow with proper signing
 8. Mobile: scope Tauri Mobile vs PWA vs separate React Native app

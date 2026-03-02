@@ -47,7 +47,7 @@ import {
 } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { OpenClawStudioIcon } from '@/components/icons/clawsuite'
+import { OpenClawStudioIcon } from '@/components/icons/mgtsuite'
 import { UserAvatar } from '@/components/avatars'
 import { SEARCH_MODAL_EVENTS, useSearchModal } from '@/hooks/use-search-modal'
 import {
@@ -967,7 +967,7 @@ function ChatSidebarComponent({
                 )}
               >
                 <OpenClawStudioIcon className="size-5 rounded-lg overflow-hidden" />
-                ClawSuite
+                MGT Suite
               </Link>
             </motion.div>
           ) : null}

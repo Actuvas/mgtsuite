@@ -1,14 +1,14 @@
-# Mobile Setup — ClawSuite
+# Mobile Setup — MGT Suite
 
-Access ClawSuite from your phone as a native app using Tailscale for secure remote access.
+Access MGT Suite from your phone as a native app using Tailscale for secure remote access.
 
 ## Overview
 
-ClawSuite is a web app — no App Store needed. You access it directly from your phone's browser and add it to your home screen as a PWA. Tailscale handles the secure tunnel between your phone and the machine running ClawSuite.
+MGT Suite is a web app — no App Store needed. You access it directly from your phone's browser and add it to your home screen as a PWA. Tailscale handles the secure tunnel between your phone and the machine running MGT Suite.
 
 ## Requirements
 
-- ClawSuite running on a desktop/server
+- MGT Suite running on a desktop/server
 - [Tailscale](https://tailscale.com) account (free)
 - iOS or Android phone
 
@@ -16,9 +16,9 @@ ClawSuite is a web app — no App Store needed. You access it directly from your
 
 ## Setup Steps
 
-### 1. Install Tailscale on the ClawSuite machine
+### 1. Install Tailscale on the MGT Suite machine
 
-Download and install Tailscale on the machine running ClawSuite:
+Download and install Tailscale on the machine running MGT Suite:
 - **macOS/Windows/Linux:** https://tailscale.com/download
 
 Sign in with your Tailscale account. Once connected, note the machine's Tailscale IP (e.g. `100.x.x.x`) — visible in the Tailscale app or dashboard.
@@ -30,9 +30,9 @@ Sign in with your Tailscale account. Once connected, note the machine's Tailscal
 
 Sign in with the **same Tailscale account** as your desktop. Both devices will now share a private network.
 
-### 3. Open ClawSuite on your phone
+### 3. Open MGT Suite on your phone
 
-In your phone's browser, navigate to your ClawSuite URL using the Tailscale IP:
+In your phone's browser, navigate to your MGT Suite URL using the Tailscale IP:
 
 ```
 http://<tailscale-ip>:3000
@@ -60,9 +60,9 @@ Install as a PWA for a native app experience:
 
 ## In-App Setup Wizard
 
-ClawSuite includes a built-in mobile setup wizard. After 45 seconds on desktop, a prompt will appear in the bottom-right corner offering to walk you through the setup.
+MGT Suite includes a built-in mobile setup wizard. After 45 seconds on desktop, a prompt will appear in the bottom-right corner offering to walk you through the setup.
 
-To trigger it manually, open ClawSuite and append `?mobile-preview=1` to the URL:
+To trigger it manually, open MGT Suite and append `?mobile-preview=1` to the URL:
 
 ```
 http://localhost:3000?mobile-preview=1
@@ -74,9 +74,9 @@ http://localhost:3000?mobile-preview=1
 
 | Issue | Solution |
 |-------|----------|
-| Can't reach ClawSuite from phone | Make sure both devices are connected to Tailscale (check the Tailscale app — both should show as "Connected") |
+| Can't reach MGT Suite from phone | Make sure both devices are connected to Tailscale (check the Tailscale app — both should show as "Connected") |
 | Tailscale IP not reachable | Try the machine's local IP (192.168.x.x) if on the same WiFi network |
-| Page loads but auth fails | ClawSuite auth tokens are stored per-browser — you'll need to log in on mobile separately |
+| Page loads but auth fails | MGT Suite auth tokens are stored per-browser — you'll need to log in on mobile separately |
 | PWA not installing | Make sure you're on HTTPS or localhost (some browsers block PWA install on plain HTTP) |
 
 ---

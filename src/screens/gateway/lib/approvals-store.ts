@@ -13,7 +13,7 @@ export type ApprovalRequest = {
   gatewayApprovalId?: string
 }
 
-const APPROVALS_KEY = 'clawsuite:approvals'
+const APPROVALS_KEY = 'mgtsuite:approvals'
 
 export function loadApprovals(): ApprovalRequest[] {
   try {

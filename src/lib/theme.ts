@@ -44,7 +44,7 @@ export const THEMES: Array<{
   },
 ]
 
-const STORAGE_KEY = 'clawsuite-theme'
+const STORAGE_KEY = 'mgtsuite-theme'
 
 export function getStoredTheme(): ThemeId {
   if (typeof window === 'undefined') return 'paper-light'

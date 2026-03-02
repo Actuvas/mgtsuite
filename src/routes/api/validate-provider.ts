@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { isAuthenticated } from '../../server/auth-middleware'
-import { requireJsonContentType } from '../../server/rate-limit'
+import { requireJsonContentType, safeErrorMessage } from '../../server/rate-limit'
 
 /**
  * POST /api/validate-provider
@@ -129,7 +129,8 @@ export const Route = createFileRoute('/api/validate-provider')({
           if (msg.includes('timeout') || msg.includes('abort')) {
             return json({ ok: false, error: 'Request timed out — check your connection' })
           }
-          return json({ ok: false, error: `Validation error: ${msg}` }, { status: 500 })
+          // Use safeErrorMessage to suppress internal details in production
+          return json({ ok: false, error: `Validation error: ${safeErrorMessage(err)}` }, { status: 500 })
         }
       },
     },

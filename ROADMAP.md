@@ -1,4 +1,4 @@
-# ClawSuite Roadmap
+# MGT Suite Roadmap
 
 ## Recently Shipped (v3.0.0)
 - [x] 3-tab restructure (Overview/Configure/Missions)

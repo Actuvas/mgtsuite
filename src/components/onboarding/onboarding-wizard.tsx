@@ -12,7 +12,7 @@ import { useOnboardingStore } from '@/hooks/use-onboarding'
 import { ONBOARDING_STEPS } from './onboarding-steps'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { OpenClawStudioIcon } from '@/components/icons/clawsuite'
+import { OpenClawStudioIcon } from '@/components/icons/mgtsuite'
 
 export function OnboardingWizard() {
   const {

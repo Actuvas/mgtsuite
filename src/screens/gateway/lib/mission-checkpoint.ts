@@ -13,8 +13,8 @@ export type MissionCheckpoint = {
   completedAt?: number
 }
 
-const CURRENT_KEY = 'clawsuite:mission-checkpoint'
-const HISTORY_KEY = 'clawsuite:mission-history'
+const CURRENT_KEY = 'mgtsuite:mission-checkpoint'
+const HISTORY_KEY = 'mgtsuite:mission-history'
 const MAX_HISTORY = 20
 
 export function saveMissionCheckpoint(cp: MissionCheckpoint): void {

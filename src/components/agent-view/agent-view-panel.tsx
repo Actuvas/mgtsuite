@@ -85,7 +85,7 @@ function formatRuntimeLabel(runtimeSeconds: number): string {
   ].join(':')
 }
 
-const AGENT_NAME_KEY = 'clawsuite-agent-name'
+const AGENT_NAME_KEY = 'mgtsuite-agent-name'
 
 function getStoredAgentName(): string {
   try {
@@ -109,7 +109,7 @@ const STATE_GLOW: Record<string, string> = {
 // ── Usage helpers (inline in OrchestratorCard) ─────────────────────────────
 
 const USAGE_POLL_MS = 30_000
-const PREFERRED_PROVIDER_KEY_OC = 'clawsuite-preferred-provider'
+const PREFERRED_PROVIDER_KEY_OC = 'mgtsuite-preferred-provider'
 
 type OcUsageLine = {
   type: 'progress' | 'text' | 'badge'

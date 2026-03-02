@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { isAuthenticated } from '../../../server/auth-middleware'
 import { gatewayCronRpc, normalizeCronBool } from '@/server/cron'
-import { requireJsonContentType } from '../../../server/rate-limit'
+import { requireJsonContentType, safeErrorMessage } from '../../../server/rate-limit'
 
 function readString(value: unknown): string {
   if (typeof value !== 'string') return ''
@@ -115,7 +115,7 @@ export const Route = createFileRoute('/api/cron/upsert')({
           return json(
             {
               ok: false,
-              error: err instanceof Error ? err.message : String(err),
+              error: safeErrorMessage(err),
             },
             { status: 500 },
           )

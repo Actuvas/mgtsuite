@@ -44,7 +44,7 @@ import { useVisibleWidgets } from './hooks/use-visible-widgets'
 import { useDashboardData, buildUsageSummaryText } from './hooks/use-dashboard-data'
 import { formatMoney, formatRelativeTime } from './lib/formatters'
 import { ErrorBoundary } from '@/components/error-boundary'
-import { OpenClawStudioIcon } from '@/components/icons/clawsuite'
+import { OpenClawStudioIcon } from '@/components/icons/mgtsuite'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { SettingsDialog } from '@/components/settings-dialog'
 import { DashboardOverflowPanel } from '@/components/dashboard-overflow-panel'
@@ -130,7 +130,7 @@ export function DashboardScreen() {
   const [dismissedChips, setDismissedChips] = useState<Set<string>>(() => {
     if (typeof window === 'undefined') return new Set()
     try {
-      const stored = window.localStorage.getItem('clawsuite-dismissed-chips')
+      const stored = window.localStorage.getItem('mgtsuite-dismissed-chips')
       return stored ? new Set(JSON.parse(stored) as string[]) : new Set()
     } catch { return new Set() }
   })
@@ -145,7 +145,7 @@ export function DashboardScreen() {
   const [showLogoTip, setShowLogoTip] = useState(() => {
     if (typeof window === 'undefined') return false
     try {
-      return localStorage.getItem('clawsuite-logo-tip-seen') !== 'true'
+      return localStorage.getItem('mgtsuite-logo-tip-seen') !== 'true'
     } catch {
       return false
     }
@@ -176,7 +176,7 @@ export function DashboardScreen() {
     const timeout = window.setTimeout(() => {
       setShowLogoTip(false)
       try {
-        localStorage.setItem('clawsuite-logo-tip-seen', 'true')
+        localStorage.setItem('mgtsuite-logo-tip-seen', 'true')
       } catch {}
     }, 4_000)
     return () => window.clearTimeout(timeout)
@@ -202,7 +202,7 @@ export function DashboardScreen() {
   const markLogoTipSeen = useCallback(function markLogoTipSeen() {
     setShowLogoTip(false)
     try {
-      localStorage.setItem('clawsuite-logo-tip-seen', 'true')
+      localStorage.setItem('mgtsuite-logo-tip-seen', 'true')
     } catch {}
   }, [])
   const shouldShowLogoTip = isMobile && showLogoTip
@@ -663,7 +663,7 @@ export function DashboardScreen() {
                 )}
                 <div className="flex min-w-0 items-center gap-2">
                   <h1 className="text-sm font-semibold text-ink text-balance md:text-base truncate">
-                    ClawSuite
+                    MGT Suite
                   </h1>
                   {isMobile ? (
                     <span
@@ -788,7 +788,7 @@ export function DashboardScreen() {
                             setDismissedChips((prev) => {
                               const next = new Set(prev)
                               next.add(chip.id)
-                              try { window.localStorage.setItem('clawsuite-dismissed-chips', JSON.stringify([...next])) } catch {}
+                              try { window.localStorage.setItem('mgtsuite-dismissed-chips', JSON.stringify([...next])) } catch {}
                               return next
                             })
                           }}
@@ -1018,7 +1018,7 @@ export function DashboardScreen() {
                             setDismissedChips((prev) => {
                               const next = new Set(prev)
                               next.add(chip.id)
-                              try { window.localStorage.setItem('clawsuite-dismissed-chips', JSON.stringify([...next])) } catch {}
+                              try { window.localStorage.setItem('mgtsuite-dismissed-chips', JSON.stringify([...next])) } catch {}
                               return next
                             })
                           }}

@@ -3,7 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { gatewayRpc } from '../../server/gateway'
 import { isAuthenticated } from '../../server/auth-middleware'
-import { requireJsonContentType } from '../../server/rate-limit'
+import { requireJsonContentType, safeErrorMessage } from '../../server/rate-limit'
 
 type DispatchGatewayResponse = {
   runId?: string
@@ -104,7 +104,7 @@ export const Route = createFileRoute('/api/agent-dispatch')({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : String(error),
+              error: safeErrorMessage(error),
             },
             { status: 500 },
           )

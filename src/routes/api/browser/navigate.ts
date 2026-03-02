@@ -32,11 +32,33 @@ async function callBrowserNavigate(params: { url: string }): Promise<unknown> {
     : new Error('Gateway browser navigate request failed')
 }
 
+/**
+ * Normalize and validate a URL for browser navigation.
+ * Only http: and https: schemes are allowed to prevent SSRF via file://, ftp://,
+ * or other unexpected protocols reaching internal resources.
+ *
+ * Returns an empty string if the URL is invalid or uses a disallowed scheme.
+ */
 function normalizeUrl(input: string): string {
   const trimmed = input.trim()
   if (!trimmed) return ''
-  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(trimmed)) return trimmed
-  return `https://${trimmed}`
+
+  let candidate = trimmed
+  // Auto-prefix bare hostnames/paths with https://
+  if (!/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(candidate)) {
+    candidate = `https://${candidate}`
+  }
+
+  // Parse and validate — reject anything that is not http or https
+  try {
+    const parsed = new URL(candidate)
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return ''
+    }
+    return parsed.toString()
+  } catch {
+    return ''
+  }
 }
 
 export const Route = createFileRoute('/api/browser/navigate')({
@@ -57,7 +79,10 @@ export const Route = createFileRoute('/api/browser/navigate')({
         const url = normalizeUrl(rawUrl)
 
         if (!url) {
-          return json({ ok: false, error: 'url is required' }, { status: 400 })
+          return json(
+            { ok: false, error: 'url is required and must use http or https' },
+            { status: 400 },
+          )
         }
 
         try {

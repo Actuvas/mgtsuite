@@ -1,4 +1,4 @@
-# Contributing to ClawSuite
+# Contributing to MGT Suite
 
 Thanks for your interest in contributing! Here's how to get started.
 
@@ -74,7 +74,7 @@ src/
 
 ## Reporting Issues
 
-- Use [GitHub Issues](https://github.com/outsourc-e/clawsuite/issues)
+- Use [GitHub Issues](https://github.com/outsourc-e/mgtsuite/issues)
 - Include: what you expected, what happened, steps to reproduce
 - Screenshots help!
 

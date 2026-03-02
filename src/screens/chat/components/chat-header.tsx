@@ -3,7 +3,7 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import {
   Folder01Icon,
 } from '@hugeicons/core-free-icons'
-import { OpenClawStudioIcon } from '@/components/icons/clawsuite'
+import { OpenClawStudioIcon } from '@/components/icons/mgtsuite'
 import { OrchestratorAvatar } from '@/components/orchestrator-avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -139,7 +139,7 @@ function ChatHeaderComponent({
       onOpenAgentDetails()
       return
     }
-    window.dispatchEvent(new CustomEvent('clawsuite:chat-agent-details'))
+    window.dispatchEvent(new CustomEvent('mgtsuite:chat-agent-details'))
   }, [onOpenAgentDetails])
 
   useEffect(() => {

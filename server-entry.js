@@ -33,6 +33,84 @@ const MIME_TYPES = {
   '.webmanifest': 'application/manifest+json',
 }
 
+/**
+ * Security headers applied to every response.
+ *
+ * CSP notes:
+ *  - 'unsafe-inline' for scripts is required for the inline splash-screen and
+ *    theme scripts injected by __root.tsx. Prefer removing those scripts and
+ *    switching to nonces if tightening CSP further.
+ *  - Shiki syntax highlighting generates inline styles — 'unsafe-inline' is
+ *    therefore required for style-src as well.
+ *  - The connect-src allowlist covers the local gateway WebSocket, the ClawSuite
+ *    API itself, and blob: for any file downloads.
+ *  - ws: and wss: in connect-src cover the gateway WebSocket proxy.
+ *  - data: in img-src is needed for base64-encoded image previews.
+ */
+const SECURITY_HEADERS = {
+  // Prevent MIME sniffing — always honour the declared Content-Type
+  'X-Content-Type-Options': 'nosniff',
+
+  // Block framing by other origins (clickjacking protection)
+  'X-Frame-Options': 'SAMEORIGIN',
+
+  // Legacy XSS filter (belt-and-suspenders for older browsers)
+  'X-XSS-Protection': '1; mode=block',
+
+  // Do not send Referer to cross-origin destinations
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+
+  // Disable browser features that the app does not need
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+
+  // HSTS: only set when running over HTTPS (detected via env var or proxy header)
+  // 1 year max-age; includeSubDomains is intentionally omitted for local-first use.
+  ...(process.env.FORCE_SECURE_COOKIES === '1'
+    ? { 'Strict-Transport-Security': 'max-age=31536000' }
+    : {}),
+
+  // Content Security Policy
+  // default-src 'self' restricts all fetch-type directives unless overridden below.
+  'Content-Security-Policy': [
+    "default-src 'self'",
+    // Inline scripts are required for splash screen and theme bootstrap (see __root.tsx).
+    // Remove 'unsafe-inline' and add a nonce if you inline fewer scripts in future.
+    "script-src 'self' 'unsafe-inline'",
+    // Shiki produces inline <style> blocks for syntax highlighting colours.
+    "style-src 'self' 'unsafe-inline'",
+    // data: URI images for base64 file preview; blob: for downloads
+    "img-src 'self' data: blob:",
+    // Fonts are all bundled locally
+    "font-src 'self'",
+    // API calls go to self; WebSocket to self (proxied to gateway); blob: for workers
+    "connect-src 'self' ws: wss: blob:",
+    // Worker scripts are bundled with the app
+    "worker-src 'self' blob:",
+    // No plugins (Flash, etc.)
+    "object-src 'none'",
+    // base element must point to same origin only
+    "base-uri 'self'",
+    // All form actions stay on the app itself
+    "form-action 'self'",
+    // The app embeds the gateway UI in an iframe (see vite.config.ts /gateway-ui proxy)
+    // Allow framing from self only; adjust if the gateway runs on a different origin.
+    "frame-src 'self'",
+  ].join('; '),
+}
+
+/**
+ * Attach all security headers to an outgoing Node http.ServerResponse.
+ * Skips headers that were already set (avoids overwriting explicit values
+ * set by individual API handlers, e.g. Content-Type on API responses).
+ */
+function applySecurityHeaders(res) {
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+    if (!res.hasHeader(name)) {
+      res.setHeader(name, value)
+    }
+  }
+}
+
 async function tryServeStatic(req, res) {
   const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`)
   const pathname = decodeURIComponent(url.pathname)
@@ -63,6 +141,8 @@ async function tryServeStatic(req, res) {
       headers['Cache-Control'] = 'public, max-age=31536000, immutable'
     }
 
+    // Apply security headers before writeHead so they merge with file headers
+    applySecurityHeaders(res)
     res.writeHead(200, headers)
     res.end(data)
     return true
@@ -108,6 +188,8 @@ const httpServer = createServer(async (req, res) => {
   try {
     const response = await server.fetch(request)
 
+    // Apply security headers first, then let individual route headers take precedence.
+    applySecurityHeaders(res)
     res.writeHead(
       response.status,
       Object.fromEntries(response.headers.entries()),
@@ -139,5 +221,5 @@ const httpServer = createServer(async (req, res) => {
 })
 
 httpServer.listen(port, host, () => {
-  console.log(`ClawSuite running at http://${host}:${port}`)
+  console.log(`MGT Suite running at http://${host}:${port}`)
 })

@@ -4,7 +4,7 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 
-const STORAGE_KEY = 'clawsuite-workspace'
+const STORAGE_KEY = 'mgtsuite-workspace'
 
 export type WorkspaceState = {
   /** Current workspace folder path (server-side) */

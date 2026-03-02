@@ -45,6 +45,12 @@ export function useGatewayChatStream(
   >(new Map())
   const reconnectAttempts = useRef(0)
   const mountedRef = useRef(true)
+  // Ref to break the circular dependency between connect and scheduleReconnect.
+  // connect cannot list scheduleReconnect as a dep (scheduleReconnect depends on
+  // connect), so we keep the latest scheduleReconnect in a ref and call it from
+  // inside connect. This ensures connect always invokes the current version
+  // without triggering infinite useCallback recreation.
+  const scheduleReconnectRef = useRef<(() => void) | null>(null)
 
   // Store callbacks in refs to avoid reconnecting when they change
   const onUserMessageRef = useRef(onUserMessage)
@@ -126,7 +132,9 @@ export function useGatewayChatStream(
       clearAllStreamTimeouts()
       clearAllStreaming()
       setConnectionState('disconnected')
-      scheduleReconnect()
+      // Use the ref so we always call the latest scheduleReconnect without
+      // adding it to connect's dependency array (which would create a cycle).
+      scheduleReconnectRef.current?.()
     })
 
     eventSource.addEventListener('error', () => {
@@ -136,7 +144,9 @@ export function useGatewayChatStream(
         clearAllStreamTimeouts()
         clearAllStreaming()
         setConnectionState('disconnected')
-        scheduleReconnect()
+        // Use the ref so we always call the latest scheduleReconnect without
+        // adding it to connect's dependency array (which would create a cycle).
+        scheduleReconnectRef.current?.()
       }
       // Don't set 'connecting' on transient errors — EventSource auto-reconnects
       // and onopen will fire when it succeeds. Avoids flashing red dot.
@@ -322,19 +332,28 @@ export function useGatewayChatStream(
   const scheduleReconnect = useCallback(() => {
     if (!mountedRef.current || !enabled) return
 
+    // Guard: if a reconnect timer is already pending, do not schedule another.
+    // Both the 'disconnected' and 'error' event handlers can fire for the same
+    // closure event, which would otherwise create two simultaneous timers.
     if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current)
+      return
     }
 
     const attempts = reconnectAttempts.current
     const delay = Math.min(1000 * Math.pow(2, attempts), 30000) // Exponential backoff, max 30s
 
     reconnectTimeoutRef.current = setTimeout(() => {
+      reconnectTimeoutRef.current = null
       if (!mountedRef.current) return
       reconnectAttempts.current++
       connect()
     }, delay)
   }, [enabled, connect])
+
+  // Keep the ref in sync with the latest scheduleReconnect so that the connect
+  // callback (which cannot depend on scheduleReconnect due to the circular dep)
+  // always calls the current version.
+  scheduleReconnectRef.current = scheduleReconnect
 
   const disconnect = useCallback(() => {
     clearAllStreamTimeouts()

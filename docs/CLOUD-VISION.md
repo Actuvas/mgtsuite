@@ -1,4 +1,4 @@
-# ClawSuite Cloud — Full Product Vision
+# MGT Suite Cloud — Full Product Vision
 _Captured: 2026-02-27_
 
 ---
@@ -25,7 +25,7 @@ Works for:
 
 ### Pro ($X/mo)
 - Larger message quota
-- Access to better models (Sonnet, GPT-4o via ClawSuite credits)
+- Access to better models (Sonnet, GPT-4o via MGT Suite credits)
 - Full app integrations
 - Multi-agent missions
 - Goal-guided sessions
@@ -38,7 +38,7 @@ Works for:
 - Works with local models (Ollama on their machine)
 
 ### Self-hosted (existing power users)
-- Local gateway (current ClawSuite)
+- Local gateway (current MGT Suite)
 - Full control, no cloud dependency
 - Desktop + mobile via LAN QR or Tailscale
 
@@ -71,7 +71,7 @@ Works for:
 ## Architecture
 
 ```
-clawsuite.app
+mgtsuite.app
   ├── Web app (SvelteKit — already built)
   ├── Desktop app (Tauri — already built, Mac/Win/Linux)
   ├── Mobile app (PWA first, then Tauri Mobile / App Store)
@@ -83,8 +83,8 @@ clawsuite.app
         ├── OpenRouter proxy (for managed model access + usage tracking)
         │
         └── Hetzner VPS (Coolify)
-              ├── gateway-user001 → user001.gateway.clawsuite.app
-              ├── gateway-user002 → user002.gateway.clawsuite.app
+              ├── gateway-user001 → user001.gateway.mgtsuite.app
+              ├── gateway-user002 → user002.gateway.mgtsuite.app
               └── ... (auto-provisioned per signup)
 ```
 
@@ -93,20 +93,20 @@ clawsuite.app
 ## Mobile Connect Flow (no Tailscale required)
 
 ### Cloud users:
-1. Sign in at clawsuite.app on phone
+1. Sign in at mgtsuite.app on phone
 2. Auto-connects to their cloud gateway
 3. Done — no QR, no IP, no config
 
 ### Local gateway users (LAN QR):
-1. Desktop ClawSuite shows QR
-2. Phone scans → opens clawsuite.app/join?token=xyz
+1. Desktop MGT Suite shows QR
+2. Phone scans → opens mgtsuite.app/join?token=xyz
 3. Token authenticates → connected on same WiFi
 4. No Tailscale needed
 
 ### Remote local gateway users:
-1. Desktop generates shareable link: clawsuite.app/join/eric (persistent)
+1. Desktop generates shareable link: mgtsuite.app/join/eric (persistent)
 2. Requires Tailscale OR cloud relay
-3. Cloud relay: traffic goes through ClawSuite relay server (like ngrok/Cloudflare Tunnel)
+3. Cloud relay: traffic goes through MGT Suite relay server (like ngrok/Cloudflare Tunnel)
 
 ---
 
@@ -130,13 +130,13 @@ clawsuite.app
 
 ### Phase 1 — Foundation (Week 1-2)
 - [ ] Hetzner CX32 + Coolify installed
-- [ ] Wildcard DNS `*.gateway.clawsuite.app` + SSL
+- [ ] Wildcard DNS `*.gateway.mgtsuite.app` + SSL
 - [ ] OpenClaw gateway Docker image (verify headless operation)
 - [ ] Simple provisioning API: POST /signup → Coolify API → gateway URL
 
-### Phase 2 — ClawSuite Integration (Week 2-3)
-- [ ] "Sign in to ClawSuite Cloud" flow in app
-- [ ] CSP update: allow `*.gateway.clawsuite.app`
+### Phase 2 — MGT Suite Integration (Week 2-3)
+- [ ] "Sign in to MGT Suite Cloud" flow in app
+- [ ] CSP update: allow `*.gateway.mgtsuite.app`
 - [ ] Auto-connect after signup (no manual gateway URL)
 - [ ] OpenRouter free model as default (zero config for new users)
 - [ ] BYOK settings screen (paste OpenAI/Anthropic/OpenRouter key)
