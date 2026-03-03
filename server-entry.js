@@ -42,7 +42,7 @@ const MIME_TYPES = {
  *    switching to nonces if tightening CSP further.
  *  - Shiki syntax highlighting generates inline styles — 'unsafe-inline' is
  *    therefore required for style-src as well.
- *  - The connect-src allowlist covers the local gateway WebSocket, the ClawSuite
+ *  - The connect-src allowlist covers the local gateway WebSocket, the MGT Suite
  *    API itself, and blob: for any file downloads.
  *  - ws: and wss: in connect-src cover the gateway WebSocket proxy.
  *  - data: in img-src is needed for base64-encoded image previews.

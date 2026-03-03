@@ -20,7 +20,7 @@ type GatewayNodesResponse = {
 
 type ServicesHealthProbe = {
   missionControlApi: { status: 'up' | 'down'; latencyMs?: number }
-  clawSuiteUi: { status: 'up' | 'down'; latencyMs?: number }
+  mgtSuiteUi: { status: 'up' | 'down'; latencyMs?: number }
   gateway: { status: 'up' | 'down'; latencyMs?: number }
   ollama: { status: 'up' | 'down'; latencyMs?: number }
 }
@@ -81,7 +81,7 @@ async function fetchServicesHealthProbe(): Promise<ServicesHealthProbe> {
     timedJsonFetch<GatewayNodesResponse>('/api/gateway/nodes', 2500),
   ])
 
-  const clawSuiteUi = uiProbe.ok
+  const mgtSuiteUi = uiProbe.ok
     ? { status: 'up' as const, latencyMs: uiProbe.latencyMs }
     : { status: 'down' as const, latencyMs: uiProbe.latencyMs }
 
@@ -108,7 +108,7 @@ async function fetchServicesHealthProbe(): Promise<ServicesHealthProbe> {
       ? { status: 'up' as const, latencyMs: ollamaProbe.latencyMs }
       : { status: 'down' as const, latencyMs: ollamaProbe?.latencyMs ?? gatewayNodes.latencyMs }
 
-  return { missionControlApi, clawSuiteUi, gateway, ollama }
+  return { missionControlApi, mgtSuiteUi, gateway, ollama }
 }
 
 export function useServicesHealth(gatewayConnected: boolean) {
@@ -126,8 +126,8 @@ export function useServicesHealth(gatewayConnected: boolean) {
     return [
       {
         name: 'MGT Suite UI',
-        status: isChecking ? 'checking' : (probe?.clawSuiteUi.status ?? 'down'),
-        latencyMs: probe?.clawSuiteUi.latencyMs,
+        status: isChecking ? 'checking' : (probe?.mgtSuiteUi.status ?? 'down'),
+        latencyMs: probe?.mgtSuiteUi.latencyMs,
       },
       {
         name: 'OpenClaw Gateway',

@@ -1530,7 +1530,7 @@ function exportToCodex() {
   const m = selectedMission;
   const score = Number(m.score || m.verdict?.score || 0);
   const issues = (m.verdict?.issues || []).length ? (m.verdict.issues || []).map((i) => `- ${i}`).join('\n') : '- none';
-  const out = `# PC1 Mission — ${m.task || 'Untitled'}\nDate: ${m.date || (m.ts || '').slice(0,10) || '—'} | Score: ${score}/10 | Tokens: ${m.tokens || 0}\n\n## Atlas Plan\n${m.atlas || '(none)'}\n\n## Forge Output\n${m.forge || '(none)'}\n\n## Lens Verdict\n${m.verdict ? `${m.verdict.verdict} (${score}/10)\n${m.verdict.feedback || ''}` : (m.lens || '(none)')}\nIssues:\n${issues}\n\n## Codex Instructions\nIntegrate into ClawSuite. Fix Lens issues. Run tsc --noEmit.\nCommit: "feat: ${slugify(m.task).replace(/-/g, ' ')} [PC1]"`;
+  const out = `# PC1 Mission — ${m.task || 'Untitled'}\nDate: ${m.date || (m.ts || '').slice(0,10) || '—'} | Score: ${score}/10 | Tokens: ${m.tokens || 0}\n\n## Atlas Plan\n${m.atlas || '(none)'}\n\n## Forge Output\n${m.forge || '(none)'}\n\n## Lens Verdict\n${m.verdict ? `${m.verdict.verdict} (${score}/10)\n${m.verdict.feedback || ''}` : (m.lens || '(none)')}\nIssues:\n${issues}\n\n## Codex Instructions\nIntegrate into MGT Suite. Fix Lens issues. Run tsc --noEmit.\nCommit: "feat: ${slugify(m.task).replace(/-/g, ' ')} [PC1]"`;
   navigator.clipboard.writeText(out).then(() => log('sys', 'Exported mission markdown to clipboard', 'log-sys'));
 }
 
