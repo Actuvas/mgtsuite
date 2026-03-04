@@ -155,7 +155,7 @@ export const Route = createFileRoute('/api/stream')({
                 }
               })
 
-              ws.on('message', (data) => {
+              ws.on('message', (data: WebSocket.RawData) => {
                 try {
                   const parsed = JSON.parse(data.toString()) as GatewayFrame
 
@@ -289,7 +289,7 @@ export const Route = createFileRoute('/api/stream')({
                 }
               })
 
-              ws.on('error', (err) => {
+              ws.on('error', (err: Error) => {
                 sendSSE('error', { message: String(err.message || err) })
                 cleanup()
                 controller.close()
