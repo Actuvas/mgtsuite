@@ -118,15 +118,17 @@ export type StudioStatsTrends = {
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
 async function readError(response: Response): Promise<string> {
+  const fallback = response.statusText || 'Studio request failed'
   try {
-    const payload = (await response.json()) as Record<string, unknown>
-    if (typeof payload.detail === 'string') return payload.detail
-    if (typeof payload.error === 'string') return payload.error
-    if (typeof payload.message === 'string') return payload.message
-    return JSON.stringify(payload)
+    const text = await response.text()
+    try {
+      const json = JSON.parse(text) as Record<string, unknown>
+      return (json.detail ?? json.message ?? json.error ?? fallback) as string
+    } catch {
+      return text || fallback
+    }
   } catch {
-    const text = await response.text().catch(() => '')
-    return text || response.statusText || 'Studio request failed'
+    return fallback
   }
 }
 
@@ -151,13 +153,12 @@ async function studioFetch<T>(
   const { method = 'GET', body, timeoutMs = DEFAULT_TIMEOUT_MS, signal } = init
 
   const controller = new AbortController()
-
-  // Respect an externally provided signal (e.g. TanStack Query's signal)
-  if (signal) {
-    signal.addEventListener('abort', () => controller.abort(), { once: true })
-  }
-
-  const timeout = globalThis.setTimeout(() => controller.abort(), timeoutMs)
+  const timeoutId = globalThis.setTimeout(
+    () => controller.abort(new Error('timeout')),
+    timeoutMs,
+  )
+  const onAbort = () => controller.abort(signal?.reason)
+  signal?.addEventListener('abort', onAbort, { once: true })
 
   try {
     const url = `${getStudioBaseUrl()}${pathname}`
@@ -184,7 +185,8 @@ async function studioFetch<T>(
     }
     throw error
   } finally {
-    globalThis.clearTimeout(timeout)
+    globalThis.clearTimeout(timeoutId)
+    signal?.removeEventListener('abort', onAbort)
   }
 }
 
