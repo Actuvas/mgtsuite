@@ -43,7 +43,10 @@ async function timedJsonFetch<T>(
   const timeout = globalThis.setTimeout(() => controller.abort(), timeoutMs)
 
   try {
-    const response = await fetch(url, { method: 'GET', signal: controller.signal })
+    const response = await fetch(url, {
+      method: 'GET',
+      signal: controller.signal,
+    })
     const latencyMs = Math.max(1, Math.round(nowMs() - startedAt))
     let data: T | null = null
     try {
@@ -106,7 +109,10 @@ async function fetchServicesHealthProbe(): Promise<ServicesHealthProbe> {
   const ollama =
     hasOllamaNodes && ollamaProbe?.ok && ollamaProbe.data?.ok === true
       ? { status: 'up' as const, latencyMs: ollamaProbe.latencyMs }
-      : { status: 'down' as const, latencyMs: ollamaProbe?.latencyMs ?? gatewayNodes.latencyMs }
+      : {
+          status: 'down' as const,
+          latencyMs: ollamaProbe?.latencyMs ?? gatewayNodes.latencyMs,
+        }
 
   return { missionControlApi, mgtSuiteUi, gateway, ollama }
 }

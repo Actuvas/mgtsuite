@@ -32,9 +32,11 @@ function shouldShowUpdateBanner(
   phase: UpdatePhase,
   dismissed: string | null,
 ): boolean {
-  return Boolean(data?.updateAvailable) &&
+  return (
+    Boolean(data?.updateAvailable) &&
     phase !== 'done' &&
     dismissed !== data?.latestVersion
+  )
 }
 
 export function OpenClawUpdateNotifier() {
@@ -84,7 +86,8 @@ export function OpenClawUpdateNotifier() {
   // Instead we use a ref to track whether we have already attempted an update
   // for the current latestVersion.
   useEffect(() => {
-    if (!autoUpdate || !data?.updateAvailable || data.installType === 'npm') return
+    if (!autoUpdate || !data?.updateAvailable || data.installType === 'npm')
+      return
     if (phase !== 'idle') return
 
     const targetVersion = data.latestVersion
@@ -93,7 +96,10 @@ export function OpenClawUpdateNotifier() {
 
     // Cooldown guard: prevent rapid retries across page reloads.
     const lastAttempt = localStorage.getItem(AUTO_UPDATE_LAST_ATTEMPT)
-    if (lastAttempt && Date.now() - Number(lastAttempt) < AUTO_UPDATE_COOLDOWN_MS) {
+    if (
+      lastAttempt &&
+      Date.now() - Number(lastAttempt) < AUTO_UPDATE_COOLDOWN_MS
+    ) {
       return
     }
 
@@ -101,7 +107,12 @@ export function OpenClawUpdateNotifier() {
     localStorage.setItem(AUTO_UPDATE_LAST_ATTEMPT, String(Date.now()))
     void handleUpdate()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoUpdate, data?.updateAvailable, data?.installType, data?.latestVersion])
+  }, [
+    autoUpdate,
+    data?.updateAvailable,
+    data?.installType,
+    data?.latestVersion,
+  ])
 
   const visible = shouldShowUpdateBanner(data, phase, dismissed)
 
@@ -137,7 +148,11 @@ export function OpenClawUpdateNotifier() {
       setProgress(10)
       await new Promise((r) => setTimeout(r, 400))
 
-      const res = await fetch('/api/openclaw-update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+      const res = await fetch('/api/openclaw-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
       const result = (await res.json()) as {
         ok: boolean
         error?: string
@@ -292,18 +307,19 @@ export function OpenClawUpdateNotifier() {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              {(phase === 'idle' || phase === 'error') && data.installType !== 'npm' && (
-                <button
-                  type="button"
-                  onClick={handleUpdate}
-                  className={cn(
-                    'rounded-lg px-4 py-1.5 text-xs font-semibold transition-all',
-                    'bg-blue-500 hover:bg-blue-400 text-white',
-                  )}
-                >
-                  {phase === 'error' ? 'Retry' : 'Install'}
-                </button>
-              )}
+              {(phase === 'idle' || phase === 'error') &&
+                data.installType !== 'npm' && (
+                  <button
+                    type="button"
+                    onClick={handleUpdate}
+                    className={cn(
+                      'rounded-lg px-4 py-1.5 text-xs font-semibold transition-all',
+                      'bg-blue-500 hover:bg-blue-400 text-white',
+                    )}
+                  >
+                    {phase === 'error' ? 'Retry' : 'Install'}
+                  </button>
+                )}
               {!isUpdating && phase !== 'done' && (
                 <button
                   type="button"

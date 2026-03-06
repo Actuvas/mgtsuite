@@ -115,12 +115,14 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
     function buildMobilePreviewTasks() {
       return [...tasks]
         .sort(function sortForMobile(left, right) {
-          const statusDelta = mobileStatusRank(left.status) - mobileStatusRank(right.status)
+          const statusDelta =
+            mobileStatusRank(left.status) - mobileStatusRank(right.status)
           if (statusDelta !== 0) return statusDelta
 
           const leftPriority = PRIORITY_ORDER.indexOf(left.priority)
           const rightPriority = PRIORITY_ORDER.indexOf(right.priority)
-          if (leftPriority !== rightPriority) return leftPriority - rightPriority
+          if (leftPriority !== rightPriority)
+            return leftPriority - rightPriority
 
           return left.title.localeCompare(right.title)
         })
@@ -133,7 +135,9 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
   const remainingCount = Math.max(0, sortedTasks.length - visibleTasks.length)
   const activeCount = tasks.filter((task) => task.status !== 'done').length
   const backlogCount = tasks.filter((task) => task.status === 'backlog').length
-  const inProgressCount = tasks.filter((task) => task.status === 'in_progress').length
+  const inProgressCount = tasks.filter(
+    (task) => task.status === 'in_progress',
+  ).length
   const doneCount = tasks.filter((task) => task.status === 'done').length
   const errorMessage =
     cronJobsQuery.error instanceof Error ? cronJobsQuery.error.message : null
@@ -146,7 +150,8 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
         icon={Task01Icon}
         action={
           <span className="inline-flex items-center rounded-full border border-primary-200 dark:border-neutral-800 bg-primary-50 dark:bg-neutral-950 px-2 py-0.5 text-[10px] font-medium text-primary-700 dark:text-neutral-300">
-            Backlog {backlogCount} • In progress {inProgressCount} • Done {doneCount}
+            Backlog {backlogCount} • In progress {inProgressCount} • Done{' '}
+            {doneCount}
           </span>
         }
         className="h-full rounded-xl border border-neutral-200 dark:border-neutral-700 border-l-4 border-l-orange-500 bg-white dark:bg-neutral-900 p-4 sm:p-5 md:hidden [&_svg]:text-orange-500"
@@ -184,7 +189,10 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
                       {task.title}
                     </span>
                     <span
-                      className={cn('size-2 shrink-0 rounded-full', statusDotClass(task.status))}
+                      className={cn(
+                        'size-2 shrink-0 rounded-full',
+                        statusDotClass(task.status),
+                      )}
                     />
                   </article>
                 )
@@ -239,11 +247,16 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
                     key={task.id}
                     className={cn(
                       'flex items-center gap-2 rounded-lg border border-primary-200 dark:border-neutral-800 px-2.5 py-2',
-                      index % 2 === 0 ? 'bg-primary-50 dark:bg-neutral-950' : 'bg-primary-50 dark:bg-neutral-950/80',
+                      index % 2 === 0
+                        ? 'bg-primary-50 dark:bg-neutral-950'
+                        : 'bg-primary-50 dark:bg-neutral-950/80',
                     )}
                   >
                     <span
-                      className={cn('size-2 shrink-0 rounded-full', statusDotClass(task.status))}
+                      className={cn(
+                        'size-2 shrink-0 rounded-full',
+                        statusDotClass(task.status),
+                      )}
                     />
                     <span className="min-w-0 flex-1 truncate text-sm text-primary-900 dark:text-neutral-100">
                       {truncateTaskTitle(task.title)}
@@ -261,7 +274,9 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
               })}
 
               {remainingCount > 0 ? (
-                <p className="px-1 text-xs text-primary-500 dark:text-neutral-400">+{remainingCount} more</p>
+                <p className="px-1 text-xs text-primary-500 dark:text-neutral-400">
+                  +{remainingCount} more
+                </p>
               ) : null}
             </div>
           )}

@@ -17,6 +17,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SessionsRouteImport } from './routes/sessions'
 import { Route as NodesRouteImport } from './routes/nodes'
 import { Route as NewRouteImport } from './routes/new'
+import { Route as MissionControlRouteImport } from './routes/mission-control'
 import { Route as MemoryRouteImport } from './routes/memory'
 import { Route as LogsRouteImport } from './routes/logs'
 import { Route as InstancesRouteImport } from './routes/instances'
@@ -155,6 +156,11 @@ const NodesRoute = NodesRouteImport.update({
 const NewRoute = NewRouteImport.update({
   id: '/new',
   path: '/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissionControlRoute = MissionControlRouteImport.update({
+  id: '/mission-control',
+  path: '/mission-control',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MemoryRoute = MemoryRouteImport.update({
@@ -673,6 +679,7 @@ export interface FileRoutesByFullPath {
   '/instances': typeof InstancesRoute
   '/logs': typeof LogsRoute
   '/memory': typeof MemoryRoute
+  '/mission-control': typeof MissionControlRoute
   '/new': typeof NewRoute
   '/nodes': typeof NodesRoute
   '/sessions': typeof SessionsRoute
@@ -782,6 +789,7 @@ export interface FileRoutesByTo {
   '/instances': typeof InstancesRoute
   '/logs': typeof LogsRoute
   '/memory': typeof MemoryRoute
+  '/mission-control': typeof MissionControlRoute
   '/new': typeof NewRoute
   '/nodes': typeof NodesRoute
   '/sessions': typeof SessionsRoute
@@ -891,6 +899,7 @@ export interface FileRoutesById {
   '/instances': typeof InstancesRoute
   '/logs': typeof LogsRoute
   '/memory': typeof MemoryRoute
+  '/mission-control': typeof MissionControlRoute
   '/new': typeof NewRoute
   '/nodes': typeof NodesRoute
   '/sessions': typeof SessionsRoute
@@ -1002,6 +1011,7 @@ export interface FileRouteTypes {
     | '/instances'
     | '/logs'
     | '/memory'
+    | '/mission-control'
     | '/new'
     | '/nodes'
     | '/sessions'
@@ -1111,6 +1121,7 @@ export interface FileRouteTypes {
     | '/instances'
     | '/logs'
     | '/memory'
+    | '/mission-control'
     | '/new'
     | '/nodes'
     | '/sessions'
@@ -1219,6 +1230,7 @@ export interface FileRouteTypes {
     | '/instances'
     | '/logs'
     | '/memory'
+    | '/mission-control'
     | '/new'
     | '/nodes'
     | '/sessions'
@@ -1329,6 +1341,7 @@ export interface RootRouteChildren {
   InstancesRoute: typeof InstancesRoute
   LogsRoute: typeof LogsRoute
   MemoryRoute: typeof MemoryRoute
+  MissionControlRoute: typeof MissionControlRoute
   NewRoute: typeof NewRoute
   NodesRoute: typeof NodesRoute
   SessionsRoute: typeof SessionsRoute
@@ -1462,6 +1475,13 @@ declare module '@tanstack/react-router' {
       path: '/new'
       fullPath: '/new'
       preLoaderRoute: typeof NewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mission-control': {
+      id: '/mission-control'
+      path: '/mission-control'
+      fullPath: '/mission-control'
+      preLoaderRoute: typeof MissionControlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/memory': {
@@ -2268,6 +2288,7 @@ const rootRouteChildren: RootRouteChildren = {
   InstancesRoute: InstancesRoute,
   LogsRoute: LogsRoute,
   MemoryRoute: MemoryRoute,
+  MissionControlRoute: MissionControlRoute,
   NewRoute: NewRoute,
   NodesRoute: NodesRoute,
   SessionsRoute: SessionsRoute,

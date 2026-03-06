@@ -268,20 +268,20 @@ function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <GatewayRestartProvider>
-      <GatewayReconnectBanner />
-      <GlobalShortcutListener />
-      <TerminalShortcutListener />
-      <TaskReminderRunner />
-      <UpdateNotifier />
-      <OpenClawUpdateNotifier />
-      <MobilePromptTrigger />
-      <Toaster />
-      <ExecApprovalToast />
-      <WorkspaceShell />
-      <SearchModal />
-      <GatewaySetupWizard />
-      <OnboardingTour />
-      <KeyboardShortcutsModal />
+        <GatewayReconnectBanner />
+        <GlobalShortcutListener />
+        <TerminalShortcutListener />
+        <TaskReminderRunner />
+        <UpdateNotifier />
+        <OpenClawUpdateNotifier />
+        <MobilePromptTrigger />
+        <Toaster />
+        <ExecApprovalToast />
+        <WorkspaceShell />
+        <SearchModal />
+        <GatewaySetupWizard />
+        <OnboardingTour />
+        <KeyboardShortcutsModal />
       </GatewayRestartProvider>
     </QueryClientProvider>
   )
@@ -296,7 +296,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeColorScript }} />
       </head>
       <body>
-        <script dangerouslySetInnerHTML={{ __html: `
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
           (function(){
             if (document.getElementById('splash-screen')) return;
             var bg = '#f8fafc', txt = '#0f172a', muted = '#64748b';
@@ -374,10 +376,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             // Fallback: always dismiss after 8s
             setTimeout(function(){ window.__dismissSplash && window.__dismissSplash(); }, 8000);
           })()
-        `}} />
+        `,
+          }}
+        />
         <div className="root">{children}</div>
         <Scripts />
-        <script dangerouslySetInnerHTML={{ __html: `
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
           (function(){
             var start = Date.now();
             function check() {
@@ -389,7 +395,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             }
             setTimeout(check, 2500);
           })()
-        `}} />
+        `,
+          }}
+        />
       </body>
     </html>
   )

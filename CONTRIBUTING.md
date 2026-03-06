@@ -40,6 +40,7 @@ npm run build
 ```
 
 **First-time setup:**
+
 - Copy `.env.example` to `.env`
 - Set `CLAWDBOT_GATEWAY_URL` (default: `ws://127.0.0.1:18789`)
 - Set `CLAWDBOT_GATEWAY_TOKEN` (find with `openclaw config get gateway.auth.token`)

@@ -149,7 +149,10 @@ function parseKnownJsonEvent(event: ActivityEvent): ActivityPreviewRow | null {
       icon: '•',
       iconClassName: 'text-blue-400',
       sourceLabel: summarySource,
-      summary: modelLabel !== 'Custom' || parsedModel ? `Session started: ${modelLabel}` : 'Session started',
+      summary:
+        modelLabel !== 'Custom' || parsedModel
+          ? `Session started: ${modelLabel}`
+          : 'Session started',
       timestamp: event.timestamp,
     }
   }
@@ -172,7 +175,9 @@ function toPreviewRow(event: ActivityEvent): ActivityPreviewRow | null {
       icon: '⚠',
       iconClassName: 'text-amber-600',
       sourceLabel,
-      summary: sanitizeEventText(readString(event.title) || readString(event.detail) || 'Error event'),
+      summary: sanitizeEventText(
+        readString(event.title) || readString(event.detail) || 'Error event',
+      ),
       timestamp: event.timestamp,
     }
   }
@@ -199,7 +204,9 @@ function toPreviewRow(event: ActivityEvent): ActivityPreviewRow | null {
     }
   }
 
-  const fallbackSummary = sanitizeEventText(readString(event.title) || readString(event.detail) || '')
+  const fallbackSummary = sanitizeEventText(
+    readString(event.title) || readString(event.detail) || '',
+  )
   if (!fallbackSummary) return null
 
   return {
@@ -223,7 +230,8 @@ function parseActivityItem(event: ActivityEvent): ParsedActivityItem {
       title: 'New activity received',
       subtitle: fallbackSubtitle,
       timeAgo,
-      statusIcon: event.level === 'error' || event.type === 'error' ? 'error' : 'info',
+      statusIcon:
+        event.level === 'error' || event.type === 'error' ? 'error' : 'info',
     }
   }
 
@@ -245,7 +253,9 @@ function parseActivityItem(event: ActivityEvent): ParsedActivityItem {
   }
 }
 
-function activityStatusDotClass(statusIcon: ParsedActivityItem['statusIcon']): string {
+function activityStatusDotClass(
+  statusIcon: ParsedActivityItem['statusIcon'],
+): string {
   if (statusIcon === 'success') return 'bg-emerald-500'
   if (statusIcon === 'warning') return 'bg-amber-500'
   if (statusIcon === 'error') return 'bg-red-500'
@@ -382,7 +392,9 @@ export function ActivityLogWidget({
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="line-clamp-2 text-sm text-primary-700 dark:text-neutral-300">
-                        <span className="font-semibold text-primary-900 dark:text-neutral-100">{row.sourceLabel}</span>{' '}
+                        <span className="font-semibold text-primary-900 dark:text-neutral-100">
+                          {row.sourceLabel}
+                        </span>{' '}
                         <span>{row.summary}</span>
                       </p>
                     </div>

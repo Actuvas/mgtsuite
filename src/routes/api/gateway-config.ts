@@ -75,10 +75,14 @@ function sanitizeOptionalDefaultModel(value: unknown): string | null {
 export const Route = createFileRoute('/api/gateway-config')({
   server: {
     handlers: {
-      // GET: return current gateway config (non-sensitive)
-      GET: async () => {
+      // GET: return current gateway config
+      GET: async ({ request }) => {
+        if (!isAuthenticated(request)) {
+          return json({ ok: false, error: 'Unauthorized' }, { status: 401 })
+        }
         try {
-          const url = process.env.CLAWDBOT_GATEWAY_URL?.trim() || 'ws://127.0.0.1:18789'
+          const url =
+            process.env.CLAWDBOT_GATEWAY_URL?.trim() || 'ws://127.0.0.1:18789'
           const hasToken = Boolean(process.env.CLAWDBOT_GATEWAY_TOKEN?.trim())
           return json({ ok: true, url, hasToken })
         } catch (err) {
@@ -111,12 +115,16 @@ export const Route = createFileRoute('/api/gateway-config')({
             unknown
           >
           const action =
-            typeof rawBody.action === 'string' ? rawBody.action.trim().toLowerCase() : ''
+            typeof rawBody.action === 'string'
+              ? rawBody.action.trim().toLowerCase()
+              : ''
 
           if (action === 'add-provider') {
             const provider = sanitizeProviderName(rawBody.provider)
             const apiKey = sanitizeApiKey(rawBody.apiKey)
-            const defaultModel = sanitizeOptionalDefaultModel(rawBody.defaultModel)
+            const defaultModel = sanitizeOptionalDefaultModel(
+              rawBody.defaultModel,
+            )
             const baseUrl =
               typeof rawBody.baseUrl === 'string' && rawBody.baseUrl.trim()
                 ? rawBody.baseUrl.trim()
@@ -133,7 +141,11 @@ export const Route = createFileRoute('/api/gateway-config')({
             try {
               const rawConfig = await readFile(configPath, 'utf-8')
               const parsed = JSON.parse(rawConfig) as unknown
-              if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+              if (
+                parsed &&
+                typeof parsed === 'object' &&
+                !Array.isArray(parsed)
+              ) {
                 config = parsed as Record<string, unknown>
               }
             } catch (error) {
@@ -144,7 +156,9 @@ export const Route = createFileRoute('/api/gateway-config')({
             }
 
             const auth =
-              config.auth && typeof config.auth === 'object' && !Array.isArray(config.auth)
+              config.auth &&
+              typeof config.auth === 'object' &&
+              !Array.isArray(config.auth)
                 ? (config.auth as Record<string, unknown>)
                 : {}
             const profiles =
@@ -158,7 +172,9 @@ export const Route = createFileRoute('/api/gateway-config')({
             config.auth = auth
 
             const models =
-              config.models && typeof config.models === 'object' && !Array.isArray(config.models)
+              config.models &&
+              typeof config.models === 'object' &&
+              !Array.isArray(config.models)
                 ? (config.models as Record<string, unknown>)
                 : {}
             const providers =
@@ -174,7 +190,9 @@ export const Route = createFileRoute('/api/gateway-config')({
                 ? (providers[provider] as Record<string, unknown>)
                 : {}
             if (defaultModel) {
-              const normalizedDefaultModel = defaultModel.startsWith(`${provider}/`)
+              const normalizedDefaultModel = defaultModel.startsWith(
+                `${provider}/`,
+              )
                 ? defaultModel.slice(provider.length + 1)
                 : defaultModel
               if (normalizedDefaultModel) {
@@ -192,7 +210,11 @@ export const Route = createFileRoute('/api/gateway-config')({
             config.models = models
 
             await mkdir(configDir, { recursive: true })
-            await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, 'utf-8')
+            await writeFile(
+              configPath,
+              `${JSON.stringify(config, null, 2)}\n`,
+              'utf-8',
+            )
             invalidateCache()
 
             return json({ ok: true, provider })
@@ -209,7 +231,11 @@ export const Route = createFileRoute('/api/gateway-config')({
             try {
               const rawConfig = await readFile(configPath, 'utf-8')
               const parsed = JSON.parse(rawConfig) as unknown
-              if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+              if (
+                parsed &&
+                typeof parsed === 'object' &&
+                !Array.isArray(parsed)
+              ) {
                 config = parsed as Record<string, unknown>
               }
             } catch (error) {
@@ -221,7 +247,9 @@ export const Route = createFileRoute('/api/gateway-config')({
 
             // Update auth profile api key
             const auth =
-              config.auth && typeof config.auth === 'object' && !Array.isArray(config.auth)
+              config.auth &&
+              typeof config.auth === 'object' &&
+              !Array.isArray(config.auth)
                 ? (config.auth as Record<string, unknown>)
                 : {}
             const profiles =
@@ -242,7 +270,11 @@ export const Route = createFileRoute('/api/gateway-config')({
             config.auth = auth
 
             await mkdir(configDir, { recursive: true })
-            await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, 'utf-8')
+            await writeFile(
+              configPath,
+              `${JSON.stringify(config, null, 2)}\n`,
+              'utf-8',
+            )
             invalidateCache()
 
             return json({ ok: true })
@@ -257,7 +289,11 @@ export const Route = createFileRoute('/api/gateway-config')({
             try {
               const rawConfig = await readFile(configPath, 'utf-8')
               const parsed = JSON.parse(rawConfig) as unknown
-              if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+              if (
+                parsed &&
+                typeof parsed === 'object' &&
+                !Array.isArray(parsed)
+              ) {
                 config = parsed as Record<string, unknown>
               }
             } catch (error) {
@@ -267,11 +303,15 @@ export const Route = createFileRoute('/api/gateway-config')({
 
             // Remove from models.providers
             const models =
-              config.models && typeof config.models === 'object' && !Array.isArray(config.models)
+              config.models &&
+              typeof config.models === 'object' &&
+              !Array.isArray(config.models)
                 ? (config.models as Record<string, unknown>)
                 : {}
             const providers =
-              models.providers && typeof models.providers === 'object' && !Array.isArray(models.providers)
+              models.providers &&
+              typeof models.providers === 'object' &&
+              !Array.isArray(models.providers)
                 ? (models.providers as Record<string, unknown>)
                 : {}
             if (Object.prototype.hasOwnProperty.call(providers, provider)) {
@@ -282,11 +322,15 @@ export const Route = createFileRoute('/api/gateway-config')({
 
             // Remove from auth.profiles
             const auth =
-              config.auth && typeof config.auth === 'object' && !Array.isArray(config.auth)
+              config.auth &&
+              typeof config.auth === 'object' &&
+              !Array.isArray(config.auth)
                 ? (config.auth as Record<string, unknown>)
                 : {}
             const profiles =
-              auth.profiles && typeof auth.profiles === 'object' && !Array.isArray(auth.profiles)
+              auth.profiles &&
+              typeof auth.profiles === 'object' &&
+              !Array.isArray(auth.profiles)
                 ? (auth.profiles as Record<string, unknown>)
                 : {}
             const profileKey = `${provider}:default`
@@ -297,7 +341,11 @@ export const Route = createFileRoute('/api/gateway-config')({
             }
 
             await mkdir(configDir, { recursive: true })
-            await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, 'utf-8')
+            await writeFile(
+              configPath,
+              `${JSON.stringify(config, null, 2)}\n`,
+              'utf-8',
+            )
             invalidateCache()
 
             return json({ ok: true })
@@ -320,7 +368,10 @@ export const Route = createFileRoute('/api/gateway-config')({
           } catch {
             // .env doesn't exist — create from .env.example or empty
             try {
-              envContent = await readFile(join(process.cwd(), '.env.example'), 'utf-8')
+              envContent = await readFile(
+                join(process.cwd(), '.env.example'),
+                'utf-8',
+              )
             } catch {
               envContent = ''
             }
@@ -373,7 +424,10 @@ export const Route = createFileRoute('/api/gateway-config')({
           }
         } catch (err) {
           return json(
-            { ok: false, error: err instanceof Error ? err.message : String(err) },
+            {
+              ok: false,
+              error: err instanceof Error ? err.message : String(err),
+            },
             { status: 500 },
           )
         }

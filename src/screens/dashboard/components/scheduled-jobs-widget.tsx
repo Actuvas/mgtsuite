@@ -21,7 +21,9 @@ export function ScheduledJobsWidget({ onRemove }: Props) {
       icon={Clock01Icon}
       onRemove={onRemove}
       loading={jobsQuery.isLoading}
-      error={jobsQuery.error instanceof Error ? jobsQuery.error.message : undefined}
+      error={
+        jobsQuery.error instanceof Error ? jobsQuery.error.message : undefined
+      }
       action={
         <span className="inline-flex items-center rounded-full border border-primary-200 dark:border-neutral-800 bg-primary-50 dark:bg-neutral-950 px-2 py-0.5 font-mono text-[11px] tabular-nums text-primary-800 dark:text-neutral-200">
           {jobs.length}
@@ -59,10 +61,10 @@ export function ScheduledJobsWidget({ onRemove }: Props) {
                       {job.schedule}
                     </span>
                   </div>
-                    <div className="mt-0.5 flex items-center gap-3 font-mono text-[10px] tabular-nums text-neutral-500 dark:text-neutral-400">
-                      <span>Next {job.nextRelative}</span>
-                      <span>Last {job.lastRelative}</span>
-                    </div>
+                  <div className="mt-0.5 flex items-center gap-3 font-mono text-[10px] tabular-nums text-neutral-500 dark:text-neutral-400">
+                    <span>Next {job.nextRelative}</span>
+                    <span>Last {job.lastRelative}</span>
+                  </div>
                 </div>
               </button>
             ))

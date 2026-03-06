@@ -7,7 +7,19 @@ type GatewayConfig = {
     profiles?: Record<string, { provider?: string }>
   }
   models?: {
-    providers?: Record<string, { models?: Array<{ id?: string; name?: string; reasoning?: boolean; input?: string[]; contextWindow?: number; cost?: Record<string, number> }> }>
+    providers?: Record<
+      string,
+      {
+        models?: Array<{
+          id?: string
+          name?: string
+          reasoning?: boolean
+          input?: string[]
+          contextWindow?: number
+          cost?: Record<string, number>
+        }>
+      }
+    >
   }
   agents?: {
     defaults?: {
@@ -98,7 +110,10 @@ export function getConfiguredProviderNames(): Array<string> {
     const code = (error as NodeJS.ErrnoException)?.code
     if (code !== 'ENOENT') {
       if (import.meta.env.DEV)
-        console.error('Failed to read Gateway config for provider names:', error)
+        console.error(
+          'Failed to read Gateway config for provider names:',
+          error,
+        )
     }
     return []
   }
@@ -195,7 +210,9 @@ export function getConfiguredModelsFromConfig(): ConfigModelEntry[] {
     const results: ConfigModelEntry[] = []
 
     if (config.models?.providers) {
-      for (const [providerName, providerConfig] of Object.entries(config.models.providers)) {
+      for (const [providerName, providerConfig] of Object.entries(
+        config.models.providers,
+      )) {
         if (providerConfig.models) {
           for (const model of providerConfig.models) {
             if (model.id) {

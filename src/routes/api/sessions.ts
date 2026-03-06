@@ -124,7 +124,8 @@ export const Route = createFileRoute('/api/sessions')({
 
           const returnedKeyRaw = payload.key
           const returnedKey =
-            typeof returnedKeyRaw === 'string' && returnedKeyRaw.trim().length > 0
+            typeof returnedKeyRaw === 'string' &&
+            returnedKeyRaw.trim().length > 0
               ? returnedKeyRaw.trim()
               : ''
           const resolvedSessionKey = returnedKey || friendlyId

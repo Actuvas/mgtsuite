@@ -6,6 +6,7 @@
 
 import http from 'node:http'
 import https from 'node:https'
+import dns from 'node:dns/promises'
 import { URL } from 'node:url'
 
 const PROXY_PORT = 9222
@@ -31,6 +32,47 @@ function isValidUrl(url: string): boolean {
   }
 }
 
+/** Block requests to internal networks, cloud metadata, and localhost to prevent SSRF. */
+async function isBlockedTarget(url: string): Promise<boolean> {
+  try {
+    const parsed = new URL(url)
+    const hostname = parsed.hostname
+
+    // Block cloud metadata endpoints
+    if (hostname === '169.254.169.254' || hostname === 'metadata.google.internal') {
+      return true
+    }
+
+    // Block localhost variants
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '0.0.0.0') {
+      return true
+    }
+
+    // Resolve DNS and check for internal IPs
+    try {
+      const addresses = await dns.resolve4(hostname)
+      for (const addr of addresses) {
+        if (
+          addr.startsWith('10.') ||
+          addr.startsWith('127.') ||
+          addr.startsWith('169.254.') ||
+          addr.startsWith('192.168.') ||
+          addr === '0.0.0.0' ||
+          /^172\.(1[6-9]|2\d|3[01])\./.test(addr)
+        ) {
+          return true
+        }
+      }
+    } catch {
+      // DNS resolution failure — allow (could be IP literal)
+    }
+
+    return false
+  } catch {
+    return true
+  }
+}
+
 export function getProxyPort(): number {
   return PROXY_PORT
 }
@@ -49,7 +91,7 @@ export async function startProxy(): Promise<{ port: number; url: string }> {
   }
 
   return new Promise((resolve, reject) => {
-    proxyServer = http.createServer((clientReq, clientRes) => {
+    proxyServer = http.createServer(async (clientReq, clientRes) => {
       // The target URL is passed via the "x-proxy-url" header or query param
       const reqUrl = new URL(
         clientReq.url || '/',
@@ -137,6 +179,14 @@ export async function startProxy(): Promise<{ port: number; url: string }> {
         return
       }
 
+      // SSRF protection: block internal/metadata targets
+      const blocked = await isBlockedTarget(fullUrl)
+      if (blocked) {
+        clientRes.writeHead(403, { 'Content-Type': 'application/json' })
+        clientRes.end(JSON.stringify({ error: 'Target URL is blocked (internal/metadata address)' }))
+        return
+      }
+
       // Fetch the target
       const parsed = new URL(fullUrl)
       const transport = parsed.protocol === 'https:' ? https : http
@@ -152,7 +202,6 @@ export async function startProxy(): Promise<{ port: number; url: string }> {
             referer: parsed.origin + '/',
             'accept-encoding': 'identity', // Request uncompressed so we can rewrite HTML
           },
-          rejectUnauthorized: false,
         },
         (proxyRes) => {
           // Strip iframe-blocking headers
@@ -208,7 +257,7 @@ document.addEventListener('submit', function(e) {
   }
 }, true);
 // Notify parent of URL changes
-try { window.parent.postMessage({ type: 'proxy-navigate', url: window.location.href }, '*'); } catch(e) {}
+try { window.parent.postMessage({ type: 'proxy-navigate', url: window.location.href }, 'http://localhost:${appPort}'); } catch(e) {}
 </script>`
               if (html.includes('<head>')) {
                 html = html.replace('<head>', `<head>${baseTag}`)

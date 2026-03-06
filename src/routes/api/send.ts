@@ -144,9 +144,7 @@ export const Route = createFileRoute('/api/send')({
             )
           }
           const gatewayMessage =
-            message.trim().length === 0 &&
-            attachments &&
-            attachments.length > 0
+            message.trim().length === 0 && attachments && attachments.length > 0
               ? ' '
               : message
 
@@ -214,10 +212,11 @@ export const Route = createFileRoute('/api/send')({
             clientId: clientId ?? null,
           })
         } catch (err) {
-          if (import.meta.env.DEV) console.error(
-            '[/api/send] Error:',
-            err instanceof Error ? err.message : String(err),
-          )
+          if (import.meta.env.DEV)
+            console.error(
+              '[/api/send] Error:',
+              err instanceof Error ? err.message : String(err),
+            )
           return json(
             { ok: false, error: safeErrorMessage(err) },
             { status: 500 },

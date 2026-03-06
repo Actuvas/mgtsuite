@@ -154,14 +154,18 @@ export function normalizeCronJobs(
         // Gateway returns schedule as object: { kind: "cron", expr: "0 13 * * *", tz: "..." }
         if (row.schedule && typeof row.schedule === 'object') {
           const sched = row.schedule as Record<string, unknown>
-          return (typeof sched.expr === 'string' && sched.expr) ||
+          return (
+            (typeof sched.expr === 'string' && sched.expr) ||
             (typeof sched.expression === 'string' && sched.expression) ||
             '* * * * *'
+          )
         }
-        return (typeof row.schedule === 'string' && row.schedule) ||
+        return (
+          (typeof row.schedule === 'string' && row.schedule) ||
           (typeof row.cron === 'string' && row.cron) ||
           (typeof row.expression === 'string' && row.expression) ||
           '* * * * *'
+        )
       })(),
       enabled,
       payload: row.payload ?? row.data ?? row.body ?? null,
@@ -188,7 +192,10 @@ export function normalizeCronJobs(
             status: normalizeRunStatus(stateObj.lastStatus),
             startedAt: normalizeTimestamp(stateObj.lastRunAtMs),
             finishedAt: null,
-            durationMs: typeof stateObj.lastDurationMs === 'number' ? stateObj.lastDurationMs : null,
+            durationMs:
+              typeof stateObj.lastDurationMs === 'number'
+                ? stateObj.lastDurationMs
+                : null,
           }
         }
         return Object.keys(lastRunRecord).length > 0

@@ -20,11 +20,7 @@ import { cn } from '@/lib/utils'
 
 // ── Types ─────────────────────────────────────────────────────────
 
-type RestartPhase =
-  | 'idle'
-  | 'restarting'
-  | 'ready'
-  | 'error'
+type RestartPhase = 'idle' | 'restarting' | 'ready' | 'error'
 
 type GatewayRestartContextValue = {
   /** Whether a restart is currently in progress */
@@ -386,11 +382,7 @@ function GatewayRestartOverlayView({
             </div>
             <div className="flex items-center gap-2">
               <Button size="sm" onClick={onRetry}>
-                <HugeiconsIcon
-                  icon={RefreshIcon}
-                  size={16}
-                  strokeWidth={1.5}
-                />
+                <HugeiconsIcon icon={RefreshIcon} size={16} strokeWidth={1.5} />
                 Retry
               </Button>
               <Button variant="outline" size="sm" onClick={onDismiss}>

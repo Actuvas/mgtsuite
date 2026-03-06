@@ -24,10 +24,7 @@ export const Route = createFileRoute('/api/cron/delete')({
             return json({ error: 'jobId is required' }, { status: 400 })
           }
 
-          const payload = await gatewayCronRpc(
-            ['cron.remove'],
-            { jobId },
-          )
+          const payload = await gatewayCronRpc(['cron.remove'], { jobId })
 
           return json({ ok: true, payload })
         } catch (err) {

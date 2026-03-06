@@ -33,27 +33,27 @@
 
 ## 📸 Screenshots
 
-| Agent Hub — Mission Control | Chat — Live Streaming |
-|:---:|:---:|
+|             Agent Hub — Mission Control             |           Chat — Live Streaming           |
+| :-------------------------------------------------: | :---------------------------------------: |
 | ![Agent Hub](./public/screenshots/agent-hub-v3.png) | ![Chat](./public/screenshots/chat-v3.png) |
 
-| Mobile Dashboard | Mission Control |
-|:---:|:---:|
+|                    Mobile Dashboard                     |                     Mission Control                      |
+| :-----------------------------------------------------: | :------------------------------------------------------: |
 | ![Mobile](./public/screenshots/mobile-dashboard-v3.png) | ![Missions](./public/screenshots/mission-control-v3.png) |
 
 <details>
 <summary>📸 More Screenshots</summary>
 
-| Mission Wizard | Tasks Board |
-|:---:|:---:|
+|                           Mission Wizard                           |                      Tasks Board                       |
+| :----------------------------------------------------------------: | :----------------------------------------------------: |
 | ![Mission Wizard](./public/screenshots/gallery/mission-wizard.png) | ![Tasks](./public/screenshots/gallery/tasks-board.png) |
 
-| Skills Marketplace | Cron Manager |
-|:---:|:---:|
+|                     Skills Marketplace                     |                      Cron Manager                      |
+| :--------------------------------------------------------: | :----------------------------------------------------: |
 | ![Skills](./public/screenshots/gallery/skills-browser.png) | ![Cron](./public/screenshots/gallery/cron-manager.png) |
 
-| Agents Configuration | Mobile Agent Hub |
-|:---:|:---:|
+|                   Agents Configuration                    |                         Mobile Agent Hub                         |
+| :-------------------------------------------------------: | :--------------------------------------------------------------: |
 | ![Agents](./public/screenshots/gallery/agents-config.png) | ![Mobile Hub](./public/screenshots/gallery/mobile-agent-hub.png) |
 
 </details>
@@ -129,12 +129,14 @@ Access MGT Suite from anywhere on your devices — no port forwarding, no VPN co
 2. **Sign in** to the same Tailscale account on both devices
 
 3. **Find your Mac's Tailscale IP:**
+
    ```bash
    tailscale ip -4
    # Example output: 100.x.x.x
    ```
 
 4. **Open MGT Suite on your phone:**
+
    ```
    http://100.x.x.x:3000
    ```
@@ -150,6 +152,7 @@ Access MGT Suite from anywhere on your devices — no port forwarding, no VPN co
 > **Status: In Development** — A native Electron-based desktop app is in active development.
 
 The desktop app will offer:
+
 - Native window management and tray icon
 - System notifications for agent events and mission completions
 - Auto-launch on startup
@@ -171,6 +174,7 @@ A fully managed cloud version of MGT Suite is in development:
 - **Automatic updates** — Always on the latest version
 
 Features pending cloud infrastructure:
+
 - Cross-device session sync
 - Team shared memory and workspaces
 - Cloud-hosted gateway with managed uptime
@@ -181,6 +185,7 @@ Features pending cloud infrastructure:
 ## ✨ Features
 
 ### 🤖 Mission Control & Agent Hub
+
 - Full multi-agent orchestration — spawn, pause, resume, abort
 - **Isometric office view** — see your agents working in real time
 - Live SSE output streaming per agent
@@ -188,6 +193,7 @@ Features pending cloud infrastructure:
 - Exec approval prompts — approve/deny sensitive commands in-UI
 
 ### 💬 Chat
+
 - Real-time token streaming (no waiting for full response)
 - Multi-session management with full history
 - File and image attachments
@@ -195,22 +201,26 @@ Features pending cloud infrastructure:
 - Message search (Cmd+F)
 
 ### 📊 Dashboard & Cost Analytics
+
 - Per-agent spend breakdown with daily trend charts
 - MTD totals and projected EOM cost
 - Provider-specific breakdowns (OpenAI, Anthropic, Google, etc.)
 - Gateway health, uptime, and system metrics footer
 
 ### 🌐 Built-in Browser
+
 - Headed Chromium with stealth anti-detection
 - Agent handoff — share live pages with your AI
 - Persistent sessions (cookies survive restarts)
 
 ### 🛒 Skills Marketplace
+
 - 2,000+ skills from ClawdHub registry
 - Security scanning before install — every skill audited
 - One-click install with dependency resolution
 
 ### 🛠️ Developer Tools
+
 - **Terminal** — Full PTY with cross-platform support
 - **File Browser** — Navigate workspace, preview and edit files (Monaco editor)
 - **Memory Browser** — Browse and edit agent memory files
@@ -218,11 +228,13 @@ Features pending cloud infrastructure:
 - **Debug Console** — Gateway diagnostics and pattern-based troubleshooter
 
 ### 🎨 Themes
+
 - Paper Light, Ops Dark, Premium Dark
 - Theme persists across sessions
 - Full mobile dark mode support
 
 ### 🔒 Security
+
 - Auth middleware on all API routes
 - Wildcard CORS locked to localhost
 - Path traversal prevention on file/memory routes
@@ -234,18 +246,18 @@ Features pending cloud infrastructure:
 
 ## 🗺️ Roadmap
 
-| Feature | Status |
-|---------|--------|
-| Mission Control + Agent Hub | ✅ Shipped (v3.0) |
-| Live SSE Streaming | ✅ Shipped (v3.0) |
-| Cost Analytics | ✅ Shipped (v3.0) |
-| Mobile PWA + Tailscale | ✅ Shipped (v3.0) |
-| Native Desktop App (Electron) | 🔨 In Development |
-| Cloud / Hosted Version | 🔜 Coming Soon |
-| Team Collaboration | 🔜 Coming Soon |
-| Multi-device Session Sync | 🔜 Coming Soon |
-| Provider Approval Workflow | 🔨 In Development |
-| Board Groups / Project Hierarchy | 📋 Planned |
+| Feature                          | Status            |
+| -------------------------------- | ----------------- |
+| Mission Control + Agent Hub      | ✅ Shipped (v3.0) |
+| Live SSE Streaming               | ✅ Shipped (v3.0) |
+| Cost Analytics                   | ✅ Shipped (v3.0) |
+| Mobile PWA + Tailscale           | ✅ Shipped (v3.0) |
+| Native Desktop App (Electron)    | 🔨 In Development |
+| Cloud / Hosted Version           | 🔜 Coming Soon    |
+| Team Collaboration               | 🔜 Coming Soon    |
+| Multi-device Session Sync        | 🔜 Coming Soon    |
+| Provider Approval Workflow       | 🔨 In Development |
+| Board Groups / Project Hierarchy | 📋 Planned        |
 
 ---
 

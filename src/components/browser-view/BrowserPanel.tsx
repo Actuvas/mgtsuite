@@ -1,5 +1,9 @@
 import { HugeiconsIcon } from '@hugeicons/react'
-import { GlobeIcon, Loading03Icon, RefreshIcon } from '@hugeicons/core-free-icons'
+import {
+  GlobeIcon,
+  Loading03Icon,
+  RefreshIcon,
+} from '@hugeicons/core-free-icons'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { motion } from 'motion/react'
 import type { FormEvent } from 'react'
@@ -377,7 +381,9 @@ function BrowserPanel() {
               className="inline-flex items-center gap-2 rounded-lg border border-primary-300 bg-primary-50 px-3 py-2 text-sm font-medium text-primary-800 transition-colors hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <HugeiconsIcon icon={RefreshIcon} size={18} strokeWidth={1.5} />
-              {statusQuery.isRefetching || tabsQuery.isRefetching || screenshotQuery.isRefetching
+              {statusQuery.isRefetching ||
+              tabsQuery.isRefetching ||
+              screenshotQuery.isRefetching
                 ? 'Refreshing'
                 : 'Refresh'}
             </button>

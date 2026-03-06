@@ -26,9 +26,14 @@ class GatewayStreamConnection extends EventEmitter {
       try {
         const parsed = new URL(url.replace(/^ws/, 'http'))
         return `${parsed.protocol}//${parsed.host}`
-      } catch { return 'http://127.0.0.1:18789' }
+      } catch {
+        return 'http://127.0.0.1:18789'
+      }
     })()
-    const ws = new WebSocket(url, { origin: gatewayOrigin, headers: { Origin: gatewayOrigin } })
+    const ws = new WebSocket(url, {
+      origin: gatewayOrigin,
+      headers: { Origin: gatewayOrigin },
+    })
     this.ws = ws
 
     await this.waitForOpen(ws)

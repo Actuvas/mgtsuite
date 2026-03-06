@@ -10,7 +10,10 @@ export const Route = createFileRoute('/api/ollama-health')({
           return json({ ok: false, error: 'Unauthorized' }, { status: 401 })
         }
 
-        const targets = ['http://127.0.0.1:11434/api/tags', 'http://localhost:11434/api/tags']
+        const targets = [
+          'http://127.0.0.1:11434/api/tags',
+          'http://localhost:11434/api/tags',
+        ]
 
         for (const target of targets) {
           const controller = new AbortController()

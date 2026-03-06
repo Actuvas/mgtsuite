@@ -49,32 +49,60 @@ const ENTERPRISE_THEMES_PAGE = [
     label: 'Clean',
     icon: '☀️',
     desc: 'Warm gray canvas with white cards',
-    preview: { bg: '#f5f5f5', panel: '#ffffff', border: '#e5e5e5', accent: '#f97316', text: '#1a1a1a' },
+    preview: {
+      bg: '#f5f5f5',
+      panel: '#ffffff',
+      border: '#e5e5e5',
+      accent: '#f97316',
+      text: '#1a1a1a',
+    },
   },
   {
     id: 'ops-dark' as ThemeId,
     label: 'Slate',
     icon: '🖥️',
     desc: 'Deep slate with teal secondary glow',
-    preview: { bg: '#1e1e2e', panel: '#2a2a3e', border: '#3a3a4e', accent: '#14b8a6', text: '#e5e5e5' },
+    preview: {
+      bg: '#1e1e2e',
+      panel: '#2a2a3e',
+      border: '#3a3a4e',
+      accent: '#14b8a6',
+      text: '#e5e5e5',
+    },
   },
   {
     id: 'premium-dark' as ThemeId,
     label: 'Midnight',
     icon: '✨',
     desc: 'OLED true black with high contrast',
-    preview: { bg: '#000000', panel: '#0a0a0a', border: '#1a1a1a', accent: '#f97316', text: '#f5f5f5' },
+    preview: {
+      bg: '#000000',
+      panel: '#0a0a0a',
+      border: '#1a1a1a',
+      accent: '#f97316',
+      text: '#f5f5f5',
+    },
   },
   {
     id: 'sunset-brand' as ThemeId,
     label: 'Sunset',
     icon: '🌇',
     desc: 'Warm brown brand immersion',
-    preview: { bg: '#1a0e05', panel: '#2a1a0e', border: '#6b3c1b', accent: '#f59e0b', text: '#ffe7d1' },
+    preview: {
+      bg: '#1a0e05',
+      panel: '#2a1a0e',
+      border: '#6b3c1b',
+      accent: '#f59e0b',
+      text: '#ffe7d1',
+    },
   },
 ] as const
 
-const DARK_ENTERPRISE_SET = new Set<ThemeId>(['ops-dark', 'premium-dark', 'sunset-brand'])
+const DARK_ENTERPRISE_SET = new Set<ThemeId>([
+  'ops-dark',
+  'premium-dark',
+  'sunset-brand',
+])
 
 function PageThemeSwatch({
   colors,
@@ -121,7 +149,9 @@ function EnterpriseThemePickerPage() {
   const [current, setCurrent] = useState<string>(() => {
     if (typeof window === 'undefined') return 'paper-light'
     const stored = localStorage.getItem('mgtsuite-theme')
-    return ENTERPRISE_THEMES_PAGE.some((t) => t.id === stored) ? (stored as string) : 'paper-light'
+    return ENTERPRISE_THEMES_PAGE.some((t) => t.id === stored)
+      ? (stored as string)
+      : 'paper-light'
   })
 
   function applyEnterpriseTheme(id: ThemeId) {
@@ -998,55 +1028,62 @@ function ChatDisplaySection() {
 
   return (
     <>
-    <SettingsSection
-      title="Chat Display"
-      description="Control what's visible in chat messages."
-      icon={MessageMultiple01Icon}
-    >
-      <SettingsRow
-        label="Show tool messages"
-        description="Display tool call details when the agent uses tools."
+      <SettingsSection
+        title="Chat Display"
+        description="Control what's visible in chat messages."
+        icon={MessageMultiple01Icon}
       >
-        <Switch
-          checked={chatSettings.showToolMessages}
-          onCheckedChange={(checked) =>
-            updateChatSettings({ showToolMessages: checked })
-          }
-          aria-label="Show tool messages"
-        />
-      </SettingsRow>
-      <SettingsRow
-        label="Show reasoning blocks"
-        description="Display model thinking and reasoning process."
-      >
-        <Switch
-          checked={chatSettings.showReasoningBlocks}
-          onCheckedChange={(checked) =>
-            updateChatSettings({ showReasoningBlocks: checked })
-          }
-          aria-label="Show reasoning blocks"
-        />
-      </SettingsRow>
-    </SettingsSection>
-    <SettingsSection
-      title="Mobile Navigation"
-      description="How the bottom nav bar behaves on chat screens."
-      icon={MessageMultiple01Icon}
-    >
-      <SettingsRow
-        label="Chat nav mode"
-        description="Dock: hides nav in chat (iMessage). Scroll-hide: nav stays, composer floats above."
-      >
-        <select
-          value={settings.mobileChatNavMode ?? 'dock'}
-          onChange={(e) => updateSettings({ mobileChatNavMode: e.target.value as 'dock' | 'integrated' | 'scroll-hide' })}
-          className="rounded-lg border border-primary-200 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
+        <SettingsRow
+          label="Show tool messages"
+          description="Display tool call details when the agent uses tools."
         >
-          <option value="dock">Dock (iMessage)</option>
-          <option value="scroll-hide">Nav visible (pill above)</option>
-        </select>
-      </SettingsRow>
-    </SettingsSection>
+          <Switch
+            checked={chatSettings.showToolMessages}
+            onCheckedChange={(checked) =>
+              updateChatSettings({ showToolMessages: checked })
+            }
+            aria-label="Show tool messages"
+          />
+        </SettingsRow>
+        <SettingsRow
+          label="Show reasoning blocks"
+          description="Display model thinking and reasoning process."
+        >
+          <Switch
+            checked={chatSettings.showReasoningBlocks}
+            onCheckedChange={(checked) =>
+              updateChatSettings({ showReasoningBlocks: checked })
+            }
+            aria-label="Show reasoning blocks"
+          />
+        </SettingsRow>
+      </SettingsSection>
+      <SettingsSection
+        title="Mobile Navigation"
+        description="How the bottom nav bar behaves on chat screens."
+        icon={MessageMultiple01Icon}
+      >
+        <SettingsRow
+          label="Chat nav mode"
+          description="Dock: hides nav in chat (iMessage). Scroll-hide: nav stays, composer floats above."
+        >
+          <select
+            value={settings.mobileChatNavMode ?? 'dock'}
+            onChange={(e) =>
+              updateSettings({
+                mobileChatNavMode: e.target.value as
+                  | 'dock'
+                  | 'integrated'
+                  | 'scroll-hide',
+              })
+            }
+            className="rounded-lg border border-primary-200 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
+          >
+            <option value="dock">Dock (iMessage)</option>
+            <option value="scroll-hide">Nav visible (pill above)</option>
+          </select>
+        </SettingsRow>
+      </SettingsSection>
     </>
   )
 }

@@ -7,16 +7,19 @@ The Gateway Setup Wizard is a first-run onboarding flow that helps users configu
 ## Features
 
 ### 1. **First-Run Detection**
+
 - Automatically checks if the gateway is configured and reachable on app load
 - Shows the setup wizard if gateway is not reachable or not configured
 - Stores completion state in `localStorage` (key: `mgtsuite-gateway-configured`)
 
 ### 2. **Auto-Detection**
+
 - Attempts to detect a local gateway running at `localhost:18789`
 - Pre-fills the Gateway URL field if detected
 - Shows a friendly "Local gateway detected!" message
 
 ### 3. **Gateway Configuration Step**
+
 - Input fields for:
   - **Gateway URL** (e.g., `http://localhost:18789`)
   - **Gateway Token** (optional, for authenticated gateways)
@@ -25,6 +28,7 @@ The Gateway Setup Wizard is a first-run onboarding flow that helps users configu
 - Only allows proceeding after a successful connection test
 
 ### 4. **Provider Setup Guidance**
+
 - After gateway connection is established, guides users to set up at least one AI provider
 - Provides clear CLI instructions:
   - `openclaw providers list`
@@ -32,6 +36,7 @@ The Gateway Setup Wizard is a first-run onboarding flow that helps users configu
 - Users can skip this step if they want to configure providers later
 
 ### 5. **Reconnection Banner**
+
 - If the gateway becomes unreachable after initial setup, a dismissible banner appears at the top of the app
 - Banner shows only when:
   - Gateway was previously configured
@@ -44,30 +49,37 @@ The Gateway Setup Wizard is a first-run onboarding flow that helps users configu
 ## Files
 
 ### New Files
+
 - `src/hooks/use-gateway-setup.ts` - Zustand store for wizard state management
 - `src/components/gateway-setup-wizard.tsx` - Main wizard component
 - `src/components/gateway-reconnect-banner.tsx` - Reconnection banner component
 
 ### Modified Files
+
 - `src/routes/__root.tsx` - Added wizard and banner to root layout
 
 ## Implementation Details
 
 ### State Management
+
 The wizard uses Zustand for state management with the following key features:
+
 - Auto-initialization on app mount
 - Gateway health checking via `/api/ping`
 - Local gateway detection via direct health endpoint fetch
 - localStorage persistence for completion state
 
 ### Health Checking
+
 Gateway health is checked via:
+
 1. **App-level check**: `GET /api/ping` (proxied through MGT Suite server)
 2. **Direct check**: `GET http://localhost:18789/health` (for auto-detection)
 
 Both use AbortSignal.timeout for fail-fast behavior (3-5 seconds).
 
 ### User Flow
+
 1. User opens MGT Suite for the first time
 2. App checks if gateway is configured (`localStorage` key exists)
 3. If not configured:
@@ -81,6 +93,7 @@ Both use AbortSignal.timeout for fail-fast behavior (3-5 seconds).
 8. Wizard closes and sets completion flag in localStorage
 
 ### Reconnection Flow
+
 1. Periodic health checks run every 30 seconds (only when user hasn't dismissed)
 2. If gateway becomes unreachable, show banner
 3. User can dismiss (session-only persistence) or reconfigure
@@ -101,6 +114,7 @@ Both use AbortSignal.timeout for fail-fast behavior (3-5 seconds).
 To test the wizard:
 
 1. **First-run test**:
+
    ```bash
    # Clear completion flag
    localStorage.removeItem('mgtsuite-gateway-configured')
@@ -108,6 +122,7 @@ To test the wizard:
    ```
 
 2. **Local detection test**:
+
    ```bash
    # Ensure gateway is running
    openclaw gateway status

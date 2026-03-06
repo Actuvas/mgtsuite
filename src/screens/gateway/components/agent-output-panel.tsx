@@ -82,7 +82,12 @@ function stripThinkBlocks(content: string): string {
 /** Format a timestamp to HH:MM:SS for terminal-style display */
 function formatTimestamp(ms: number): string {
   const d = new Date(ms)
-  return d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  return d.toLocaleTimeString('en-US', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  })
 }
 
 function truncateArgs(args: unknown, maxLength = 80): string {
@@ -131,7 +136,9 @@ function readEventText(payload: Record<string, unknown>): string {
   )
 }
 
-function readEventRole(payload: Record<string, unknown>): 'assistant' | 'user' | '' {
+function readEventRole(
+  payload: Record<string, unknown>,
+): 'assistant' | 'user' | '' {
   const direct = readString(payload.role).toLowerCase()
   if (direct === 'assistant' || direct === 'user') {
     return direct
@@ -157,25 +164,32 @@ function upsertAssistantStream(
       { ...last, content: replace ? text : `${last.content}${text}` },
     ]
   }
-  return [...previous, { role: 'assistant', content: text, timestamp: Date.now() }]
+  return [
+    ...previous,
+    { role: 'assistant', content: text, timestamp: Date.now() },
+  ]
 }
 
-function appendAssistantMessage(previous: OutputMessage[], text: string): OutputMessage[] {
+function appendAssistantMessage(
+  previous: OutputMessage[],
+  text: string,
+): OutputMessage[] {
   const last = previous[previous.length - 1]
   if (last && last.role === 'assistant' && !last.done) {
     // Avoid duplicate final frames when providers send both chunk stream and final message.
     if (last.content === text) return previous
     if (text.startsWith(last.content) || last.content.startsWith(text)) {
-      return [
-        ...previous.slice(0, -1),
-        { ...last, content: text },
-      ]
+      return [...previous.slice(0, -1), { ...last, content: text }]
     }
   }
   // Check recent messages for exact duplicate content (guards against SSE replay on reconnect)
   const tail = previous.slice(-10)
-  if (tail.some((msg) => msg.role === 'assistant' && msg.content === text)) return previous
-  return [...previous, { role: 'assistant', content: text, timestamp: Date.now() }]
+  if (tail.some((msg) => msg.role === 'assistant' && msg.content === text))
+    return previous
+  return [
+    ...previous,
+    { role: 'assistant', content: text, timestamp: Date.now() },
+  ]
 }
 
 function trimMessages(messages: OutputMessage[]): OutputMessage[] {
@@ -183,16 +197,25 @@ function trimMessages(messages: OutputMessage[]): OutputMessage[] {
   return messages.slice(-MAX_CACHED_MESSAGES)
 }
 
-function appendBoundedMessage(previous: OutputMessage[], message: OutputMessage): OutputMessage[] {
+function appendBoundedMessage(
+  previous: OutputMessage[],
+  message: OutputMessage,
+): OutputMessage[] {
   // Deduplicate: skip if an identical role+content message exists in the recent tail
   const tail = previous.slice(-10)
-  if (tail.some((msg) => msg.role === message.role && msg.content === message.content)) {
+  if (
+    tail.some(
+      (msg) => msg.role === message.role && msg.content === message.content,
+    )
+  ) {
     return previous
   }
   return [...trimMessages(previous), message].slice(-MAX_CACHED_MESSAGES)
 }
 
-function readCachedSessionState(sessionKey: string | null): SessionOutputCacheEntry | null {
+function readCachedSessionState(
+  sessionKey: string | null,
+): SessionOutputCacheEntry | null {
   if (!sessionKey) return null
   return sessionOutputCache.get(sessionKey) ?? null
 }
@@ -210,8 +233,12 @@ export function AgentOutputPanel({
   outputLines,
 }: AgentOutputPanelProps) {
   const cachedInitial = readCachedSessionState(sessionKey)
-  const [messages, setMessages] = useState<OutputMessage[]>(cachedInitial?.messages ?? [])
-  const [sessionEnded, setSessionEnded] = useState(cachedInitial?.sessionEnded ?? false)
+  const [messages, setMessages] = useState<OutputMessage[]>(
+    cachedInitial?.messages ?? [],
+  )
+  const [sessionEnded, setSessionEnded] = useState(
+    cachedInitial?.sessionEnded ?? false,
+  )
   const [tokenCount, setTokenCount] = useState(cachedInitial?.tokenCount ?? 0)
   const [streamDisconnected, setStreamDisconnected] = useState(false)
   const [streamReconnectNonce, setStreamReconnectNonce] = useState(0)
@@ -266,7 +293,9 @@ export function AgentOutputPanel({
   useEffect(() => {
     if (!sessionKey || externalStream) return
 
-    const source = new EventSource(`/api/chat-events?sessionKey=${encodeURIComponent(sessionKey)}`)
+    const source = new EventSource(
+      `/api/chat-events?sessionKey=${encodeURIComponent(sessionKey)}`,
+    )
     source.onopen = () => {
       setStreamDisconnected(false)
     }
@@ -289,7 +318,9 @@ export function AgentOutputPanel({
         setTokenCount((n) => n + Math.ceil(text.length / 4))
       }
 
-      setMessages((prev) => trimMessages(upsertAssistantStream(prev, text, fullReplace)))
+      setMessages((prev) =>
+        trimMessages(upsertAssistantStream(prev, text, fullReplace)),
+      )
       onLine?.(text)
     })
 
@@ -304,7 +335,11 @@ export function AgentOutputPanel({
       const argsStr = truncateArgs(args)
       const content = argsStr ? `${name}(${argsStr})` : `${name}()`
       setMessages((prev) =>
-        appendBoundedMessage(prev, { role: 'tool', content, timestamp: Date.now() }),
+        appendBoundedMessage(prev, {
+          role: 'tool',
+          content,
+          timestamp: Date.now(),
+        }),
       )
     })
 
@@ -318,7 +353,9 @@ export function AgentOutputPanel({
         const state = readString(payload?.state).toLowerCase()
         const error = readString(payload?.errorMessage)
         if (state === 'error') {
-          doneLabel = error ? `Session ended with error: ${error}` : 'Session ended with error'
+          doneLabel = error
+            ? `Session ended with error: ${error}`
+            : 'Session ended with error'
         } else if (state === 'aborted') {
           doneLabel = 'Session aborted'
         }
@@ -344,7 +381,11 @@ export function AgentOutputPanel({
       const text = readEventText(payload)
       if (!text) return
       setMessages((prev) =>
-        appendBoundedMessage(prev, { role: 'user', content: text, timestamp: Date.now() }),
+        appendBoundedMessage(prev, {
+          role: 'user',
+          content: text,
+          timestamp: Date.now(),
+        }),
       )
     })
 
@@ -359,7 +400,11 @@ export function AgentOutputPanel({
       if (!text) return
       if (role === 'user') {
         setMessages((prev) =>
-          appendBoundedMessage(prev, { role: 'user', content: text, timestamp: Date.now() }),
+          appendBoundedMessage(prev, {
+            role: 'user',
+            content: text,
+            timestamp: Date.now(),
+          }),
         )
         return
       }
@@ -388,15 +433,35 @@ export function AgentOutputPanel({
               )}
             >
               <div className="flex items-center gap-2">
-                <span className={cn(
-                  'size-1.5 rounded-full',
-                  task.status === 'done' ? 'bg-emerald-500' : task.status === 'in_progress' ? 'bg-blue-500 animate-pulse' : 'bg-neutral-500',
-                )} />
-                <span className={cn('text-xs font-medium', compact ? 'text-[var(--theme-text)]' : 'text-[var(--theme-text)]')}>
+                <span
+                  className={cn(
+                    'size-1.5 rounded-full',
+                    task.status === 'done'
+                      ? 'bg-emerald-500'
+                      : task.status === 'in_progress'
+                        ? 'bg-blue-500 animate-pulse'
+                        : 'bg-neutral-500',
+                  )}
+                />
+                <span
+                  className={cn(
+                    'text-xs font-medium',
+                    compact
+                      ? 'text-[var(--theme-text)]'
+                      : 'text-[var(--theme-text)]',
+                  )}
+                >
                   {task.title}
                 </span>
               </div>
-              <p className={cn('mt-1 text-[10px]', compact ? 'text-[var(--theme-muted)]' : 'text-[var(--theme-muted)]')}>
+              <p
+                className={cn(
+                  'mt-1 text-[10px]',
+                  compact
+                    ? 'text-[var(--theme-muted)]'
+                    : 'text-[var(--theme-muted)]',
+                )}
+              >
                 {task.status === 'in_progress'
                   ? 'Working...'
                   : task.status === 'done'
@@ -441,10 +506,14 @@ export function AgentOutputPanel({
                   </Markdown>
                 </div>
               ))}
-              <span className="animate-pulse text-emerald-600 dark:text-emerald-400">▊</span>
+              <span className="animate-pulse text-emerald-600 dark:text-emerald-400">
+                ▊
+              </span>
             </>
           ) : messages.length === 0 && !sessionEnded ? (
-            <p className="animate-pulse text-[var(--theme-muted)]">Waiting for response…</p>
+            <p className="animate-pulse text-[var(--theme-muted)]">
+              Waiting for response…
+            </p>
           ) : (
             <>
               {messages.map((msg, index) =>
@@ -453,8 +522,12 @@ export function AgentOutputPanel({
                     key={`${msg.timestamp}-${index}`}
                     className="mb-1 rounded-md border border-[var(--theme-border)] bg-[var(--theme-card2)] px-2 py-1 font-mono text-xs leading-5 text-[var(--theme-muted)]"
                   >
-                    <span className="text-[var(--theme-muted)] mr-2 text-[10px] tabular-nums opacity-60">{formatTimestamp(msg.timestamp)}</span>
-                    <span className="text-[var(--theme-muted)] opacity-70">▶ </span>
+                    <span className="text-[var(--theme-muted)] mr-2 text-[10px] tabular-nums opacity-60">
+                      {formatTimestamp(msg.timestamp)}
+                    </span>
+                    <span className="text-[var(--theme-muted)] opacity-70">
+                      ▶{' '}
+                    </span>
                     {msg.content}
                   </div>
                 ) : msg.role === 'user' ? (
@@ -463,8 +536,12 @@ export function AgentOutputPanel({
                     className="my-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm leading-6 text-blue-900 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-200"
                   >
                     <div className="mb-1 flex items-center gap-2">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">You</span>
-                      <span className="text-[10px] text-[var(--theme-muted)] tabular-nums">{formatTimestamp(msg.timestamp)}</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                        You
+                      </span>
+                      <span className="text-[10px] text-[var(--theme-muted)] tabular-nums">
+                        {formatTimestamp(msg.timestamp)}
+                      </span>
                     </div>
                     <Markdown className="text-sm leading-6 text-blue-800 dark:text-blue-100 [&_p]:my-1 [&_ul]:my-2 [&_ol]:my-2">
                       {msg.content}
@@ -475,15 +552,16 @@ export function AgentOutputPanel({
                     key={`${msg.timestamp}-${index}`}
                     className="mt-2 border-t border-[var(--theme-border)] pt-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 font-mono"
                   >
-                    <span className="text-[var(--theme-muted)] mr-2 text-[10px] tabular-nums">{formatTimestamp(msg.timestamp)}</span>
+                    <span className="text-[var(--theme-muted)] mr-2 text-[10px] tabular-nums">
+                      {formatTimestamp(msg.timestamp)}
+                    </span>
                     {msg.content}
                   </div>
                 ) : (
-                  <div
-                    key={`${msg.timestamp}-${index}`}
-                    className="my-2"
-                  >
-                    <span className="text-[var(--theme-muted)] text-[10px] font-mono tabular-nums block mb-0.5">{formatTimestamp(msg.timestamp)}</span>
+                  <div key={`${msg.timestamp}-${index}`} className="my-2">
+                    <span className="text-[var(--theme-muted)] text-[10px] font-mono tabular-nums block mb-0.5">
+                      {formatTimestamp(msg.timestamp)}
+                    </span>
                     <Markdown className="text-sm leading-6 text-[var(--theme-text)] [&_p]:my-1 [&_ul]:my-2 [&_ol]:my-2 [&_pre]:my-2 [&_pre]:bg-[var(--theme-card2)] [&_pre]:border-[var(--theme-border)] [&_code]:text-emerald-600 dark:[&_code]:text-emerald-300">
                       {stripThinkBlocks(msg.content)}
                     </Markdown>
@@ -491,20 +569,33 @@ export function AgentOutputPanel({
                 ),
               )}
               {!sessionEnded && messages.length > 0 && (
-                <span className="animate-pulse text-emerald-600 dark:text-emerald-400">▊</span>
+                <span className="animate-pulse text-emerald-600 dark:text-emerald-400">
+                  ▊
+                </span>
               )}
             </>
           )}
         </div>
       ) : (
         // Fallback placeholder when no sessionKey
-        <div className={cn('min-h-0 flex-1 overflow-y-auto rounded-lg bg-[var(--theme-card2)] p-3 font-mono text-sm leading-6 text-[var(--theme-text)]', compact ? 'min-h-0 flex-1 overflow-y-auto' : 'mt-1 min-h-[300px]')}>
+        <div
+          className={cn(
+            'min-h-0 flex-1 overflow-y-auto rounded-lg bg-[var(--theme-card2)] p-3 font-mono text-sm leading-6 text-[var(--theme-text)]',
+            compact ? 'min-h-0 flex-1 overflow-y-auto' : 'mt-1 min-h-[300px]',
+          )}
+        >
           {tasks.length === 0 ? (
-            <p className="text-[var(--theme-muted)]">No dispatched tasks yet.</p>
+            <p className="text-[var(--theme-muted)]">
+              No dispatched tasks yet.
+            </p>
           ) : (
             <>
-              <p className="text-[var(--theme-muted)]">$ Dispatching to {agentName}…</p>
-              <p className="animate-pulse text-emerald-600 dark:text-emerald-400">▊</p>
+              <p className="text-[var(--theme-muted)]">
+                $ Dispatching to {agentName}…
+              </p>
+              <p className="animate-pulse text-emerald-600 dark:text-emerald-400">
+                ▊
+              </p>
             </>
           )}
         </div>
@@ -513,11 +604,7 @@ export function AgentOutputPanel({
   )
 
   if (compact) {
-    return (
-      <div className="flex h-full min-h-0 flex-col p-3">
-        {inner}
-      </div>
-    )
+    return <div className="flex h-full min-h-0 flex-col p-3">{inner}</div>
   }
 
   return (
@@ -539,7 +626,7 @@ export function AgentOutputPanel({
                 ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                 : headerStatus === 'Disconnected'
                   ? 'border-amber-200 bg-amber-50 text-amber-700'
-                : headerStatus === 'Streaming'
+                  : headerStatus === 'Streaming'
                     ? 'border-sky-200 bg-sky-50 text-sky-700'
                     : 'border-[var(--theme-border)] bg-[var(--theme-bg)] text-[var(--theme-muted)]',
             )}
@@ -561,9 +648,7 @@ export function AgentOutputPanel({
           ✕
         </button>
       </div>
-      <div className="flex min-h-0 flex-1 flex-col p-4">
-        {inner}
-      </div>
+      <div className="flex min-h-0 flex-1 flex-col p-4">{inner}</div>
     </div>
   )
 }

@@ -1,6 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import { createFileRoute } from '@tanstack/react-router'
-import { gatewayRpc, onGatewayEvent, gatewayConnectCheck } from '../../server/gateway'
+import {
+  gatewayRpc,
+  onGatewayEvent,
+  gatewayConnectCheck,
+} from '../../server/gateway'
 import type { GatewayFrame } from '../../server/gateway'
 import { resolveSessionKey } from '../../server/session-utils'
 import { isAuthenticated } from '../../server/auth-middleware'
@@ -284,7 +288,11 @@ export const Route = createFileRoute('/api/send-stream')({
 function parsePayload(frame: any): unknown {
   if (frame.payload !== undefined) return frame.payload
   if (typeof frame.payloadJSON === 'string') {
-    try { return JSON.parse(frame.payloadJSON) } catch { return null }
+    try {
+      return JSON.parse(frame.payloadJSON)
+    } catch {
+      return null
+    }
   }
   return null
 }

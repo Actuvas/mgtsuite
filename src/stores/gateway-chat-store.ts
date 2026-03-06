@@ -95,12 +95,15 @@ function normalizeString(value: unknown): string {
   return typeof value === 'string' ? value.trim() : ''
 }
 
-function getMessageId(msg: GatewayMessage | null | undefined): string | undefined {
+function getMessageId(
+  msg: GatewayMessage | null | undefined,
+): string | undefined {
   if (!msg) return undefined
   const id = (msg as { id?: string }).id
   if (typeof id === 'string' && id.trim().length > 0) return id
   const messageId = (msg as { messageId?: string }).messageId
-  if (typeof messageId === 'string' && messageId.trim().length > 0) return messageId
+  if (typeof messageId === 'string' && messageId.trim().length > 0)
+    return messageId
   return undefined
 }
 
@@ -115,21 +118,29 @@ function getClientNonce(msg: GatewayMessage | null | undefined): string {
   )
 }
 
-function messageMultipartSignature(msg: GatewayMessage | null | undefined): string {
+function messageMultipartSignature(
+  msg: GatewayMessage | null | undefined,
+): string {
   if (!msg) return ''
   const content = Array.isArray(msg.content)
     ? msg.content
         .map((part) => {
-          if (part.type === 'text') return `t:${String((part as any).text ?? '').trim()}`
-          if (part.type === 'thinking') return `h:${String((part as any).thinking ?? '').trim()}`
-          if (part.type === 'toolCall') return `tc:${String((part as any).id ?? '')}:${String((part as any).name ?? '')}`
+          if (part.type === 'text')
+            return `t:${String((part as any).text ?? '').trim()}`
+          if (part.type === 'thinking')
+            return `h:${String((part as any).thinking ?? '').trim()}`
+          if (part.type === 'toolCall')
+            return `tc:${String((part as any).id ?? '')}:${String((part as any).name ?? '')}`
           return `p:${String((part as any).type ?? '')}`
         })
         .join('|')
     : ''
   const attachments = Array.isArray((msg as any).attachments)
     ? (msg as any).attachments
-        .map((attachment: any) => `${String(attachment?.name ?? '')}:${String(attachment?.size ?? '')}:${String(attachment?.contentType ?? '')}`)
+        .map(
+          (attachment: any) =>
+            `${String(attachment?.name ?? '')}:${String(attachment?.size ?? '')}:${String(attachment?.contentType ?? '')}`,
+        )
         .join('|')
     : ''
   return `${msg.role ?? 'unknown'}:${content}:${attachments}`
@@ -166,7 +177,10 @@ export const useGatewayChatStore = create<GatewayChatState>((set, get) => ({
             ? sessionMessages.findIndex((existing) => {
                 if (existing.role !== event.message.role) return false
                 const existingNonce = getClientNonce(existing)
-                if (existingNonce.length === 0 || existingNonce !== newClientNonce) {
+                if (
+                  existingNonce.length === 0 ||
+                  existingNonce !== newClientNonce
+                ) {
                   return false
                 }
                 return (
@@ -182,7 +196,11 @@ export const useGatewayChatStore = create<GatewayChatState>((set, get) => ({
           if (newId && existingId && newId === existingId) return true
 
           const existingNonce = getClientNonce(existing)
-          if (newClientNonce && existingNonce && newClientNonce === existingNonce) {
+          if (
+            newClientNonce &&
+            existingNonce &&
+            newClientNonce === existingNonce
+          ) {
             return true
           }
 
@@ -220,14 +238,14 @@ export const useGatewayChatStore = create<GatewayChatState>((set, get) => ({
 
       case 'chunk': {
         const streamingMap = new Map(state.streamingState)
-        const prev =
-          streamingMap.get(sessionKey) ?? createEmptyStreamingState()
+        const prev = streamingMap.get(sessionKey) ?? createEmptyStreamingState()
 
         // Gateway sends full accumulated text with fullReplace=true
         // Replace entire text (default), or append if fullReplace is explicitly false
         const next: StreamingState = {
           ...prev,
-          text: event.fullReplace === false ? prev.text + event.text : event.text,
+          text:
+            event.fullReplace === false ? prev.text + event.text : event.text,
           runId: event.runId ?? prev.runId,
         }
 
@@ -238,8 +256,7 @@ export const useGatewayChatStore = create<GatewayChatState>((set, get) => ({
 
       case 'thinking': {
         const streamingMap = new Map(state.streamingState)
-        const prev =
-          streamingMap.get(sessionKey) ?? createEmptyStreamingState()
+        const prev = streamingMap.get(sessionKey) ?? createEmptyStreamingState()
         const next: StreamingState = {
           ...prev,
           thinking: event.text,
@@ -253,8 +270,7 @@ export const useGatewayChatStore = create<GatewayChatState>((set, get) => ({
 
       case 'tool': {
         const streamingMap = new Map(state.streamingState)
-        const prev =
-          streamingMap.get(sessionKey) ?? createEmptyStreamingState()
+        const prev = streamingMap.get(sessionKey) ?? createEmptyStreamingState()
 
         const toolCallId =
           event.toolCallId ??
@@ -350,8 +366,13 @@ export const useGatewayChatStore = create<GatewayChatState>((set, get) => ({
           const isDuplicate = sessionMessages.some((existing) => {
             if (existing.role !== 'assistant') return false
             const existingId = getMessageId(existing)
-            if (completeId && existingId && completeId === existingId) return true
-            if (completeText && completeText === extractTextFromContent(existing.content)) return true
+            if (completeId && existingId && completeId === existingId)
+              return true
+            if (
+              completeText &&
+              completeText === extractTextFromContent(existing.content)
+            )
+              return true
             return false
           })
 
@@ -454,27 +475,21 @@ export const useGatewayChatStore = create<GatewayChatState>((set, get) => ({
           // Attachment-based match for paste/image messages: compare
           // attachment names + sizes, which survive round-trip to the gateway.
           const rtAttachments = Array.isArray((rtMsg as any).attachments)
-            ? (rtMsg as any).attachments as Array<Record<string, unknown>>
+            ? ((rtMsg as any).attachments as Array<Record<string, unknown>>)
             : []
           const histAttachments = Array.isArray((histMsg as any).attachments)
-            ? (histMsg as any).attachments as Array<Record<string, unknown>>
+            ? ((histMsg as any).attachments as Array<Record<string, unknown>>)
             : []
           if (
             rtAttachments.length > 0 &&
             rtAttachments.length === histAttachments.length
           ) {
             const rtSig = rtAttachments
-              .map(
-                (a) =>
-                  `${normalizeString(a.name)}:${String(a.size ?? '')}`,
-              )
+              .map((a) => `${normalizeString(a.name)}:${String(a.size ?? '')}`)
               .sort()
               .join('|')
             const histSig = histAttachments
-              .map(
-                (a) =>
-                  `${normalizeString(a.name)}:${String(a.size ?? '')}`,
-              )
+              .map((a) => `${normalizeString(a.name)}:${String(a.size ?? '')}`)
               .sort()
               .join('|')
             if (rtSig && rtSig === histSig) return true

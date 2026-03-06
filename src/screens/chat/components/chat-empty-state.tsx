@@ -1,9 +1,5 @@
 import { HugeiconsIcon } from '@hugeicons/react'
-import {
-  BrainIcon,
-  CodeIcon,
-  Edit02Icon,
-} from '@hugeicons/core-free-icons'
+import { BrainIcon, CodeIcon, Edit02Icon } from '@hugeicons/core-free-icons'
 import { motion } from 'motion/react'
 import { OpenClawStudioIcon } from '@/components/icons/mgtsuite'
 

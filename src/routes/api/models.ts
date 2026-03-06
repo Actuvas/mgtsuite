@@ -56,7 +56,9 @@ export const Route = createFileRoute('/api/models')({
           })
 
           // Merge in any models from config that the gateway didn't auto-discover
-          const discoveredIds = new Set(filteredModels.map((m) => (m as ModelEntry).id))
+          const discoveredIds = new Set(
+            filteredModels.map((m) => (m as ModelEntry).id),
+          )
           const configModels = getConfiguredModelsFromConfig()
           for (const cm of configModels) {
             if (!discoveredIds.has(cm.id)) {

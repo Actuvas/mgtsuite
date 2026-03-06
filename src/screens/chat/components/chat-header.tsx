@@ -1,8 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { HugeiconsIcon } from '@hugeicons/react'
-import {
-  Folder01Icon,
-} from '@hugeicons/core-free-icons'
+import { Folder01Icon } from '@hugeicons/core-free-icons'
 import { OpenClawStudioIcon } from '@/components/icons/mgtsuite'
 import { OrchestratorAvatar } from '@/components/orchestrator-avatar'
 import { Button } from '@/components/ui/button'
@@ -32,7 +30,10 @@ function formatMobileSessionTitle(rawTitle: string): string {
   if (normalized === 'agent:main:main' || normalized === 'agent:main') {
     return 'Main Chat'
   }
-  const parts = title.split(':').map((part) => part.trim()).filter(Boolean)
+  const parts = title
+    .split(':')
+    .map((part) => part.trim())
+    .filter(Boolean)
   if (
     parts.length >= 2 &&
     parts[0].toLowerCase() === 'agent' &&
@@ -63,7 +64,6 @@ function formatMobileSessionTitle(rawTitle: string): string {
 
   return title
 }
-
 
 type ChatHeaderProps = {
   activeTitle: string
@@ -125,7 +125,10 @@ function ChatHeaderComponent({
 
   const isStale = dataUpdatedAt > 0 && Date.now() - dataUpdatedAt > 15000
   const mobileTitle = formatMobileSessionTitle(activeTitle)
-  void _agentModel; void agentConnected; void statusMode; void activeToolName // kept for prop compat
+  void _agentModel
+  void agentConnected
+  void statusMode
+  void activeToolName // kept for prop compat
 
   const handleRefresh = useCallback(() => {
     if (!onRefresh) return
@@ -197,7 +200,11 @@ function ChatHeaderComponent({
       <div
         ref={wrapperRef}
         className="shrink-0 border-b border-primary-200 bg-surface transition-transform"
-        style={pullOffset > 0 ? { transform: `translateY(${pullOffset}px)` } : undefined}
+        style={
+          pullOffset > 0
+            ? { transform: `translateY(${pullOffset}px)` }
+            : undefined
+        }
       >
         <div className="px-4 h-12 flex items-center justify-between">
           <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -264,59 +271,59 @@ function ChatHeaderComponent({
           </TooltipProvider>
         ) : null}
         <div className="group min-w-0 flex-1">
-        {isEditingTitle ? (
-          <input
-            ref={titleInputRef}
-            value={titleDraft}
-            disabled={renamingTitle}
-            onChange={(event) => setTitleDraft(event.target.value)}
-            onBlur={() => {
-              void saveTitleEdit()
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault()
+          {isEditingTitle ? (
+            <input
+              ref={titleInputRef}
+              value={titleDraft}
+              disabled={renamingTitle}
+              onChange={(event) => setTitleDraft(event.target.value)}
+              onBlur={() => {
                 void saveTitleEdit()
-                return
-              }
-              if (event.key === 'Escape') {
-                event.preventDefault()
-                cancelTitleEdit()
-              }
-            }}
-            className="h-7 w-full min-w-0 border-b border-transparent bg-transparent px-0 text-sm font-medium text-balance text-ink outline-none transition-colors focus:border-primary-300"
-            aria-label="Session name"
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  void saveTitleEdit()
+                  return
+                }
+                if (event.key === 'Escape') {
+                  event.preventDefault()
+                  cancelTitleEdit()
+                }
+              }}
+              className="h-7 w-full min-w-0 border-b border-transparent bg-transparent px-0 text-sm font-medium text-balance text-ink outline-none transition-colors focus:border-primary-300"
+              aria-label="Session name"
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={startTitleEdit}
+              disabled={!canRenameTitle || renamingTitle}
+              className="flex max-w-full items-center gap-1.5 rounded-sm text-left"
+              aria-label="Rename session"
+              title={canRenameTitle ? 'Click to rename session' : undefined}
+            >
+              <span
+                className="min-w-0 truncate text-sm font-medium text-balance"
+                suppressHydrationWarning
+              >
+                {activeTitle}
+              </span>
+              <span
+                aria-hidden
+                className="text-xs text-primary-400 opacity-0 transition-opacity group-hover:opacity-100"
+              >
+                ✏️
+              </span>
+            </button>
+          )}
+        </div>
+        {renamingTitle ? (
+          <span
+            className="mr-1 inline-flex size-3 animate-spin rounded-full border border-primary-300 border-t-primary-700"
+            aria-label="Saving session name"
           />
-        ) : (
-          <button
-            type="button"
-            onClick={startTitleEdit}
-            disabled={!canRenameTitle || renamingTitle}
-            className="flex max-w-full items-center gap-1.5 rounded-sm text-left"
-            aria-label="Rename session"
-            title={canRenameTitle ? 'Click to rename session' : undefined}
-          >
-            <span
-              className="min-w-0 truncate text-sm font-medium text-balance"
-              suppressHydrationWarning
-            >
-              {activeTitle}
-            </span>
-            <span
-              aria-hidden
-              className="text-xs text-primary-400 opacity-0 transition-opacity group-hover:opacity-100"
-            >
-              ✏️
-            </span>
-          </button>
-        )}
-      </div>
-      {renamingTitle ? (
-        <span
-          className="mr-1 inline-flex size-3 animate-spin rounded-full border border-primary-300 border-t-primary-700"
-          aria-label="Saving session name"
-        />
-      ) : null}
+        ) : null}
         {dataUpdatedAt > 0 ? (
           <TooltipProvider>
             <TooltipRoot>
@@ -329,7 +336,9 @@ function ChatHeaderComponent({
                     className={cn(
                       'mr-2 inline-flex items-center justify-center rounded-full transition-colors',
                       isRefreshing && 'animate-pulse',
-                      onRefresh ? 'cursor-pointer hover:opacity-70' : 'cursor-default',
+                      onRefresh
+                        ? 'cursor-pointer hover:opacity-70'
+                        : 'cursor-default',
                     )}
                   >
                     <span

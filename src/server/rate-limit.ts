@@ -39,9 +39,10 @@ export function checkRateLimit(
   // Remove timestamps outside the sliding window
   entry.timestamps = entry.timestamps.filter((t) => now - t < windowMs)
 
-  const resetMs = entry.timestamps.length > 0
-    ? entry.timestamps[0] + windowMs
-    : now + windowMs
+  const resetMs =
+    entry.timestamps.length > 0
+      ? entry.timestamps[0] + windowMs
+      : now + windowMs
 
   if (entry.timestamps.length >= maxRequests) {
     const retryAfterSec = Math.ceil((resetMs - now) / 1000)
@@ -118,7 +119,9 @@ export function rateLimitResponse(retryAfterSec = 60): Response {
 /**
  * Build standard X-RateLimit-* response headers from a rate limit result.
  */
-export function rateLimitHeaders(result: RateLimitResult): Record<string, string> {
+export function rateLimitHeaders(
+  result: RateLimitResult,
+): Record<string, string> {
   return {
     'X-RateLimit-Remaining': String(result.remaining),
     'X-RateLimit-Reset': String(Math.ceil(result.resetMs / 1000)),

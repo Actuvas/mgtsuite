@@ -1,8 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
-import {
-  ArrowDown01Icon,
-  Idea01Icon,
-} from '@hugeicons/core-free-icons'
+import { ArrowDown01Icon, Idea01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   getMessageTimestamp,
@@ -301,7 +298,9 @@ function isImageAttachment(attachment: GatewayAttachment): boolean {
   if (contentType.startsWith('image/')) return true
 
   const ext = attachmentExtension(attachment)
-  return ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'avif'].includes(ext)
+  return ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'avif'].includes(
+    ext,
+  )
 }
 
 function MessageItemComponent({
@@ -520,8 +519,11 @@ function MessageItemComponent({
   const hasInlineImages = inlineImages.length > 0
 
   const hasText = displayText.length > 0
-  const hasRevealedText = effectiveIsStreaming ? assistantDisplayText.length > 0 : hasText
-  const canRetryMessage = isUser && (hasText || hasAttachments || hasInlineImages)
+  const hasRevealedText = effectiveIsStreaming
+    ? assistantDisplayText.length > 0
+    : hasText
+  const canRetryMessage =
+    isUser && (hasText || hasAttachments || hasInlineImages)
 
   // Get tool calls from this message (for assistant messages)
   const toolCalls = role === 'assistant' ? getToolCallsFromMessage(message) : []
@@ -606,7 +608,6 @@ function MessageItemComponent({
         !isUser && isNew && 'animate-[message-fade-in_0.4s_ease-out]',
       )}
     >
-
       {/* Bridge gap: thinking done but first text token not yet arrived */}
       {effectiveIsStreaming && !thinking && !hasText && (
         <div className="flex items-center gap-1.5 px-1 py-1">
@@ -678,7 +679,9 @@ function MessageItemComponent({
       )}
       {(hasText || hasAttachments || hasInlineImages || effectiveIsStreaming) &&
         !(message as any).__isNarration && (
-          <Message className={cn('gap-2 md:gap-3', isUser ? 'flex-row-reverse' : '')}>
+          <Message
+            className={cn('gap-2 md:gap-3', isUser ? 'flex-row-reverse' : '')}
+          >
             {isUser ? (
               <UserAvatar
                 size={24}
@@ -737,7 +740,9 @@ function MessageItemComponent({
                         className="inline-flex max-w-full items-center gap-2 rounded-xl border border-primary-200 bg-primary-50 px-3 py-2 text-sm text-primary-700 hover:border-primary-400"
                       >
                         <span>📄</span>
-                        <span className="truncate">{attachment.name || 'Attachment'}</span>
+                        <span className="truncate">
+                          {attachment.name || 'Attachment'}
+                        </span>
                         <span className="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] uppercase text-primary-600">
                           {ext || 'file'}
                         </span>
@@ -768,9 +773,7 @@ function MessageItemComponent({
               )}
               {hasText &&
                 (isUser ? (
-                  <span className="text-pretty">
-                    {displayText}
-                  </span>
+                  <span className="text-pretty">{displayText}</span>
                 ) : hasRevealedText ? (
                   <div className="relative">
                     <MessageContent
@@ -817,29 +820,37 @@ function MessageItemComponent({
         <div className="w-full max-w-[900px] mt-2">
           <Collapsible open={toolCallsOpen} onOpenChange={setToolCallsOpen}>
             <CollapsibleTrigger className="w-full justify-start gap-1.5 bg-transparent hover:bg-primary-50 dark:hover:bg-primary-800/60 data-panel-open:bg-primary-50/60 px-2 py-1 rounded-md text-xs text-neutral-500 dark:text-neutral-400">
-              <span className="transition-transform duration-150 group-data-panel-open:rotate-90">▶</span>
+              <span className="transition-transform duration-150 group-data-panel-open:rotate-90">
+                ▶
+              </span>
               <span className="font-mono">tool result</span>
-              {hasToolErrors && (
-                <span className="ml-1 text-red-400">⚠</span>
-              )}
+              {hasToolErrors && <span className="ml-1 text-red-400">⚠</span>}
             </CollapsibleTrigger>
             <CollapsiblePanel>
               <div className="mt-1 flex flex-col gap-2">
                 {toolParts.map((toolPart, index) => {
-                  const resultText = typeof toolPart.output === 'string'
-                    ? toolPart.output
-                    : toolPart.output
-                      ? JSON.stringify(toolPart.output, null, 2)
-                      : ''
+                  const resultText =
+                    typeof toolPart.output === 'string'
+                      ? toolPart.output
+                      : toolPart.output
+                        ? JSON.stringify(toolPart.output, null, 2)
+                        : ''
                   return (
-                    <div key={toolPart.toolCallId || `${toolPart.type}-${index}`} className="flex flex-col gap-0.5">
-                      <span className="text-[10px] text-neutral-400 font-mono">{toolPart.type}</span>
+                    <div
+                      key={toolPart.toolCallId || `${toolPart.type}-${index}`}
+                      className="flex flex-col gap-0.5"
+                    >
+                      <span className="text-[10px] text-neutral-400 font-mono">
+                        {toolPart.type}
+                      </span>
                       {resultText ? (
                         <pre className="text-xs font-mono bg-neutral-900 dark:bg-neutral-950 text-neutral-200 rounded p-2 overflow-x-auto whitespace-pre-wrap break-words max-h-48">
                           {resultText}
                         </pre>
                       ) : (
-                        <span className="text-xs text-neutral-400 italic">no output</span>
+                        <span className="text-xs text-neutral-400 italic">
+                          no output
+                        </span>
                       )}
                     </div>
                   )

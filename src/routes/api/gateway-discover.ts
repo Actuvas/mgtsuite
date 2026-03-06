@@ -40,7 +40,10 @@ export const Route = createFileRoute('/api/gateway-discover')({
             envContent = await readFile(envPath, 'utf-8')
           } catch {
             try {
-              envContent = await readFile(join(process.cwd(), '.env.example'), 'utf-8')
+              envContent = await readFile(
+                join(process.cwd(), '.env.example'),
+                'utf-8',
+              )
             } catch {
               envContent = ''
             }
@@ -89,7 +92,10 @@ export const Route = createFileRoute('/api/gateway-discover')({
           }
         } catch (err) {
           return json(
-            { ok: false, error: err instanceof Error ? err.message : String(err) },
+            {
+              ok: false,
+              error: err instanceof Error ? err.message : String(err),
+            },
             { status: 500 },
           )
         }

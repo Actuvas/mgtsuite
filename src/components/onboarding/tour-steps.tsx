@@ -8,10 +8,18 @@ export const tourSteps: Step[] = [
     placement: 'center',
     title: 'Welcome to MGT Suite! 👋',
     content: (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '12px',
+        }}
+      >
         <OpenClawStudioIcon className="size-12 rounded-xl shadow-sm" />
         <p style={{ textAlign: 'center', margin: 0 }}>
-          Your AI-powered command center for managing agents, chats, files, and more. Let&apos;s take a quick tour!
+          Your AI-powered command center for managing agents, chats, files, and
+          more. Let&apos;s take a quick tour!
         </p>
       </div>
     ),

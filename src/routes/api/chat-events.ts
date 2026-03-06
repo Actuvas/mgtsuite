@@ -49,15 +49,27 @@ export const Route = createFileRoute('/api/chat-events')({
               try {
                 const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
                 controller.enqueue(encoder.encode(payload))
-              } catch { /* stream closed */ }
+              } catch {
+                /* stream closed */
+              }
             }
 
             const closeStream = () => {
               if (streamClosed) return
               streamClosed = true
-              if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null }
-              if (cleanupListener) { cleanupListener(); cleanupListener = null }
-              try { controller.close() } catch { /* ignore */ }
+              if (heartbeatTimer) {
+                clearInterval(heartbeatTimer)
+                heartbeatTimer = null
+              }
+              if (cleanupListener) {
+                cleanupListener()
+                cleanupListener = null
+              }
+              try {
+                controller.close()
+              } catch {
+                /* ignore */
+              }
             }
 
             try {
@@ -75,13 +87,30 @@ export const Route = createFileRoute('/api/chat-events')({
                 if (frame.type !== 'event' && frame.type !== 'evt') return
 
                 const eventName = (frame as any).event
-                const rawPayload = (frame as any).payload ?? ((frame as any).payloadJSON ? (() => { try { return JSON.parse((frame as any).payloadJSON) } catch { return null } })() : null)
+                const rawPayload =
+                  (frame as any).payload ??
+                  ((frame as any).payloadJSON
+                    ? (() => {
+                        try {
+                          return JSON.parse((frame as any).payloadJSON)
+                        } catch {
+                          return null
+                        }
+                      })()
+                    : null)
                 if (!rawPayload) return
 
-                const eventSessionKey = rawPayload?.sessionKey || rawPayload?.context?.sessionKey
-                if (sessionKeyParam && eventSessionKey && eventSessionKey !== sessionKeyParam) return
+                const eventSessionKey =
+                  rawPayload?.sessionKey || rawPayload?.context?.sessionKey
+                if (
+                  sessionKeyParam &&
+                  eventSessionKey &&
+                  eventSessionKey !== sessionKeyParam
+                )
+                  return
 
-                const targetSessionKey = eventSessionKey || sessionKeyParam || 'main'
+                const targetSessionKey =
+                  eventSessionKey || sessionKeyParam || 'main'
 
                 // Agent events (streaming chunks, thinking, tool calls)
                 if (eventName === 'agent') {
@@ -90,13 +119,25 @@ export const Route = createFileRoute('/api/chat-events')({
                   const runId = rawPayload?.runId
 
                   if (stream === 'assistant' && data?.text) {
-                    sendEvent('chunk', { text: data.text, runId, sessionKey: targetSessionKey })
+                    sendEvent('chunk', {
+                      text: data.text,
+                      runId,
+                      sessionKey: targetSessionKey,
+                    })
                   } else if (stream === 'thinking' && data?.text) {
-                    sendEvent('thinking', { text: data.text, runId, sessionKey: targetSessionKey })
+                    sendEvent('thinking', {
+                      text: data.text,
+                      runId,
+                      sessionKey: targetSessionKey,
+                    })
                   } else if (stream === 'tool') {
                     sendEvent('tool', {
-                      phase: data?.phase, name: data?.name, toolCallId: data?.toolCallId,
-                      args: data?.args, runId, sessionKey: targetSessionKey,
+                      phase: data?.phase,
+                      name: data?.name,
+                      toolCallId: data?.toolCallId,
+                      args: data?.args,
+                      runId,
+                      sessionKey: targetSessionKey,
                     })
                   }
                   return
@@ -110,42 +151,86 @@ export const Route = createFileRoute('/api/chat-events')({
 
                   if (state === 'delta' && message) {
                     const text = extractTextFromMessage(message)
-                    if (text) sendEvent('chunk', { text, runId, sessionKey: targetSessionKey, fullReplace: true })
+                    if (text)
+                      sendEvent('chunk', {
+                        text,
+                        runId,
+                        sessionKey: targetSessionKey,
+                        fullReplace: true,
+                      })
                     return
                   }
                   if (state === 'final') {
-                    sendEvent('done', { state: 'final', runId, sessionKey: targetSessionKey, message })
+                    sendEvent('done', {
+                      state: 'final',
+                      runId,
+                      sessionKey: targetSessionKey,
+                      message,
+                    })
                     return
                   }
                   if (state === 'error') {
-                    sendEvent('done', { state: 'error', errorMessage: rawPayload?.errorMessage, runId, sessionKey: targetSessionKey })
+                    sendEvent('done', {
+                      state: 'error',
+                      errorMessage: rawPayload?.errorMessage,
+                      runId,
+                      sessionKey: targetSessionKey,
+                    })
                     return
                   }
                   if (state === 'aborted') {
-                    sendEvent('done', { state: 'aborted', runId, sessionKey: targetSessionKey })
+                    sendEvent('done', {
+                      state: 'aborted',
+                      runId,
+                      sessionKey: targetSessionKey,
+                    })
                     return
                   }
                   if (message?.role === 'user') {
-                    sendEvent('user_message', { message, sessionKey: targetSessionKey, source: rawPayload?.source || rawPayload?.channel || 'external' })
+                    sendEvent('user_message', {
+                      message,
+                      sessionKey: targetSessionKey,
+                      source:
+                        rawPayload?.source || rawPayload?.channel || 'external',
+                    })
                     return
                   }
                   if (message?.role === 'assistant' && !state) {
-                    sendEvent('message', { message, sessionKey: targetSessionKey })
+                    sendEvent('message', {
+                      message,
+                      sessionKey: targetSessionKey,
+                    })
                     return
                   }
                   if (state === 'started' || state === 'thinking') {
-                    sendEvent('state', { state, runId, sessionKey: targetSessionKey })
+                    sendEvent('state', {
+                      state,
+                      runId,
+                      sessionKey: targetSessionKey,
+                    })
                   }
                   return
                 }
 
                 // Other message events
-                if (eventName === 'message.received' || eventName === 'chat.message' || eventName === 'channel.message') {
+                if (
+                  eventName === 'message.received' ||
+                  eventName === 'chat.message' ||
+                  eventName === 'channel.message'
+                ) {
                   const message = rawPayload?.message || rawPayload
                   if (message?.role === 'user') {
-                    sendEvent('user_message', { message, sessionKey: targetSessionKey, source: rawPayload?.source || rawPayload?.channel || eventName })
+                    sendEvent('user_message', {
+                      message,
+                      sessionKey: targetSessionKey,
+                      source:
+                        rawPayload?.source || rawPayload?.channel || eventName,
+                    })
                   } else if (message?.role === 'assistant') {
-                    sendEvent('message', { message, sessionKey: targetSessionKey })
+                    sendEvent('message', {
+                      message,
+                      sessionKey: targetSessionKey,
+                    })
                   }
                 }
               })
@@ -154,7 +239,6 @@ export const Route = createFileRoute('/api/chat-events')({
               heartbeatTimer = setInterval(() => {
                 sendEvent('heartbeat', { timestamp: Date.now() })
               }, 30000)
-
             } catch (err) {
               const errorMsg = err instanceof Error ? err.message : String(err)
               sendEvent('error', { message: errorMsg })
@@ -163,8 +247,14 @@ export const Route = createFileRoute('/api/chat-events')({
           },
           cancel() {
             streamClosed = true
-            if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null }
-            if (cleanupListener) { cleanupListener(); cleanupListener = null }
+            if (heartbeatTimer) {
+              clearInterval(heartbeatTimer)
+              heartbeatTimer = null
+            }
+            if (cleanupListener) {
+              cleanupListener()
+              cleanupListener = null
+            }
           },
         })
 

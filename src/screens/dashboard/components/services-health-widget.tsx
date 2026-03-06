@@ -8,11 +8,7 @@ type ServicesHealthWidgetProps = {
   onRemove?: () => void
 }
 
-function StatusBadge({
-  status,
-}: {
-  status: 'up' | 'down' | 'checking'
-}) {
+function StatusBadge({ status }: { status: 'up' | 'down' | 'checking' }) {
   if (status === 'checking') {
     return (
       <span className="inline-flex items-center gap-1 rounded-full border border-primary-300 dark:border-neutral-700 bg-white dark:bg-neutral-900/80 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary-500 dark:text-neutral-400">

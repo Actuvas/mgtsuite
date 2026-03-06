@@ -154,7 +154,9 @@ export function NotificationsWidget({
         </div>
       ) : notifications.length === 0 ? (
         <div className="flex h-[150px] flex-col items-center justify-center gap-1 rounded-xl border border-neutral-800 bg-neutral-950">
-          <p className="text-sm font-semibold text-neutral-100">No notifications</p>
+          <p className="text-sm font-semibold text-neutral-100">
+            No notifications
+          </p>
           <p className="text-xs text-neutral-400 text-pretty">
             Session events will appear here
           </p>

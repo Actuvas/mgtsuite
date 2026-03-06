@@ -1,11 +1,4 @@
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Robot01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { hapticTap } from '@/lib/haptics'
@@ -181,7 +174,9 @@ function ChatMessageListComponent({
   // Bug 2 fix: grace period — keep thinking indicator alive briefly after
   // waitingForResponse clears so the response message has time to render.
   const [thinkingGrace, setThinkingGrace] = useState(false)
-  const thinkingGraceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const thinkingGraceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  )
   const [isMessageSearchOpen, setIsMessageSearchOpen] = useState(false)
   const [messageSearchValue, setMessageSearchValue] = useState('')
   const [activeSearchMatchIndex, setActiveSearchMatchIndex] = useState(0)
@@ -212,7 +207,7 @@ function ChatMessageListComponent({
 
   // Pull-to-refresh handlers removed
 
-    // contentContainerStyle removed with pull-to-refresh
+  // contentContainerStyle removed with pull-to-refresh
 
   const chatContentStyle = useMemo<React.CSSProperties | undefined>(() => {
     if (!isMobileViewport) return contentStyle
@@ -332,7 +327,10 @@ function ChatMessageListComponent({
     ).length
 
     // Cancel grace period early when a new assistant message appears
-    if (thinkingGrace && currentAssistantCount > assistantMessageCountRef.current) {
+    if (
+      thinkingGrace &&
+      currentAssistantCount > assistantMessageCountRef.current
+    ) {
       if (thinkingGraceTimerRef.current) {
         clearTimeout(thinkingGraceTimerRef.current)
         thinkingGraceTimerRef.current = null
@@ -353,7 +351,8 @@ function ChatMessageListComponent({
         (m) => m.role === 'assistant',
       ).length
       setThinkingGrace(true)
-      if (thinkingGraceTimerRef.current) clearTimeout(thinkingGraceTimerRef.current)
+      if (thinkingGraceTimerRef.current)
+        clearTimeout(thinkingGraceTimerRef.current)
       thinkingGraceTimerRef.current = setTimeout(() => {
         thinkingGraceTimerRef.current = null
         setThinkingGrace(false)
@@ -553,7 +552,10 @@ function ChatMessageListComponent({
     // Typewriter disabled — messages just fade in via CSS animation
     // toStream stays empty, no streaming targets
 
-    return { streamingTargets: new Set<string>(), signatureById: nextSignatures }
+    return {
+      streamingTargets: new Set<string>(),
+      signatureById: nextSignatures,
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayMessages, streamingCleared])
 
@@ -732,7 +734,8 @@ function ChatMessageListComponent({
     if (stickToBottomRef.current) {
       // Use smooth scroll only when user is near bottom (<200px) and new messages arrive;
       // use instant scroll during streaming to avoid choppiness.
-      const behavior: ScrollBehavior = isNearBottomRef.current && !isStreaming ? 'smooth' : 'auto'
+      const behavior: ScrollBehavior =
+        isNearBottomRef.current && !isStreaming ? 'smooth' : 'auto'
       frameId = window.requestAnimationFrame(() => scrollToBottom(behavior))
     }
 
@@ -978,7 +981,10 @@ function ChatMessageListComponent({
             </div>
           </div>
         )}
-        <ChatContainerContent className="pt-2.5 md:pt-6" style={chatContentStyle}>
+        <ChatContainerContent
+          className="pt-2.5 md:pt-6"
+          style={chatContentStyle}
+        >
           {notice && noticePosition === 'start' ? notice : null}
           {showToolOnlyNotice ? (
             <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
@@ -993,7 +999,9 @@ function ChatMessageListComponent({
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-amber-800 text-balance">
                       This session contains{' '}
-                      <span className="tabular-nums">{toolInteractionCount}</span>{' '}
+                      <span className="tabular-nums">
+                        {toolInteractionCount}
+                      </span>{' '}
                       tool interactions
                     </p>
                     <p className="mt-1 text-sm text-amber-700 text-pretty">
@@ -1050,7 +1058,9 @@ function ChatMessageListComponent({
               for space-y-6 (24px) when pinning. */}
               <div
                 className="my-2 flex flex-col gap-2 md:my-3 md:gap-3"
-                style={{ minHeight: `${Math.max(0, pinGroupMinHeight - 12)}px` }}
+                style={{
+                  minHeight: `${Math.max(0, pinGroupMinHeight - 12)}px`,
+                }}
               >
                 {displayMessages
                   .slice(groupStartIndex)
@@ -1158,9 +1168,14 @@ function ChatMessageListComponent({
                 </div>
               ) : activeToolCalls.length > 0 ? (
                 activeToolCalls.map((tool) => (
-                  <div key={tool.id} className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
+                  <div
+                    key={tool.id}
+                    className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-300"
+                  >
                     <div className="size-5 rounded-full bg-accent-100 flex items-center justify-center shrink-0">
-                      <span className="text-[10px]">{getToolIcon(tool.name)}</span>
+                      <span className="text-[10px]">
+                        {getToolIcon(tool.name)}
+                      </span>
                     </div>
                     <span className="text-xs text-accent-600 font-medium">
                       {getToolLabel(tool.name, tool.phase)}
@@ -1173,9 +1188,9 @@ function ChatMessageListComponent({
               ) : (
                 <div className="flex items-center gap-3">
                   <LoadingIndicator
-                      ariaLabel="Assistant is working"
-                      className="!ml-0"
-                    />
+                    ariaLabel="Assistant is working"
+                    className="!ml-0"
+                  />
                   <ThinkingStatusText elapsedSeconds={thinkingElapsedSeconds} />
                 </div>
               )}

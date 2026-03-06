@@ -41,7 +41,11 @@ function GatewayStepContent() {
     <div className="w-full">
       <div className="mb-6 flex flex-col items-center text-center">
         <div className="mb-4 flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-500 to-accent-600 text-white shadow-lg">
-          <HugeiconsIcon icon={CloudIcon} className="size-10" strokeWidth={1.5} />
+          <HugeiconsIcon
+            icon={CloudIcon}
+            className="size-10"
+            strokeWidth={1.5}
+          />
         </div>
         <h2 className="mb-2 text-2xl font-semibold text-primary-900">
           Connect to Gateway
@@ -206,9 +210,7 @@ export function GatewaySetupWizard() {
                     key={s}
                     className={cn(
                       'size-2 rounded-full transition-colors',
-                      step === s
-                        ? 'bg-accent-500'
-                        : 'bg-primary-300',
+                      step === s ? 'bg-accent-500' : 'bg-primary-300',
                     )}
                   />
                 ))}

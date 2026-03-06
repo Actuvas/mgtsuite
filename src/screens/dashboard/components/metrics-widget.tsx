@@ -34,10 +34,14 @@ const METRIC_COLOR_CLASSES: Record<
   string
 > = {
   cyan: 'border-primary-200 dark:border-neutral-800 bg-white dark:bg-neutral-900',
-  orange: 'border-primary-200 dark:border-neutral-800 bg-white dark:bg-neutral-900',
-  emerald: 'border-primary-200 dark:border-neutral-800 bg-white dark:bg-neutral-900',
-  violet: 'border-primary-200 dark:border-neutral-800 bg-white dark:bg-neutral-900',
-  purple: 'border-primary-200 dark:border-neutral-800 bg-white dark:bg-neutral-900',
+  orange:
+    'border-primary-200 dark:border-neutral-800 bg-white dark:bg-neutral-900',
+  emerald:
+    'border-primary-200 dark:border-neutral-800 bg-white dark:bg-neutral-900',
+  violet:
+    'border-primary-200 dark:border-neutral-800 bg-white dark:bg-neutral-900',
+  purple:
+    'border-primary-200 dark:border-neutral-800 bg-white dark:bg-neutral-900',
   red: 'border-primary-200 dark:border-neutral-800 bg-white dark:bg-neutral-900',
 }
 
@@ -89,9 +93,7 @@ function getTrendUi(
 
   return {
     label: `${isUp ? '↑' : '↓'} ${rounded}%`,
-    className: isGood
-      ? 'text-emerald-400'
-      : 'text-red-400',
+    className: isGood ? 'text-emerald-400' : 'text-red-400',
   }
 }
 
@@ -119,9 +121,7 @@ function MicroBarChart({ data, days, accentClass }: MicroBarChartProps) {
             key={point.date}
             className={cn(
               'flex-1 rounded-sm transition-[height] duration-300',
-              isLatest
-                ? accentClass
-                : 'bg-neutral-300 dark:bg-neutral-700',
+              isLatest ? accentClass : 'bg-neutral-300 dark:bg-neutral-700',
               point.value === 0 && 'opacity-40',
             )}
             style={{ height: `${heightPx}px` }}
@@ -147,7 +147,10 @@ function TimeRangePills({ value, onChange }: TimeRangePillsProps) {
         <button
           key={r}
           type="button"
-          onClick={(e) => { e.stopPropagation(); onChange(r) }}
+          onClick={(e) => {
+            e.stopPropagation()
+            onChange(r)
+          }}
           className={cn(
             'rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase transition-colors',
             value === r
@@ -270,7 +273,10 @@ export function MetricsWidget({
 
   const popoverTop = useMemo(() => {
     if (!anchorRect || typeof window === 'undefined') return 96
-    return Math.max(96, Math.min(window.innerHeight - 220, anchorRect.bottom + 8))
+    return Math.max(
+      96,
+      Math.min(window.innerHeight - 220, anchorRect.bottom + 8),
+    )
   }, [anchorRect])
 
   useEffect(() => {
@@ -347,7 +353,10 @@ export function MetricsWidget({
                 {metricDescription}
               </p>
               <p className="mt-3 text-sm text-primary-700 dark:text-neutral-300">
-                Raw value: <span className="font-mono font-medium tabular-nums">{rawMetricValue}</span>
+                Raw value:{' '}
+                <span className="font-mono font-medium tabular-nums">
+                  {rawMetricValue}
+                </span>
               </p>
               {isError && onRetry ? (
                 <button
@@ -401,7 +410,9 @@ export function MetricsWidget({
             <p
               className={cn(
                 'truncate font-mono text-2xl font-semibold leading-none tabular-nums',
-                isError ? 'text-neutral-500 dark:text-neutral-400' : 'text-primary-900 dark:text-neutral-100',
+                isError
+                  ? 'text-neutral-500 dark:text-neutral-400'
+                  : 'text-primary-900 dark:text-neutral-100',
               )}
             >
               {isError ? '—' : value}
@@ -410,7 +421,12 @@ export function MetricsWidget({
               {isError ? value : subtitle}
             </p>
             {trend && !chartData ? (
-              <p className={cn('mt-1.5 text-[11px] font-medium', trend.className)}>
+              <p
+                className={cn(
+                  'mt-1.5 text-[11px] font-medium',
+                  trend.className,
+                )}
+              >
                 {trend.label}
                 {trendLabel ? ` ${trendLabel}` : ''}
               </p>
@@ -425,7 +441,12 @@ export function MetricsWidget({
                 accentClass={accentBarClass}
               />
               {trend ? (
-                <p className={cn('mt-1 text-[11px] font-medium', trend.className)}>
+                <p
+                  className={cn(
+                    'mt-1 text-[11px] font-medium',
+                    trend.className,
+                  )}
+                >
                   {trend.label}
                   {trendLabel ? ` ${trendLabel}` : ''}
                 </p>

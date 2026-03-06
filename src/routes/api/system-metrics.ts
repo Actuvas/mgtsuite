@@ -107,4 +107,3 @@ export const Route = createFileRoute('/api/system-metrics')({
     },
   },
 })
-

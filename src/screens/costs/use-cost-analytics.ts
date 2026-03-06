@@ -389,8 +389,7 @@ function buildKpis(
   const yesterdayKey = yesterday.toISOString().slice(0, 10)
 
   const todaySpend = daily.find((d) => d.date === todayKey)?.amount ?? 0
-  const yesterdaySpend =
-    daily.find((d) => d.date === yesterdayKey)?.amount ?? 0
+  const yesterdaySpend = daily.find((d) => d.date === yesterdayKey)?.amount ?? 0
   const todayDelta = todaySpend - yesterdaySpend
   const todayDeltaPct =
     yesterdaySpend > 0 ? (todayDelta / yesterdaySpend) * 100 : null
@@ -414,8 +413,7 @@ function buildKpis(
       ? (monthToDate / DEFAULT_MONTHLY_BUDGET) * 100
       : null
 
-  const mostExpensiveAgent =
-    agentRows.length > 0 ? agentRows[0].agent : null
+  const mostExpensiveAgent = agentRows.length > 0 ? agentRows[0].agent : null
 
   const activeSessions = sessions.filter(
     (s) => s.totalTokens > 0 || s.costUsd > 0,

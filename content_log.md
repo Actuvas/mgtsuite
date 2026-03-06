@@ -1,5 +1,25 @@
 # ClawSuite Content Log
 
+## 2026-03-05 — Dedicated Studio & Mission Control Screens
+
+**What shipped today:** Full dedicated screens for Studio Tasks and Mission Control, replacing placeholder pages with real data-driven UIs.
+
+**Files added/changed:**
+
+- `src/screens/studio/studio-tasks-screen.tsx` — Studio Tasks page with status filters, expandable clip rows, pagination
+- `src/screens/mission-control/mission-control-screen.tsx` — MC page with Boards + Agents tabs, task creation modal, live 15s agent polling
+- `src/routes/mission-control.tsx` — New route wiring for /mission-control
+- `src/routes/tasks.tsx` — Updated to render StudioTasksScreen
+- `src/lib/mc-api.ts` — Fixed auth token browser leak, AbortSignal memory leak, readError body double-consume
+- `src/lib/studio-api.ts` — Same AbortSignal + readError fixes
+
+**Build-in-public highlights:**
+
+- 1,375 lines of new screen code committed
+- API clients + hooks wired to real Studio and MC backends
+- Security fixes: browser auth guard, signal cleanup, response body handling
+- Full verification: TypeScript clean, ClawFactory 258 tests pass, Docker healthy, Studio reachable
+
 ## 2026-03-02 — Security Audit and Hardening
 
 **What shipped today:** Full security audit + hardening pass on the ClawSuite backend (TanStack Start / React 19 app).

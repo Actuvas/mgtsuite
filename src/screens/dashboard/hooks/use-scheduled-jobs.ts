@@ -23,7 +23,9 @@ function asRecord(value: unknown): Record<string, unknown> {
 }
 
 function readString(value: unknown, fallback: string): string {
-  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : fallback
+  return typeof value === 'string' && value.trim().length > 0
+    ? value.trim()
+    : fallback
 }
 
 function readBoolean(value: unknown, fallback = false): boolean {
@@ -31,8 +33,10 @@ function readBoolean(value: unknown, fallback = false): boolean {
   if (typeof value === 'number') return value > 0
   if (typeof value === 'string') {
     const normalized = value.trim().toLowerCase()
-    if (['1', 'true', 'enabled', 'active', 'on'].includes(normalized)) return true
-    if (['0', 'false', 'disabled', 'inactive', 'off'].includes(normalized)) return false
+    if (['1', 'true', 'enabled', 'active', 'on'].includes(normalized))
+      return true
+    if (['0', 'false', 'disabled', 'inactive', 'off'].includes(normalized))
+      return false
   }
   return fallback
 }
@@ -94,7 +98,10 @@ function mapJob(row: CronApiJob, index: number): ScheduledJobItem {
   const lastRun = asRecord(row.lastRun)
   const id = readString(row.id ?? row.jobId ?? row.key, `job-${index}`)
   const name = readString(row.name ?? row.title, `Cron Job ${index + 1}`)
-  const schedule = readString(row.schedule ?? row.cron ?? row.expression, '* * * * *')
+  const schedule = readString(
+    row.schedule ?? row.cron ?? row.expression,
+    '* * * * *',
+  )
   const enabled = readBoolean(
     row.enabled ?? row.isEnabled ?? row.active,
     typeof row.status === 'string' ? row.status !== 'disabled' : true,
@@ -103,7 +110,8 @@ function mapJob(row: CronApiJob, index: number): ScheduledJobItem {
     row.nextRunAt ?? row.nextRunTime ?? state.nextRunAt ?? state.nextRunAtMs,
   )
   const lastRunAt = normalizeTimestamp(
-    (lastRun.startedAt ?? lastRun.started_at) ??
+    lastRun.startedAt ??
+      lastRun.started_at ??
       row.lastRunAt ??
       row.lastRunTime ??
       state.lastRunAt ??

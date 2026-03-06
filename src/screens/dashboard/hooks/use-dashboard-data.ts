@@ -9,8 +9,18 @@ import { useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { fetchInstalledSkills } from '../components/skills-widget'
 import { fetchUsage } from '../components/usage-meter-widget'
-import { formatModelName, formatMoney, formatRelativeTime, formatTokens, formatUptime } from '../lib/formatters'
-import { chatQueryKeys, fetchGatewayStatus, fetchSessions } from '@/screens/chat/chat-queries'
+import {
+  formatModelName,
+  formatMoney,
+  formatRelativeTime,
+  formatTokens,
+  formatUptime,
+} from '../lib/formatters'
+import {
+  chatQueryKeys,
+  fetchGatewayStatus,
+  fetchSessions,
+} from '@/screens/chat/chat-queries'
 import { fetchCronJobs } from '@/lib/cron-api'
 
 // ─── Internal helpers ────────────────────────────────────────────────────────
@@ -58,7 +68,7 @@ function toSessionDisplayName(session: Record<string, unknown>): string {
   const title = readString(session.title)
   if (title && !/^a new session was started/i.test(title)) return title
   const friendlyId = readString(session.friendlyId) || readString(session.key)
-  return friendlyId === 'main' ? 'Main Session' : (friendlyId || 'Session')
+  return friendlyId === 'main' ? 'Main Session' : friendlyId || 'Session'
 }
 
 /** Returns true if the session is a spawned subagent or Agent Hub mission session (exclude from hero counts). */
@@ -75,7 +85,9 @@ function isSubagentSession(session: Record<string, unknown>): boolean {
 }
 
 function getSessionActivityTimestamp(session: SessionStatusSession): number {
-  return normalizeTimestamp(session.updatedAt ?? session.usage?.lastActivity ?? 0)
+  return normalizeTimestamp(
+    session.updatedAt ?? session.usage?.lastActivity ?? 0,
+  )
 }
 
 // ─── API fetch functions ─────────────────────────────────────────────────────
@@ -162,7 +174,9 @@ async function fetchCostTimeseries(): Promise<Array<CostPoint>> {
       }))
       .filter((p) => p.date.length > 0)
   } catch (error) {
-    throw error instanceof Error ? error : new Error('Unable to load cost summary')
+    throw error instanceof Error
+      ? error
+      : new Error('Unable to load cost summary')
   }
 }
 
@@ -226,7 +240,12 @@ export type DashboardData = {
     /** % change vs previous day, null if unknown */
     trend: number | null
     byProvider: Array<{ name: string; cost: number; tokens: number }>
-    byModel: Array<{ model: string; cost: number; tokens: number; count: number }>
+    byModel: Array<{
+      model: string
+      cost: number
+      tokens: number
+      count: number
+    }>
   }
   usage: {
     /** Today's total tokens */
@@ -236,7 +255,12 @@ export type DashboardData = {
     cacheRead: number
     /** Context window usage % for the main session, null if unknown */
     contextPercent: number | null
-    messages: { total: number; user: number; assistant: number; toolCalls: number }
+    messages: {
+      total: number
+      user: number
+      assistant: number
+      toolCalls: number
+    }
     latency: { avgMs: number; p95Ms: number } | null
   }
   uptime: {
@@ -346,509 +370,568 @@ export function useDashboardData(): UseDashboardDataResult {
 
   // ── Derived computations ─────────────────────────────────────────────────
 
-  const data = useMemo<DashboardData>(function buildDashboardData() {
-    const now = Date.now()
-    const todayKey = toLocalDateKey(new Date(now))
+  const data = useMemo<DashboardData>(
+    function buildDashboardData() {
+      const now = Date.now()
+      const todayKey = toLocalDateKey(new Date(now))
 
-    // ── Connection ──────────────────────────────────────────────────────────
-    const connected = gatewayStatusQuery.data?.ok === true
-    const syncing = !gatewayStatusQuery.isLoading && connected
+      // ── Connection ──────────────────────────────────────────────────────────
+      const connected = gatewayStatusQuery.data?.ok === true
+      const syncing = !gatewayStatusQuery.isLoading && connected
 
-    // ── Session-status payload ──────────────────────────────────────────────
-    const ssPayload = sessionStatusQuery.data?.payload
-    const ssSessions: Array<SessionStatusSession> = Array.isArray(ssPayload?.sessions)
-      ? (ssPayload.sessions as Array<SessionStatusSession>).filter(
-          (s) => !isSubagentSession(s as Record<string, unknown>),
-        )
-      : []
-    const updatedAt = normalizeTimestamp(ssPayload?.updatedAt ?? 0)
+      // ── Session-status payload ──────────────────────────────────────────────
+      const ssPayload = sessionStatusQuery.data?.payload
+      const ssSessions: Array<SessionStatusSession> = Array.isArray(
+        ssPayload?.sessions,
+      )
+        ? (ssPayload.sessions as Array<SessionStatusSession>).filter(
+            (s) => !isSubagentSession(s as Record<string, unknown>),
+          )
+        : []
+      const updatedAt = normalizeTimestamp(ssPayload?.updatedAt ?? 0)
 
-    // ── Uptime: use firstActivity from the EARLIEST session, NOT startDate ──
-    // startDate is the billing period start (e.g. "2026-01-20"), NOT gateway boot.
-    let earliestActivity = 0
-    for (const s of ssSessions) {
-      const fa = normalizeTimestamp(s.usage?.firstActivity ?? 0)
-      if (fa > 0 && (earliestActivity === 0 || fa < earliestActivity)) {
-        earliestActivity = fa
-      }
-    }
-    // Fallback to session updatedAt only if no firstActivity
-    if (earliestActivity === 0 && ssSessions.length > 0) {
-      earliestActivity = normalizeTimestamp(ssSessions[0]?.updatedAt ?? 0)
-    }
-    const uptimeSeconds =
-      earliestActivity > 0
-        ? Math.max(0, Math.floor((now - earliestActivity) / 1000))
-        : 0
-
-    // ── Sessions ────────────────────────────────────────────────────────────
-    const oneDayAgo = now - 86_400_000
-    const fiveMinAgo = now - 5 * 60 * 1000
-
-    const activeSessions24h = ssSessions.filter((s) => {
-      const ts = getSessionActivityTimestamp(s)
-      return ts > oneDayAgo
-    })
-    const activeSessions5m = ssSessions.filter((s) => {
-      const ts = getSessionActivityTimestamp(s)
-      return ts > fiveMinAgo
-    })
-
-    // Fallback: if no sessions in session-status, use sessions from sessions API
-    // Filter out subagent sessions from both sources
-    const chatSessions = Array.isArray(sessionsQuery.data)
-      ? sessionsQuery.data.filter(
-          (s) => !isSubagentSession(s as unknown as Record<string, unknown>),
-        )
-      : []
-    const sessionTotal = activeSessions24h.length || chatSessions.length
-
-    // Build session list for widget from sessions query (has friendlyId etc)
-    const sessionList: SessionInfo[] = chatSessions
-      .map((s) => ({
-        key: readString(s.key ?? s.friendlyId),
-        friendlyId: readString(s.friendlyId),
-        label: toSessionDisplayName(s as unknown as Record<string, unknown>),
-        model: readString((s as Record<string, unknown>).model),
-        updatedAt: typeof s.updatedAt === 'number' ? s.updatedAt : 0,
-      }))
-      .sort((a, b) => b.updatedAt - a.updatedAt)
-      .slice(0, 10)
-
-    // Context percent from main session in sessions API
-    let contextPercent: number | null = null
-    if (chatSessions.length > 0) {
-      const mainSession = chatSessions[0] as unknown as Record<string, unknown>
-      const totalTokens = readNumber(mainSession.totalTokens)
-      const contextTokens = readNumber(mainSession.contextTokens)
-      if (totalTokens > 0 && contextTokens > 0) {
-        contextPercent = Math.min(100, (totalTokens / contextTokens) * 100)
-      }
-    }
-    // Fallback to session-status contextPercent if available
-    if (contextPercent === null) {
-      const raw = ssPayload?.contextPercent
-      if (typeof raw === 'number' && Number.isFinite(raw)) {
-        contextPercent = Math.max(0, Math.min(100, raw))
-      }
-    }
-
-    // ── Agents ──────────────────────────────────────────────────────────────
-    const uniqueAgentIds = new Set(
-      activeSessions24h
-        .map((s) => readString(s.agentId ?? s.key))
-        .filter(Boolean),
-    )
-    const agentCount = uniqueAgentIds.size || sessionTotal
-
-    const roster: AgentInfo[] = ssSessions
-      .map((s, i): AgentInfo => {
-        const updatedAtMs = normalizeTimestamp(s.updatedAt ?? 0)
-        const activityAtMs = getSessionActivityTimestamp(s)
-        const isActive = activityAtMs > fiveMinAgo
-        const isIdle = activityAtMs > oneDayAgo && !isActive
-        return {
-          id: readString(s.key) || readString(s.agentId) || `agent-${i}`,
-          name: toSessionDisplayName(s as Record<string, unknown>),
-          status: isActive ? 'active' : isIdle ? 'idle' : 'available',
-          model: readString(s.model),
-          modelFormatted: formatModelName(readString(s.model)),
-          updatedAt: activityAtMs || updatedAtMs,
+      // ── Uptime: use firstActivity from the EARLIEST session, NOT startDate ──
+      // startDate is the billing period start (e.g. "2026-01-20"), NOT gateway boot.
+      let earliestActivity = 0
+      for (const s of ssSessions) {
+        const fa = normalizeTimestamp(s.usage?.firstActivity ?? 0)
+        if (fa > 0 && (earliestActivity === 0 || fa < earliestActivity)) {
+          earliestActivity = fa
         }
-      })
-      .sort((a, b) => b.updatedAt - a.updatedAt)
-
-    const activeAgentCount = roster.filter((a) => a.status === 'active').length
-    const idleAgentCount = roster.filter((a) => a.status === 'idle').length
-
-    // Stalled agent: most-idle session (30+ min no updates)
-    const stalledThreshold = 30 * 60 * 1000
-    let stalledAgent: string | null = null
-    let maxStalledMs = 0
-    for (const s of ssSessions) {
-      const ts = getSessionActivityTimestamp(s)
-      if (ts <= 0) continue
-      const staleMs = now - ts
-      if (staleMs > stalledThreshold && staleMs > maxStalledMs) {
-        maxStalledMs = staleMs
-        stalledAgent = toSessionDisplayName(s as Record<string, unknown>)
       }
-    }
-    // Also check sessions API for stalled agents
-    if (!stalledAgent) {
-      for (const s of chatSessions) {
-        const raw = s as unknown as Record<string, unknown>
-        const ts = normalizeTimestamp(raw.updatedAt ?? 0)
+      // Fallback to session updatedAt only if no firstActivity
+      if (earliestActivity === 0 && ssSessions.length > 0) {
+        earliestActivity = normalizeTimestamp(ssSessions[0]?.updatedAt ?? 0)
+      }
+      const uptimeSeconds =
+        earliestActivity > 0
+          ? Math.max(0, Math.floor((now - earliestActivity) / 1000))
+          : 0
+
+      // ── Sessions ────────────────────────────────────────────────────────────
+      const oneDayAgo = now - 86_400_000
+      const fiveMinAgo = now - 5 * 60 * 1000
+
+      const activeSessions24h = ssSessions.filter((s) => {
+        const ts = getSessionActivityTimestamp(s)
+        return ts > oneDayAgo
+      })
+      const activeSessions5m = ssSessions.filter((s) => {
+        const ts = getSessionActivityTimestamp(s)
+        return ts > fiveMinAgo
+      })
+
+      // Fallback: if no sessions in session-status, use sessions from sessions API
+      // Filter out subagent sessions from both sources
+      const chatSessions = Array.isArray(sessionsQuery.data)
+        ? sessionsQuery.data.filter(
+            (s) => !isSubagentSession(s as unknown as Record<string, unknown>),
+          )
+        : []
+      const sessionTotal = activeSessions24h.length || chatSessions.length
+
+      // Build session list for widget from sessions query (has friendlyId etc)
+      const sessionList: SessionInfo[] = chatSessions
+        .map((s) => ({
+          key: readString(s.key ?? s.friendlyId),
+          friendlyId: readString(s.friendlyId),
+          label: toSessionDisplayName(s as unknown as Record<string, unknown>),
+          model: readString((s as Record<string, unknown>).model),
+          updatedAt: typeof s.updatedAt === 'number' ? s.updatedAt : 0,
+        }))
+        .sort((a, b) => b.updatedAt - a.updatedAt)
+        .slice(0, 10)
+
+      // Context percent from main session in sessions API
+      let contextPercent: number | null = null
+      if (chatSessions.length > 0) {
+        const mainSession = chatSessions[0] as unknown as Record<
+          string,
+          unknown
+        >
+        const totalTokens = readNumber(mainSession.totalTokens)
+        const contextTokens = readNumber(mainSession.contextTokens)
+        if (totalTokens > 0 && contextTokens > 0) {
+          contextPercent = Math.min(100, (totalTokens / contextTokens) * 100)
+        }
+      }
+      // Fallback to session-status contextPercent if available
+      if (contextPercent === null) {
+        const raw = ssPayload?.contextPercent
+        if (typeof raw === 'number' && Number.isFinite(raw)) {
+          contextPercent = Math.max(0, Math.min(100, raw))
+        }
+      }
+
+      // ── Agents ──────────────────────────────────────────────────────────────
+      const uniqueAgentIds = new Set(
+        activeSessions24h
+          .map((s) => readString(s.agentId ?? s.key))
+          .filter(Boolean),
+      )
+      const agentCount = uniqueAgentIds.size || sessionTotal
+
+      const roster: AgentInfo[] = ssSessions
+        .map((s, i): AgentInfo => {
+          const updatedAtMs = normalizeTimestamp(s.updatedAt ?? 0)
+          const activityAtMs = getSessionActivityTimestamp(s)
+          const isActive = activityAtMs > fiveMinAgo
+          const isIdle = activityAtMs > oneDayAgo && !isActive
+          return {
+            id: readString(s.key) || readString(s.agentId) || `agent-${i}`,
+            name: toSessionDisplayName(s as Record<string, unknown>),
+            status: isActive ? 'active' : isIdle ? 'idle' : 'available',
+            model: readString(s.model),
+            modelFormatted: formatModelName(readString(s.model)),
+            updatedAt: activityAtMs || updatedAtMs,
+          }
+        })
+        .sort((a, b) => b.updatedAt - a.updatedAt)
+
+      const activeAgentCount = roster.filter(
+        (a) => a.status === 'active',
+      ).length
+      const idleAgentCount = roster.filter((a) => a.status === 'idle').length
+
+      // Stalled agent: most-idle session (30+ min no updates)
+      const stalledThreshold = 30 * 60 * 1000
+      let stalledAgent: string | null = null
+      let maxStalledMs = 0
+      for (const s of ssSessions) {
+        const ts = getSessionActivityTimestamp(s)
         if (ts <= 0) continue
         const staleMs = now - ts
         if (staleMs > stalledThreshold && staleMs > maxStalledMs) {
           maxStalledMs = staleMs
-          stalledAgent = toSessionDisplayName(raw)
+          stalledAgent = toSessionDisplayName(s as Record<string, unknown>)
         }
       }
-    }
-
-    // ── Current model ────────────────────────────────────────────────────────
-    const mainSession = ssSessions[0]
-    const rawModel =
-      readString(mainSession?.model) ||
-      readString(ssPayload?.model) ||
-      readString(ssPayload?.currentModel) ||
-      readString(ssPayload?.modelAlias) ||
-      ''
-
-    // ── Cost: aggregate from dailyModelUsage across all sessions ────────────
-    // This gives us today's real usage, not the lifetime cost from /api/cost
-    const providerMap = new Map<string, { cost: number; tokens: number }>()
-    const modelMap = new Map<string, { cost: number; tokens: number; count: number }>()
-    let todayCostTotal = 0
-    let todayTokensTotal = 0
-    let todayInputTokens = 0
-    let todayOutputTokens = 0
-    let todayCacheRead = 0
-
-    for (const session of ssSessions) {
-      const usage = session.usage
-      if (!usage) continue
-
-      // Daily breakdown for cost + token totals
-      const breakdown = Array.isArray(usage.dailyBreakdown) ? usage.dailyBreakdown : []
-      for (const entry of breakdown) {
-        if (!entry.date?.startsWith(todayKey)) continue
-        todayCostTotal += readNumber(entry.cost)
-        const inputTokens = readNumber(entry.inputTokens)
-        const outputTokens = readNumber(entry.outputTokens)
-        todayTokensTotal +=
-          readNumber(entry.tokens) ||
-          readNumber(entry.totalTokens) ||
-          (inputTokens + outputTokens)
+      // Also check sessions API for stalled agents
+      if (!stalledAgent) {
+        for (const s of chatSessions) {
+          const raw = s as unknown as Record<string, unknown>
+          const ts = normalizeTimestamp(raw.updatedAt ?? 0)
+          if (ts <= 0) continue
+          const staleMs = now - ts
+          if (staleMs > stalledThreshold && staleMs > maxStalledMs) {
+            maxStalledMs = staleMs
+            stalledAgent = toSessionDisplayName(raw)
+          }
+        }
       }
 
-      // Model usage for provider/model breakdown
-      const modelUsage = Array.isArray(usage.dailyModelUsage) ? usage.dailyModelUsage : []
-      for (const entry of modelUsage) {
-        if (!entry.date?.startsWith(todayKey)) continue
-        const provider = readString(entry.provider)
-        const modelRaw =
-          readString(entry.model) ||
-          readString(session.model) ||
-          provider ||
-          'unknown'
-        const cost = readNumber(entry.cost)
-        const tokens = readNumber(entry.tokens)
-        const count = readNumber(entry.count)
+      // ── Current model ────────────────────────────────────────────────────────
+      const mainSession = ssSessions[0]
+      const rawModel =
+        readString(mainSession?.model) ||
+        readString(ssPayload?.model) ||
+        readString(ssPayload?.currentModel) ||
+        readString(ssPayload?.modelAlias) ||
+        ''
 
-        if (provider) {
-          const prev = providerMap.get(provider) ?? { cost: 0, tokens: 0 }
-          providerMap.set(provider, { cost: prev.cost + cost, tokens: prev.tokens + tokens })
+      // ── Cost: aggregate from dailyModelUsage across all sessions ────────────
+      // This gives us today's real usage, not the lifetime cost from /api/cost
+      const providerMap = new Map<string, { cost: number; tokens: number }>()
+      const modelMap = new Map<
+        string,
+        { cost: number; tokens: number; count: number }
+      >()
+      let todayCostTotal = 0
+      let todayTokensTotal = 0
+      let todayInputTokens = 0
+      let todayOutputTokens = 0
+      let todayCacheRead = 0
+
+      for (const session of ssSessions) {
+        const usage = session.usage
+        if (!usage) continue
+
+        // Daily breakdown for cost + token totals
+        const breakdown = Array.isArray(usage.dailyBreakdown)
+          ? usage.dailyBreakdown
+          : []
+        for (const entry of breakdown) {
+          if (!entry.date?.startsWith(todayKey)) continue
+          todayCostTotal += readNumber(entry.cost)
+          const inputTokens = readNumber(entry.inputTokens)
+          const outputTokens = readNumber(entry.outputTokens)
+          todayTokensTotal +=
+            readNumber(entry.tokens) ||
+            readNumber(entry.totalTokens) ||
+            inputTokens + outputTokens
         }
-        const prev = modelMap.get(modelRaw) ?? { cost: 0, tokens: 0, count: 0 }
-        modelMap.set(modelRaw, {
-          cost: prev.cost + cost,
-          tokens: prev.tokens + tokens,
-          count: prev.count + count,
+
+        // Model usage for provider/model breakdown
+        const modelUsage = Array.isArray(usage.dailyModelUsage)
+          ? usage.dailyModelUsage
+          : []
+        for (const entry of modelUsage) {
+          if (!entry.date?.startsWith(todayKey)) continue
+          const provider = readString(entry.provider)
+          const modelRaw =
+            readString(entry.model) ||
+            readString(session.model) ||
+            provider ||
+            'unknown'
+          const cost = readNumber(entry.cost)
+          const tokens = readNumber(entry.tokens)
+          const count = readNumber(entry.count)
+
+          if (provider) {
+            const prev = providerMap.get(provider) ?? { cost: 0, tokens: 0 }
+            providerMap.set(provider, {
+              cost: prev.cost + cost,
+              tokens: prev.tokens + tokens,
+            })
+          }
+          const prev = modelMap.get(modelRaw) ?? {
+            cost: 0,
+            tokens: 0,
+            count: 0,
+          }
+          modelMap.set(modelRaw, {
+            cost: prev.cost + cost,
+            tokens: prev.tokens + tokens,
+            count: prev.count + count,
+          })
+        }
+      }
+
+      // Primary: top-level dailyCost from session-status (most accurate, always present)
+      const ssDaily = readNumber(
+        ssPayload?.dailyCost ?? ssPayload?.costUsd ?? 0,
+      )
+      if (ssDaily > 0) todayCostTotal = ssDaily
+
+      // Also pull input/output/cacheRead from usage API for finer breakdown
+      const usageData =
+        usageSummaryQuery.data?.kind === 'ok'
+          ? usageSummaryQuery.data.data
+          : null
+      if (usageData) {
+        todayInputTokens = usageData.totalInputOutput
+        todayCacheRead = usageData.totalCached
+        // Output = totalUsage - inputOutput - cached
+        todayOutputTokens = Math.max(
+          0,
+          (usageData.totalUsage || 0) - usageData.totalInputOutput,
+        )
+        // If we have better today's token count from session-status, use that
+        if (todayTokensTotal === 0) todayTokensTotal = usageData.totalUsage
+        if (todayCostTotal === 0) todayCostTotal = usageData.totalCost
+      }
+
+      const byProvider = Array.from(providerMap.entries())
+        .map(([name, { cost, tokens }]) => ({ name, cost, tokens }))
+        .sort((a, b) => b.cost - a.cost)
+
+      const byModel = Array.from(modelMap.entries())
+        .map(([model, { cost, tokens, count }]) => ({
+          model: formatModelName(model),
+          cost,
+          tokens,
+          count,
+        }))
+        .sort((a, b) => b.cost - a.cost)
+
+      // Cost timeseries for billing total + trend
+      const points = [
+        ...(Array.isArray(costTimeseriesQuery.data)
+          ? costTimeseriesQuery.data
+          : []),
+      ]
+      points.sort((a, b) => a.date.localeCompare(b.date))
+      const latestPoint = points[points.length - 1]
+      const previousPoint = points[points.length - 2]
+
+      // Billing period total from most recent cost API point
+      const billingTotal = latestPoint?.amount ?? usageData?.totalCost ?? 0
+
+      // Trend vs previous day
+      let trend: number | null = null
+      if (latestPoint && previousPoint && previousPoint.amount > 0) {
+        trend =
+          ((latestPoint.amount - previousPoint.amount) / previousPoint.amount) *
+          100
+      }
+
+      // ── Canonical todayCostUsd ────────────────────────────────────────────────
+      // Priority: (1) session-status dailyBreakdown/dailyCost, (2) /api/cost today,
+      //           (3) /api/usage totalCost, (4) 0 once all queries have resolved
+      const costTodayFromTimeseries =
+        points.find((p) => p.date === todayKey)?.amount ?? null
+      let todayCostUsd: number | null = null
+      if (todayCostTotal > 0) {
+        todayCostUsd = todayCostTotal
+      } else if (
+        costTodayFromTimeseries !== null &&
+        costTodayFromTimeseries > 0
+      ) {
+        todayCostUsd = costTodayFromTimeseries
+      } else if (usageData && usageData.totalCost > 0) {
+        todayCostUsd = usageData.totalCost
+      } else if (
+        !sessionStatusQuery.isLoading &&
+        !costTimeseriesQuery.isLoading &&
+        !usageSummaryQuery.isLoading
+      ) {
+        // All queries resolved with no cost data — show $0.00 rather than "—"
+        todayCostUsd = 0
+      }
+
+      // ── Message counts ───────────────────────────────────────────────────────
+      let msgTotal = 0
+      let msgUser = 0
+      let msgAssistant = 0
+      let msgToolCalls = 0
+      let latencyAvg = 0
+      let latencyP95 = 0
+      let latencyCount = 0
+      const sessionsPerDayMap = new Map<string, number>()
+
+      for (const session of ssSessions) {
+        const usage = session.usage
+        if (!usage) continue
+
+        const msgCounts = Array.isArray(usage.dailyMessageCounts)
+          ? usage.dailyMessageCounts
+          : []
+        for (const entry of msgCounts) {
+          if (!entry.date?.startsWith(todayKey)) continue
+          msgTotal += readNumber(entry.total)
+          msgUser += readNumber(entry.user)
+          msgAssistant += readNumber(entry.assistant)
+          msgToolCalls += readNumber(entry.toolCalls)
+        }
+
+        const latency = Array.isArray(usage.dailyLatency)
+          ? usage.dailyLatency
+          : []
+        for (const entry of latency) {
+          if (!entry.date?.startsWith(todayKey)) continue
+          // Weighted average
+          const cnt = readNumber(entry.count)
+          if (cnt > 0) {
+            latencyAvg =
+              (latencyAvg * latencyCount + readNumber(entry.avgMs) * cnt) /
+              (latencyCount + cnt)
+            latencyP95 = Math.max(latencyP95, readNumber(entry.p95Ms))
+            latencyCount += cnt
+          }
+        }
+
+        const activeDates = new Set<string>()
+        const dailyBreakdown = Array.isArray(usage.dailyBreakdown)
+          ? usage.dailyBreakdown
+          : []
+        for (const entry of dailyBreakdown) {
+          const date = readString(entry.date)
+          if (!date) continue
+          activeDates.add(date)
+        }
+        for (const date of activeDates) {
+          sessionsPerDayMap.set(date, (sessionsPerDayMap.get(date) ?? 0) + 1)
+        }
+      }
+
+      // ── Timeseries ───────────────────────────────────────────────────────────
+      // Cost by day — from cost timeseries API (last 28 days)
+      const costByDay = points.slice(-28)
+
+      // Messages by day — aggregate dailyMessageCounts across all sessions
+      const messagesPerDayMap = new Map<string, number>()
+      for (const session of ssSessions) {
+        const msgCounts = Array.isArray(session.usage?.dailyMessageCounts)
+          ? session.usage.dailyMessageCounts
+          : []
+        for (const entry of msgCounts) {
+          const date = readString(entry.date)
+          if (!date) continue
+          messagesPerDayMap.set(
+            date,
+            (messagesPerDayMap.get(date) ?? 0) + readNumber(entry.total),
+          )
+        }
+      }
+      const messagesByDay = Array.from(messagesPerDayMap.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .slice(-28)
+        .map(([date, count]) => ({ date, count }))
+      const sessionsByDay = Array.from(sessionsPerDayMap.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .slice(-28)
+        .map(([date, count]) => ({ date, count }))
+
+      // ── Cron jobs ────────────────────────────────────────────────────────────
+      const cronJobs = Array.isArray(cronJobsQuery.data)
+        ? cronJobsQuery.data
+        : []
+      let cronInProgress = 0
+      let cronDone = 0
+      for (const job of cronJobs) {
+        if (!job.enabled) continue
+        const status = job.lastRun?.status
+        if (status === 'running' || status === 'queued') cronInProgress++
+        else if (status === 'success') cronDone++
+      }
+
+      // ── Skills ───────────────────────────────────────────────────────────────
+      const skills = Array.isArray(skillsSummaryQuery.data)
+        ? skillsSummaryQuery.data
+        : []
+      const enabledSkills = skills.filter((s) => s.enabled).length
+
+      // ── Alerts / signal chips ────────────────────────────────────────────────
+      const alerts: Array<DashboardAlert> = []
+
+      if (todayCostTotal > 50) {
+        alerts.push({
+          id: 'high-spend',
+          text: '⚠ High spend today',
+          severity: 'amber',
+          dismissable: true,
         })
       }
-    }
-
-    // Primary: top-level dailyCost from session-status (most accurate, always present)
-    const ssDaily = readNumber(ssPayload?.dailyCost ?? ssPayload?.costUsd ?? 0)
-    if (ssDaily > 0) todayCostTotal = ssDaily
-
-    // Also pull input/output/cacheRead from usage API for finer breakdown
-    const usageData = usageSummaryQuery.data?.kind === 'ok' ? usageSummaryQuery.data.data : null
-    if (usageData) {
-      todayInputTokens = usageData.totalInputOutput
-      todayCacheRead = usageData.totalCached
-      // Output = totalUsage - inputOutput - cached
-      todayOutputTokens = Math.max(0, (usageData.totalUsage || 0) - usageData.totalInputOutput)
-      // If we have better today's token count from session-status, use that
-      if (todayTokensTotal === 0) todayTokensTotal = usageData.totalUsage
-      if (todayCostTotal === 0) todayCostTotal = usageData.totalCost
-    }
-
-    const byProvider = Array.from(providerMap.entries())
-      .map(([name, { cost, tokens }]) => ({ name, cost, tokens }))
-      .sort((a, b) => b.cost - a.cost)
-
-    const byModel = Array.from(modelMap.entries())
-      .map(([model, { cost, tokens, count }]) => ({
-        model: formatModelName(model),
-        cost,
-        tokens,
-        count,
-      }))
-      .sort((a, b) => b.cost - a.cost)
-
-    // Cost timeseries for billing total + trend
-    const points = [...(Array.isArray(costTimeseriesQuery.data) ? costTimeseriesQuery.data : [])]
-    points.sort((a, b) => a.date.localeCompare(b.date))
-    const latestPoint = points[points.length - 1]
-    const previousPoint = points[points.length - 2]
-
-    // Billing period total from most recent cost API point
-    const billingTotal =
-      latestPoint?.amount ??
-      (usageData?.totalCost ?? 0)
-
-    // Trend vs previous day
-    let trend: number | null = null
-    if (latestPoint && previousPoint && previousPoint.amount > 0) {
-      trend = ((latestPoint.amount - previousPoint.amount) / previousPoint.amount) * 100
-    }
-
-    // ── Canonical todayCostUsd ────────────────────────────────────────────────
-    // Priority: (1) session-status dailyBreakdown/dailyCost, (2) /api/cost today,
-    //           (3) /api/usage totalCost, (4) 0 once all queries have resolved
-    const costTodayFromTimeseries = points.find((p) => p.date === todayKey)?.amount ?? null
-    let todayCostUsd: number | null = null
-    if (todayCostTotal > 0) {
-      todayCostUsd = todayCostTotal
-    } else if (costTodayFromTimeseries !== null && costTodayFromTimeseries > 0) {
-      todayCostUsd = costTodayFromTimeseries
-    } else if (usageData && usageData.totalCost > 0) {
-      todayCostUsd = usageData.totalCost
-    } else if (
-      !sessionStatusQuery.isLoading &&
-      !costTimeseriesQuery.isLoading &&
-      !usageSummaryQuery.isLoading
-    ) {
-      // All queries resolved with no cost data — show $0.00 rather than "—"
-      todayCostUsd = 0
-    }
-
-    // ── Message counts ───────────────────────────────────────────────────────
-    let msgTotal = 0
-    let msgUser = 0
-    let msgAssistant = 0
-    let msgToolCalls = 0
-    let latencyAvg = 0
-    let latencyP95 = 0
-    let latencyCount = 0
-    const sessionsPerDayMap = new Map<string, number>()
-
-    for (const session of ssSessions) {
-      const usage = session.usage
-      if (!usage) continue
-
-      const msgCounts = Array.isArray(usage.dailyMessageCounts) ? usage.dailyMessageCounts : []
-      for (const entry of msgCounts) {
-        if (!entry.date?.startsWith(todayKey)) continue
-        msgTotal += readNumber(entry.total)
-        msgUser += readNumber(entry.user)
-        msgAssistant += readNumber(entry.assistant)
-        msgToolCalls += readNumber(entry.toolCalls)
+      if (stalledAgent) {
+        alerts.push({
+          id: 'stalled-agent',
+          text: `⚠ Agent stalled: ${stalledAgent}`,
+          severity: 'red',
+          dismissable: true,
+        })
+      }
+      if (contextPercent !== null && contextPercent >= 75) {
+        alerts.push({
+          id: 'context-pressure',
+          text: `Memory pressure: ${contextPercent.toFixed(0)}%`,
+          severity: 'amber',
+          dismissable: true,
+        })
       }
 
-      const latency = Array.isArray(usage.dailyLatency) ? usage.dailyLatency : []
-      for (const entry of latency) {
-        if (!entry.date?.startsWith(todayKey)) continue
-        // Weighted average
-        const cnt = readNumber(entry.count)
-        if (cnt > 0) {
-          latencyAvg = (latencyAvg * latencyCount + readNumber(entry.avgMs) * cnt) / (latencyCount + cnt)
-          latencyP95 = Math.max(latencyP95, readNumber(entry.p95Ms))
-          latencyCount += cnt
-        }
+      // ── Status ───────────────────────────────────────────────────────────────
+      const isLoading =
+        sessionStatusQuery.isLoading ||
+        sessionsQuery.isLoading ||
+        gatewayStatusQuery.isLoading
+      const isError =
+        sessionStatusQuery.isError ||
+        sessionsQuery.isError ||
+        gatewayStatusQuery.isError ||
+        costTimeseriesQuery.isError
+
+      const status: DashboardData['status'] = isError
+        ? 'error'
+        : isLoading
+          ? 'loading'
+          : 'ready'
+
+      // Usage-specific status
+      const usageResult = usageSummaryQuery.data
+      let usageStatus: DashboardData['usageStatus']
+      if (
+        usageSummaryQuery.isError ||
+        usageResult?.kind === 'error' ||
+        usageResult?.kind === 'unavailable'
+      ) {
+        usageStatus = 'error'
+      } else if (usageResult?.kind === 'ok') {
+        usageStatus = 'ready'
+      } else if (usageSummaryQuery.isLoading) {
+        usageStatus = usageTimedOut ? 'timeout' : 'loading'
+      } else {
+        // Not loading, no data
+        usageStatus = usageTimedOut ? 'timeout' : 'error'
       }
 
-      const activeDates = new Set<string>()
-      const dailyBreakdown = Array.isArray(usage.dailyBreakdown) ? usage.dailyBreakdown : []
-      for (const entry of dailyBreakdown) {
-        const date = readString(entry.date)
-        if (!date) continue
-        activeDates.add(date)
-      }
-      for (const date of activeDates) {
-        sessionsPerDayMap.set(date, (sessionsPerDayMap.get(date) ?? 0) + 1)
-      }
-    }
-
-    // ── Timeseries ───────────────────────────────────────────────────────────
-    // Cost by day — from cost timeseries API (last 28 days)
-    const costByDay = points.slice(-28)
-
-    // Messages by day — aggregate dailyMessageCounts across all sessions
-    const messagesPerDayMap = new Map<string, number>()
-    for (const session of ssSessions) {
-      const msgCounts = Array.isArray(session.usage?.dailyMessageCounts)
-        ? session.usage.dailyMessageCounts
-        : []
-      for (const entry of msgCounts) {
-        const date = readString(entry.date)
-        if (!date) continue
-        messagesPerDayMap.set(date, (messagesPerDayMap.get(date) ?? 0) + readNumber(entry.total))
-      }
-    }
-    const messagesByDay = Array.from(messagesPerDayMap.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .slice(-28)
-      .map(([date, count]) => ({ date, count }))
-    const sessionsByDay = Array.from(sessionsPerDayMap.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .slice(-28)
-      .map(([date, count]) => ({ date, count }))
-
-    // ── Cron jobs ────────────────────────────────────────────────────────────
-    const cronJobs = Array.isArray(cronJobsQuery.data) ? cronJobsQuery.data : []
-    let cronInProgress = 0
-    let cronDone = 0
-    for (const job of cronJobs) {
-      if (!job.enabled) continue
-      const status = job.lastRun?.status
-      if (status === 'running' || status === 'queued') cronInProgress++
-      else if (status === 'success') cronDone++
-    }
-
-    // ── Skills ───────────────────────────────────────────────────────────────
-    const skills = Array.isArray(skillsSummaryQuery.data) ? skillsSummaryQuery.data : []
-    const enabledSkills = skills.filter((s) => s.enabled).length
-
-    // ── Alerts / signal chips ────────────────────────────────────────────────
-    const alerts: Array<DashboardAlert> = []
-
-    if (todayCostTotal > 50) {
-      alerts.push({
-        id: 'high-spend',
-        text: '⚠ High spend today',
-        severity: 'amber',
-        dismissable: true,
-      })
-    }
-    if (stalledAgent) {
-      alerts.push({
-        id: 'stalled-agent',
-        text: `⚠ Agent stalled: ${stalledAgent}`,
-        severity: 'red',
-        dismissable: true,
-      })
-    }
-    if (contextPercent !== null && contextPercent >= 75) {
-      alerts.push({
-        id: 'context-pressure',
-        text: `Memory pressure: ${contextPercent.toFixed(0)}%`,
-        severity: 'amber',
-        dismissable: true,
-      })
-    }
-
-    // ── Status ───────────────────────────────────────────────────────────────
-    const isLoading =
-      sessionStatusQuery.isLoading ||
-      sessionsQuery.isLoading ||
-      gatewayStatusQuery.isLoading
-    const isError =
-      sessionStatusQuery.isError ||
-      sessionsQuery.isError ||
-      gatewayStatusQuery.isError ||
-      costTimeseriesQuery.isError
-
-    const status: DashboardData['status'] = isError
-      ? 'error'
-      : isLoading
-        ? 'loading'
-        : 'ready'
-
-    // Usage-specific status
-    const usageResult = usageSummaryQuery.data
-    let usageStatus: DashboardData['usageStatus']
-    if (usageSummaryQuery.isError || usageResult?.kind === 'error' || usageResult?.kind === 'unavailable') {
-      usageStatus = 'error'
-    } else if (usageResult?.kind === 'ok') {
-      usageStatus = 'ready'
-    } else if (usageSummaryQuery.isLoading) {
-      usageStatus = usageTimedOut ? 'timeout' : 'loading'
-    } else {
-      // Not loading, no data
-      usageStatus = usageTimedOut ? 'timeout' : 'error'
-    }
-
-    return {
-      status,
-      usageStatus,
-      todayCostUsd,
-      connection: { connected, syncing },
-      updatedAt,
-      sessions: {
-        total: sessionTotal,
-        active: activeSessions5m.length || activeAgentCount || 0,
-        list: sessionList,
-      },
-      agents: {
-        total: agentCount,
-        active: activeAgentCount,
-        idle: idleAgentCount,
-        stalled: stalledAgent,
-        roster,
-      },
-      cost: {
-        // Use todayCostUsd (canonical priority-resolved value) so cost.today
-        // always reflects the same number shown in SystemGlance and MetricCards.
-        today: todayCostUsd ?? todayCostTotal,
-        total: billingTotal,
-        trend,
-        byProvider,
-        byModel,
-      },
-      usage: {
-        tokens: todayTokensTotal,
-        inputTokens: todayInputTokens,
-        outputTokens: todayOutputTokens,
-        cacheRead: todayCacheRead,
-        contextPercent,
-        messages: {
-          total: msgTotal,
-          user: msgUser,
-          assistant: msgAssistant,
-          toolCalls: msgToolCalls,
+      return {
+        status,
+        usageStatus,
+        todayCostUsd,
+        connection: { connected, syncing },
+        updatedAt,
+        sessions: {
+          total: sessionTotal,
+          active: activeSessions5m.length || activeAgentCount || 0,
+          list: sessionList,
         },
-        latency:
-          latencyCount > 0 ? { avgMs: latencyAvg, p95Ms: latencyP95 } : null,
-      },
-      uptime: {
-        seconds: uptimeSeconds,
-        formatted: formatUptime(uptimeSeconds),
-        healthy: connected && uptimeSeconds > 0,
-      },
-      model: {
-        current: rawModel ? formatModelName(rawModel) : '—',
-        raw: rawModel,
-      },
-      alerts,
-      cron: {
-        jobs: cronJobs,
-        inProgress: cronInProgress,
-        done: cronDone,
-      },
-      skills: {
-        total: skills.length,
-        enabled: enabledSkills,
-      },
-      timeseries: {
-        costByDay,
-        messagesByDay,
-        sessionsByDay,
-      },
-    }
-  }, [
-    sessionsQuery.data,
-    sessionsQuery.isLoading,
-    sessionsQuery.isError,
-    gatewayStatusQuery.data,
-    gatewayStatusQuery.isLoading,
-    gatewayStatusQuery.isError,
-    sessionStatusQuery.data,
-    sessionStatusQuery.isLoading,
-    sessionStatusQuery.isError,
-    costTimeseriesQuery.data,
-    costTimeseriesQuery.isLoading,
-    costTimeseriesQuery.isError,
-    cronJobsQuery.data,
-    skillsSummaryQuery.data,
-    usageSummaryQuery.data,
-    usageSummaryQuery.isLoading,
-    usageTimedOut,
-  ])
+        agents: {
+          total: agentCount,
+          active: activeAgentCount,
+          idle: idleAgentCount,
+          stalled: stalledAgent,
+          roster,
+        },
+        cost: {
+          // Use todayCostUsd (canonical priority-resolved value) so cost.today
+          // always reflects the same number shown in SystemGlance and MetricCards.
+          today: todayCostUsd ?? todayCostTotal,
+          total: billingTotal,
+          trend,
+          byProvider,
+          byModel,
+        },
+        usage: {
+          tokens: todayTokensTotal,
+          inputTokens: todayInputTokens,
+          outputTokens: todayOutputTokens,
+          cacheRead: todayCacheRead,
+          contextPercent,
+          messages: {
+            total: msgTotal,
+            user: msgUser,
+            assistant: msgAssistant,
+            toolCalls: msgToolCalls,
+          },
+          latency:
+            latencyCount > 0 ? { avgMs: latencyAvg, p95Ms: latencyP95 } : null,
+        },
+        uptime: {
+          seconds: uptimeSeconds,
+          formatted: formatUptime(uptimeSeconds),
+          healthy: connected && uptimeSeconds > 0,
+        },
+        model: {
+          current: rawModel ? formatModelName(rawModel) : '—',
+          raw: rawModel,
+        },
+        alerts,
+        cron: {
+          jobs: cronJobs,
+          inProgress: cronInProgress,
+          done: cronDone,
+        },
+        skills: {
+          total: skills.length,
+          enabled: enabledSkills,
+        },
+        timeseries: {
+          costByDay,
+          messagesByDay,
+          sessionsByDay,
+        },
+      }
+    },
+    [
+      sessionsQuery.data,
+      sessionsQuery.isLoading,
+      sessionsQuery.isError,
+      gatewayStatusQuery.data,
+      gatewayStatusQuery.isLoading,
+      gatewayStatusQuery.isError,
+      sessionStatusQuery.data,
+      sessionStatusQuery.isLoading,
+      sessionStatusQuery.isError,
+      costTimeseriesQuery.data,
+      costTimeseriesQuery.isLoading,
+      costTimeseriesQuery.isError,
+      cronJobsQuery.data,
+      skillsSummaryQuery.data,
+      usageSummaryQuery.data,
+      usageSummaryQuery.isLoading,
+      usageTimedOut,
+    ],
+  )
 
   const refetch = useCallback(
     function refetchAll() {
@@ -885,8 +968,10 @@ export function useUpdatedAgo(updatedAt: number): string {
 // ─── Derived usage text for CollapsibleWidget summary ───────────────────────
 
 export function buildUsageSummaryText(data: DashboardData): string {
-  if (data.usageStatus === 'error' || data.usageStatus === 'timeout') return 'Usage unavailable'
-  if (data.usageStatus === 'idle' || data.usageStatus === 'loading') return 'Usage: loading…'
+  if (data.usageStatus === 'error' || data.usageStatus === 'timeout')
+    return 'Usage unavailable'
+  if (data.usageStatus === 'idle' || data.usageStatus === 'loading')
+    return 'Usage: loading…'
   // 'ready'
   const costVal = data.todayCostUsd ?? data.cost.today
   if (costVal > 0 || data.usage.tokens > 0) {

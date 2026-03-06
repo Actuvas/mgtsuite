@@ -25,12 +25,9 @@ export const Route = createFileRoute('/api/cron/run')({
             return json({ error: 'jobId is required' }, { status: 400 })
           }
 
-          const payload = await gatewayCronRpc(
-            ['cron.run'],
-            {
-              jobId,
-            },
-          )
+          const payload = await gatewayCronRpc(['cron.run'], {
+            jobId,
+          })
 
           return json({ ok: true, payload })
         } catch (err) {

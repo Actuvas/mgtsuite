@@ -60,7 +60,13 @@ type AgentsScreenProps = {
   variant?: AgentsScreenVariant
 }
 
-const CATEGORY_ORDER = ['Core', 'ClawFactory', 'Coding', 'System', 'Integrations'] as const
+const CATEGORY_ORDER = [
+  'Core',
+  'ClawFactory',
+  'Coding',
+  'System',
+  'Integrations',
+] as const
 
 const STATUS_SORT_ORDER: Record<AgentRegistryStatus, number> = {
   active: 0,
@@ -327,7 +333,9 @@ function toAgentDefinition(
   }
 }
 
-function parseAgentDefinitions(data: AgentsData | undefined): Array<AgentDefinition> | null {
+function parseAgentDefinitions(
+  data: AgentsData | undefined,
+): Array<AgentDefinition> | null {
   if (!data || typeof data !== 'object') return null
 
   const directAgents = Array.isArray(data.agents) ? data.agents : null
@@ -351,19 +359,21 @@ function parseAgentDefinitions(data: AgentsData | undefined): Array<AgentDefinit
 
   const profiles = record.profiles
   if (profiles && typeof profiles === 'object' && !Array.isArray(profiles)) {
-    const entries = Object.entries(profiles).map(([profileId, profileValue]) => {
-      const profileRecord =
-        profileValue &&
-        typeof profileValue === 'object' &&
-        !Array.isArray(profileValue)
-          ? (profileValue as Record<string, unknown>)
-          : {}
-      return {
-        ...profileRecord,
-        id: profileId,
-        name: readString(profileRecord.name) || profileId,
-      }
-    })
+    const entries = Object.entries(profiles).map(
+      ([profileId, profileValue]) => {
+        const profileRecord =
+          profileValue &&
+          typeof profileValue === 'object' &&
+          !Array.isArray(profileValue)
+            ? (profileValue as Record<string, unknown>)
+            : {}
+        return {
+          ...profileRecord,
+          id: profileId,
+          name: readString(profileRecord.name) || profileId,
+        }
+      },
+    )
 
     return entries
       .map((entry, index) => toAgentDefinition(entry, index))
@@ -409,7 +419,10 @@ function getSessionTitle(session: SessionEntry): string {
   )
 }
 
-function scoreSessionMatch(agent: AgentDefinition, session: SessionEntry): number {
+function scoreSessionMatch(
+  agent: AgentDefinition,
+  session: SessionEntry,
+): number {
   const sessionKey = normalizeToken(readString(session.key))
   const friendlyId = normalizeToken(readString(session.friendlyId))
   const blob = getSessionSearchBlob(session)
@@ -505,7 +518,9 @@ async function readResponseError(response: Response): Promise<string> {
   return response.statusText || `HTTP ${response.status}`
 }
 
-export function AgentsScreen({ variant = 'mission-control' }: AgentsScreenProps) {
+export function AgentsScreen({
+  variant = 'mission-control',
+}: AgentsScreenProps) {
   const navigate = useNavigate()
   const missionControlEnabled = variant === 'mission-control'
   const [optimisticPausedByAgentId, setOptimisticPausedByAgentId] = useState<
@@ -519,8 +534,10 @@ export function AgentsScreen({ variant = 'mission-control' }: AgentsScreenProps)
   const [historyAgentId, setHistoryAgentId] = useState<string | null>(null)
 
   // Mobile detection for pull-to-refresh
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches,
+  const [isMobile, setIsMobile] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia('(max-width: 767px)').matches,
   )
   useEffect(() => {
     const media = window.matchMedia('(max-width: 767px)')
@@ -533,7 +550,9 @@ export function AgentsScreen({ variant = 'mission-control' }: AgentsScreenProps)
   // Pull-to-refresh: attach to the scrollable <main> in workspace-shell
   const scrollContainerRef = useRef<HTMLElement | null>(null)
   useEffect(() => {
-    const el = document.querySelector('main[data-tour="chat-area"]') as HTMLElement | null
+    const el = document.querySelector(
+      'main[data-tour="chat-area"]',
+    ) as HTMLElement | null
     scrollContainerRef.current = el
   }, [])
 
@@ -569,11 +588,11 @@ export function AgentsScreen({ variant = 'mission-control' }: AgentsScreenProps)
     void sessionsQuery.refetch()
   }, [agentsQuery, sessionsQuery])
 
-  const { isPulling: agentHubPulling, pullDistance: agentHubPullDistance, threshold: agentHubThreshold } = usePullToRefresh(
-    isMobile,
-    handlePullRefresh,
-    scrollContainerRef,
-  )
+  const {
+    isPulling: agentHubPulling,
+    pullDistance: agentHubPullDistance,
+    threshold: agentHubThreshold,
+  } = usePullToRefresh(isMobile, handlePullRefresh, scrollContainerRef)
 
   useEffect(() => {
     if (!sessionsQuery.isSuccess) return
@@ -602,7 +621,6 @@ export function AgentsScreen({ variant = 'mission-control' }: AgentsScreenProps)
     FALLBACK_AGENT_REGISTRY.forEach((definition) => {
       merged.set(definition.id, definition)
     })
-
     ;(parsedDefinitions ?? []).forEach((definition) => {
       const existing = merged.get(definition.id)
       if (!existing) {
@@ -697,12 +715,15 @@ export function AgentsScreen({ variant = 'mission-control' }: AgentsScreenProps)
     ]
 
     return orderedCategories.map((category) => {
-      const agentsInCategory = (grouped.get(category) ?? []).sort((left, right) => {
-        const leftPriority = STATUS_SORT_ORDER[left.status] ?? 9
-        const rightPriority = STATUS_SORT_ORDER[right.status] ?? 9
-        if (leftPriority !== rightPriority) return leftPriority - rightPriority
-        return left.name.localeCompare(right.name)
-      })
+      const agentsInCategory = (grouped.get(category) ?? []).sort(
+        (left, right) => {
+          const leftPriority = STATUS_SORT_ORDER[left.status] ?? 9
+          const rightPriority = STATUS_SORT_ORDER[right.status] ?? 9
+          if (leftPriority !== rightPriority)
+            return leftPriority - rightPriority
+          return left.name.localeCompare(right.name)
+        },
+      )
 
       return {
         category,
@@ -773,7 +794,8 @@ export function AgentsScreen({ variant = 'mission-control' }: AgentsScreenProps)
 
   async function handleChat(agent: AgentRegistryCardData) {
     const existingFriendlyId =
-      readString(agent.friendlyId) || deriveFriendlyIdFromKey(readString(agent.sessionKey))
+      readString(agent.friendlyId) ||
+      deriveFriendlyIdFromKey(readString(agent.sessionKey))
 
     if (existingFriendlyId) {
       void navigate({
@@ -897,7 +919,10 @@ export function AgentsScreen({ variant = 'mission-control' }: AgentsScreenProps)
     : null
 
   const agentHubPullIndicatorStyle = agentHubPulling
-    ? { transform: `translateY(${Math.min(agentHubPullDistance - 8, 48)}px)`, opacity: Math.min(agentHubPullDistance / agentHubThreshold, 1) }
+    ? {
+        transform: `translateY(${Math.min(agentHubPullDistance - 8, 48)}px)`,
+        opacity: Math.min(agentHubPullDistance / agentHubThreshold, 1),
+      }
     : undefined
 
   if (missionControlEnabled) {
@@ -914,11 +939,15 @@ export function AgentsScreen({ variant = 'mission-control' }: AgentsScreenProps)
               <span
                 className={[
                   'size-3 rounded-full border-2 border-accent-500',
-                  agentHubPullDistance >= agentHubThreshold ? 'border-t-transparent animate-spin' : 'opacity-50',
+                  agentHubPullDistance >= agentHubThreshold
+                    ? 'border-t-transparent animate-spin'
+                    : 'opacity-50',
                 ].join(' ')}
               />
               <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
-                {agentHubPullDistance >= agentHubThreshold ? 'Release to refresh' : 'Pull to refresh'}
+                {agentHubPullDistance >= agentHubThreshold
+                  ? 'Release to refresh'
+                  : 'Pull to refresh'}
               </span>
             </div>
           </div>
@@ -1061,45 +1090,47 @@ export function AgentsScreen({ variant = 'mission-control' }: AgentsScreenProps)
               </p>
             ) : (
               <div className="max-h-[48vh] space-y-2 overflow-auto">
-                {selectedHistoryAgent.matchedSessions.slice(0, 8).map((session, index) => {
-                  const friendlyId = getSessionFriendlyId(session)
-                  return (
-                    <div
-                      key={`${readString(session.key)}-${readString(session.friendlyId)}-${index}`}
-                      className="rounded-xl border border-white/30 bg-white/60 p-2.5 dark:border-white/10 dark:bg-neutral-900/40"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="truncate text-xs font-medium text-neutral-900 dark:text-neutral-100">
-                          {getSessionTitle(session)}
-                        </p>
-                        <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
-                          {formatRelativeTime(session.updatedAt)}
-                        </span>
-                      </div>
+                {selectedHistoryAgent.matchedSessions
+                  .slice(0, 8)
+                  .map((session, index) => {
+                    const friendlyId = getSessionFriendlyId(session)
+                    return (
+                      <div
+                        key={`${readString(session.key)}-${readString(session.friendlyId)}-${index}`}
+                        className="rounded-xl border border-white/30 bg-white/60 p-2.5 dark:border-white/10 dark:bg-neutral-900/40"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="truncate text-xs font-medium text-neutral-900 dark:text-neutral-100">
+                            {getSessionTitle(session)}
+                          </p>
+                          <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
+                            {formatRelativeTime(session.updatedAt)}
+                          </span>
+                        </div>
 
-                      <div className="mt-1 flex items-center justify-between">
-                        <span className="text-[10px] font-medium text-neutral-600 dark:text-neutral-300">
-                          {readString(session.status) || 'unknown'}
-                        </span>
-                        {friendlyId ? (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setHistoryAgentId(null)
-                              void navigate({
-                                to: '/chat/$sessionKey',
-                                params: { sessionKey: friendlyId },
-                              })
-                            }}
-                            className="min-h-11 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-accent-700 transition-colors hover:bg-accent-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-accent-300 dark:hover:bg-accent-950/30 sm:px-4 sm:py-2 sm:text-sm"
-                          >
-                            Open Chat
-                          </button>
-                        ) : null}
+                        <div className="mt-1 flex items-center justify-between">
+                          <span className="text-[10px] font-medium text-neutral-600 dark:text-neutral-300">
+                            {readString(session.status) || 'unknown'}
+                          </span>
+                          {friendlyId ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setHistoryAgentId(null)
+                                void navigate({
+                                  to: '/chat/$sessionKey',
+                                  params: { sessionKey: friendlyId },
+                                })
+                              }}
+                              className="min-h-11 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-accent-700 transition-colors hover:bg-accent-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-accent-300 dark:hover:bg-accent-950/30 sm:px-4 sm:py-2 sm:text-sm"
+                            >
+                              Open Chat
+                            </button>
+                          ) : null}
+                        </div>
                       </div>
-                    </div>
-                  )
-                })}
+                    )
+                  })}
               </div>
             )}
           </div>

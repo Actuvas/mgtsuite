@@ -18,7 +18,10 @@ export const Route = createFileRoute('/api/sessions/$sessionKey/status')({
         const { sessionKey } = params
 
         if (!sessionKey || sessionKey.trim().length === 0) {
-          return json({ ok: false, error: 'sessionKey required' }, { status: 400 })
+          return json(
+            { ok: false, error: 'sessionKey required' },
+            { status: 400 },
+          )
         }
 
         try {
@@ -28,7 +31,9 @@ export const Route = createFileRoute('/api/sessions/$sessionKey/status')({
             { limit: 100 },
           )
 
-          const sessions = Array.isArray(payload.sessions) ? payload.sessions : []
+          const sessions = Array.isArray(payload.sessions)
+            ? payload.sessions
+            : []
           const session = sessions.find(
             (s) =>
               s.key === sessionKey ||
@@ -41,7 +46,11 @@ export const Route = createFileRoute('/api/sessions/$sessionKey/status')({
           }
 
           const result: Record<string, unknown> = { ...session }
-          return json({ ok: true, status: result.status ?? 'unknown', ...result })
+          return json({
+            ok: true,
+            status: result.status ?? 'unknown',
+            ...result,
+          })
         } catch (err) {
           return json(
             {

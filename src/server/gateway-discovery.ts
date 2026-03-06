@@ -164,13 +164,15 @@ export async function discoverGateway(): Promise<DiscoveryResult> {
       found: false,
       url: 'ws://127.0.0.1:18789',
       source: 'none',
-      error: 'Gateway found on port 18789 but no auth token discovered. Please enter your token.',
+      error:
+        'Gateway found on port 18789 but no auth token discovered. Please enter your token.',
     }
   }
 
   return {
     found: false,
     source: 'none',
-    error: 'No local OpenClaw gateway found. Please start OpenClaw or enter connection details manually.',
+    error:
+      'No local OpenClaw gateway found. Please start OpenClaw or enter connection details manually.',
   }
 }

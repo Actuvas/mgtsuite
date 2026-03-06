@@ -31,10 +31,7 @@ export const Route = createFileRoute('/api/agent-pause')({
           }
 
           if (pause === null) {
-            return json(
-              { ok: false, error: 'pause required' },
-              { status: 400 },
-            )
+            return json({ ok: false, error: 'pause required' }, { status: 400 })
           }
 
           // Try dedicated pause RPC first, then fall back to steer with

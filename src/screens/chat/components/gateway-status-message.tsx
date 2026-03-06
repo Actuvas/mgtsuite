@@ -27,7 +27,8 @@ export function GatewayStatusMessage({
       setTimeout(() => setVisible(false), 300)
     }
     window.addEventListener('gateway:health-restored', handleRestored)
-    return () => window.removeEventListener('gateway:health-restored', handleRestored)
+    return () =>
+      window.removeEventListener('gateway:health-restored', handleRestored)
   }, [])
 
   if (!visible) return null
@@ -49,7 +50,10 @@ export function GatewayStatusMessage({
           icon={isChecking ? WifiDisconnected01Icon : Alert02Icon}
           size={16}
           strokeWidth={1.5}
-          className={cn('shrink-0', isChecking ? 'text-primary-500' : 'text-amber-600')}
+          className={cn(
+            'shrink-0',
+            isChecking ? 'text-primary-500' : 'text-amber-600',
+          )}
         />
         <p className="flex-1 text-xs font-medium">
           {isChecking ? 'Connecting to gateway...' : 'Gateway unreachable'}

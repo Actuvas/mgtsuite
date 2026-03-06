@@ -34,7 +34,12 @@ export function PercentRing({
   const offset = circumference - (clamped / 100) * circumference
 
   return (
-    <div className={cn('relative inline-flex items-center justify-center', className)}>
+    <div
+      className={cn(
+        'relative inline-flex items-center justify-center',
+        className,
+      )}
+    >
       <svg width={size} height={size} className="-rotate-90">
         <circle
           cx={size / 2}
@@ -53,7 +58,10 @@ export function PercentRing({
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          className={cn('transition-all duration-700 ease-out', getRingColor(clamped))}
+          className={cn(
+            'transition-all duration-700 ease-out',
+            getRingColor(clamped),
+          )}
         />
       </svg>
       <span className="absolute text-sm font-bold tabular-nums text-neutral-900 dark:text-neutral-50">
@@ -67,8 +75,10 @@ export function PercentRing({
 type HealthStatus = 'healthy' | 'warning' | 'critical' | 'offline'
 
 const HEALTH_STYLES: Record<HealthStatus, string> = {
-  healthy: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
-  warning: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+  healthy:
+    'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+  warning:
+    'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
   critical: 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30',
   offline: 'bg-neutral-500/15 text-neutral-500 border-neutral-500/30',
 }
@@ -80,7 +90,13 @@ const HEALTH_LABELS: Record<HealthStatus, string> = {
   offline: 'OFFLINE',
 }
 
-export function HealthBadge({ status, syncing }: { status: HealthStatus; syncing?: boolean }) {
+export function HealthBadge({
+  status,
+  syncing,
+}: {
+  status: HealthStatus
+  syncing?: boolean
+}) {
   return (
     <span
       className={cn(
@@ -147,7 +163,13 @@ type StatBlockProps = {
   sublabel?: string
 }
 
-export function StatBlock({ label, value, percent, badge, sublabel }: StatBlockProps) {
+export function StatBlock({
+  label,
+  value,
+  percent,
+  badge,
+  sublabel,
+}: StatBlockProps) {
   return (
     <div className="flex flex-col items-center gap-1.5">
       <div className="flex items-center gap-1.5">

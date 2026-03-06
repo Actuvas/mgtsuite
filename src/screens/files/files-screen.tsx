@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { usePageTitle } from '@/hooks/use-page-title'
 import {
@@ -58,8 +52,18 @@ const IGNORED_DIRS = new Set([
 
 const IMAGE_EXTS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'])
 const CODE_EXTS = new Set([
-  'ts', 'tsx', 'js', 'jsx', 'json', 'css', 'html',
-  'yml', 'yaml', 'sh', 'py', 'env',
+  'ts',
+  'tsx',
+  'js',
+  'jsx',
+  'json',
+  'css',
+  'html',
+  'yml',
+  'yaml',
+  'sh',
+  'py',
+  'env',
 ])
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -93,7 +97,8 @@ function getFileIcon(entry: FileEntry): string {
   const ext = getExt(entry.name)
   if (ext === 'md' || ext === 'mdx') return '📄'
   if (ext === 'json') return '📋'
-  if (ext === 'ts' || ext === 'tsx' || ext === 'js' || ext === 'jsx') return '📜'
+  if (ext === 'ts' || ext === 'tsx' || ext === 'js' || ext === 'jsx')
+    return '📜'
   if (IMAGE_EXTS.has(ext)) return '🖼'
   return '📃'
 }
@@ -175,11 +180,17 @@ function markdownToHtml(md: string): string {
   html = html.replace(/^---+$/gm, '<hr class="md-hr" />')
 
   // Blockquotes (re-escaped)
-  html = html.replace(/^&gt;\s+(.+)$/gm, '<blockquote class="md-blockquote">$1</blockquote>')
+  html = html.replace(
+    /^&gt;\s+(.+)$/gm,
+    '<blockquote class="md-blockquote">$1</blockquote>',
+  )
 
   // Unordered lists
   html = html.replace(/^[-*+]\s+(.+)$/gm, '<li class="md-li">$1</li>')
-  html = html.replace(/(<li[^>]*>.*<\/li>\n?)+/g, (m) => `<ul class="md-ul">${m}</ul>`)
+  html = html.replace(
+    /(<li[^>]*>.*<\/li>\n?)+/g,
+    (m) => `<ul class="md-ul">${m}</ul>`,
+  )
 
   // Links — sanitize the href to block javascript: and other dangerous schemes
   html = html.replace(
@@ -217,17 +228,52 @@ function markdownToHtml(md: string): string {
 // ──────────────────────────────────────────────────────────────────────────────
 
 const KEYWORDS = new Set([
-  'import', 'export', 'default', 'from', 'const', 'let', 'var', 'function',
-  'return', 'if', 'else', 'for', 'while', 'class', 'extends', 'new', 'this',
-  'type', 'interface', 'async', 'await', 'try', 'catch', 'throw', 'null',
-  'undefined', 'true', 'false', 'typeof', 'instanceof', 'void', 'in', 'of',
-  'break', 'continue', 'switch', 'case', 'delete',
+  'import',
+  'export',
+  'default',
+  'from',
+  'const',
+  'let',
+  'var',
+  'function',
+  'return',
+  'if',
+  'else',
+  'for',
+  'while',
+  'class',
+  'extends',
+  'new',
+  'this',
+  'type',
+  'interface',
+  'async',
+  'await',
+  'try',
+  'catch',
+  'throw',
+  'null',
+  'undefined',
+  'true',
+  'false',
+  'typeof',
+  'instanceof',
+  'void',
+  'in',
+  'of',
+  'break',
+  'continue',
+  'switch',
+  'case',
+  'delete',
 ])
 
 function highlightCode(code: string, ext: string): string {
   if (ext === 'json') {
     return code
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
       .replace(/("(?:[^"\\]|\\.)*")(\s*:)/g, '<span class="hl-key">$1</span>$2')
       .replace(/:\s*("(?:[^"\\]|\\.)*")/g, ': <span class="hl-str">$1</span>')
       .replace(/:\s*(-?\d+\.?\d*)/g, ': <span class="hl-num">$1</span>')
@@ -362,7 +408,9 @@ function Breadcrumb({ path }: { path: string }) {
       <span className="shrink-0">workspace</span>
       {parts.map((part, i) => (
         <span key={i} className="flex items-center gap-1 min-w-0">
-          <span className="shrink-0 text-primary-300 dark:text-neutral-600">/</span>
+          <span className="shrink-0 text-primary-300 dark:text-neutral-600">
+            /
+          </span>
           <span
             className={cn(
               'truncate',
@@ -496,7 +544,9 @@ function FilePanel({ selectedEntry }: FilePanelProps) {
         <div>
           <div className="text-5xl mb-3 opacity-40">📁</div>
           <p className="text-sm font-medium">{selectedEntry.name}</p>
-          <p className="text-xs mt-1 opacity-70">Select a file inside to preview</p>
+          <p className="text-xs mt-1 opacity-70">
+            Select a file inside to preview
+          </p>
         </div>
       </div>
     )

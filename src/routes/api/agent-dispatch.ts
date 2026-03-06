@@ -3,7 +3,10 @@ import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { gatewayRpc } from '../../server/gateway'
 import { isAuthenticated } from '../../server/auth-middleware'
-import { requireJsonContentType, safeErrorMessage } from '../../server/rate-limit'
+import {
+  requireJsonContentType,
+  safeErrorMessage,
+} from '../../server/rate-limit'
 
 type DispatchGatewayResponse = {
   runId?: string
@@ -12,7 +15,10 @@ type DispatchGatewayResponse = {
 function looksLikeMethodMissingError(error: unknown): boolean {
   if (!(error instanceof Error)) return false
   const message = error.message.toLowerCase()
-  return message.includes('method') && (message.includes('not found') || message.includes('unknown'))
+  return (
+    message.includes('method') &&
+    (message.includes('not found') || message.includes('unknown'))
+  )
 }
 
 async function dispatchViaGateway(payload: {
@@ -82,7 +88,8 @@ export const Route = createFileRoute('/api/agent-dispatch')({
               : randomUUID()
 
           // Allow callers to specify timeout (default 2min, max 10min)
-          const rawTimeout = typeof body.timeoutMs === 'number' ? body.timeoutMs : 120_000
+          const rawTimeout =
+            typeof body.timeoutMs === 'number' ? body.timeoutMs : 120_000
           const timeoutMs = Math.min(Math.max(rawTimeout, 10_000), 600_000)
 
           const result = await dispatchViaGateway({
@@ -96,7 +103,8 @@ export const Route = createFileRoute('/api/agent-dispatch')({
             ok: true,
             missionId:
               typeof body.missionId === 'string' ? body.missionId.trim() : '',
-            agentId: typeof body.agentId === 'string' ? body.agentId.trim() : '',
+            agentId:
+              typeof body.agentId === 'string' ? body.agentId.trim() : '',
             sessionKey,
             runId: result.runId ?? null,
           })

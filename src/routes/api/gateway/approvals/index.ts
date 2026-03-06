@@ -1,7 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { isAuthenticated } from '@/server/auth-middleware'
-import { getPendingApprovals, getAllApprovals } from '@/server/exec-approval-store'
+import {
+  getPendingApprovals,
+  getAllApprovals,
+} from '@/server/exec-approval-store'
 
 export const Route = createFileRoute('/api/gateway/approvals/')({
   server: {

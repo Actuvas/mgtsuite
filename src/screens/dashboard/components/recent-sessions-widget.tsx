@@ -103,14 +103,16 @@ export function RecentSessionsWidget({
       const recentRows = sorted.filter((s) => toSessionUpdatedAt(s) > oneDayAgo)
       const displayRows = recentRows.length > 0 ? recentRows : sorted
 
-      return displayRows.slice(0, 5).map(function mapSession(session): RecentSession {
-        return {
-          friendlyId: session.friendlyId,
-          title: toSessionTitle(session),
-          preview: toSessionPreview(session),
-          updatedAt: toSessionUpdatedAt(session),
-        }
-      })
+      return displayRows
+        .slice(0, 5)
+        .map(function mapSession(session): RecentSession {
+          return {
+            friendlyId: session.friendlyId,
+            title: toSessionTitle(session),
+            preview: toSessionPreview(session),
+            updatedAt: toSessionUpdatedAt(session),
+          }
+        })
     },
     [sessionsQuery.data],
   )
@@ -138,11 +140,15 @@ export function RecentSessionsWidget({
             role="status"
             aria-label="Loading"
           />
-          <span className="text-sm text-primary-500 dark:text-neutral-400">Loading sessions…</span>
+          <span className="text-sm text-primary-500 dark:text-neutral-400">
+            Loading sessions…
+          </span>
         </div>
       ) : sessions.length === 0 ? (
         <div className="flex h-32 flex-col items-center justify-center gap-1 rounded-lg border border-primary-200 dark:border-neutral-800 bg-primary-50 dark:bg-neutral-950">
-          <p className="text-sm font-semibold text-primary-900 dark:text-neutral-100">No sessions yet</p>
+          <p className="text-sm font-semibold text-primary-900 dark:text-neutral-100">
+            No sessions yet
+          </p>
           <p className="text-xs text-primary-500 dark:text-neutral-400">
             Start a conversation to see recent sessions here
           </p>

@@ -1,71 +1,75 @@
-'use client';
+'use client'
 
-import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
-import { HugeiconsIcon } from '@hugeicons/react';
-import { Cancel01Icon } from '@hugeicons/core-free-icons';
-import { MobileSetupModal } from './MobileSetupModal';
-import { OpenClawStudioIcon } from '@/components/icons/mgtsuite';
+import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Cancel01Icon } from '@hugeicons/core-free-icons'
+import { MobileSetupModal } from './MobileSetupModal'
+import { OpenClawStudioIcon } from '@/components/icons/mgtsuite'
 
 export function MobilePromptTrigger() {
-  const [showPrompt, setShowPrompt] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const mountTimeRef = useRef<number | null>(null);
+  const [showPrompt, setShowPrompt] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const mountTimeRef = useRef<number | null>(null)
 
   useEffect(() => {
-    mountTimeRef.current = Date.now();
+    mountTimeRef.current = Date.now()
 
     // ?mobile-preview forces modal open immediately (dev/review only)
     // Strip the param from URL so navigation doesn't re-trigger it
-    if (new URLSearchParams(window.location.search).get('mobile-preview') === '1') {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('mobile-preview');
-      window.history.replaceState({}, '', url.toString());
-      setIsModalOpen(true);
-      return;
+    if (
+      new URLSearchParams(window.location.search).get('mobile-preview') === '1'
+    ) {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('mobile-preview')
+      window.history.replaceState({}, '', url.toString())
+      setIsModalOpen(true)
+      return
     }
 
-    const isDismissed = localStorage.getItem('mgtsuite-mobile-prompt-dismissed') === 'true';
-    const isSetup = localStorage.getItem('mgtsuite-mobile-setup-seen') === 'true';
+    const isDismissed =
+      localStorage.getItem('mgtsuite-mobile-prompt-dismissed') === 'true'
+    const isSetup =
+      localStorage.getItem('mgtsuite-mobile-setup-seen') === 'true'
 
     if (isDismissed || isSetup) {
-      return;
+      return
     }
 
     const checkPrompt = () => {
       if (!mountTimeRef.current) {
-        return;
+        return
       }
 
-      const elapsedTime = Date.now() - mountTimeRef.current;
-      const isDesktop = window.innerWidth > 768;
-      const hasBeenOnPageLongEnough = elapsedTime >= 45_000;
+      const elapsedTime = Date.now() - mountTimeRef.current
+      const isDesktop = window.innerWidth > 768
+      const hasBeenOnPageLongEnough = elapsedTime >= 45_000
 
       if (isDesktop && hasBeenOnPageLongEnough) {
-        setShowPrompt(true);
+        setShowPrompt(true)
       }
-    };
+    }
 
-    checkPrompt();
-    const interval = window.setInterval(checkPrompt, 5_000);
-    return () => window.clearInterval(interval);
-  }, []);
+    checkPrompt()
+    const interval = window.setInterval(checkPrompt, 5_000)
+    return () => window.clearInterval(interval)
+  }, [])
 
   const dismissPrompt = () => {
-    localStorage.setItem('mgtsuite-mobile-prompt-dismissed', 'true');
-    setShowPrompt(false);
-  };
+    localStorage.setItem('mgtsuite-mobile-prompt-dismissed', 'true')
+    setShowPrompt(false)
+  }
 
   const openSetup = () => {
-    setShowPrompt(false);
-    setIsModalOpen(true);
-  };
+    setShowPrompt(false)
+    setIsModalOpen(true)
+  }
 
   const closeSetup = () => {
-    setIsModalOpen(false);
+    setIsModalOpen(false)
     // Treat any close (including Finish) as dismissed so it never re-shows
-    localStorage.setItem('mgtsuite-mobile-prompt-dismissed', 'true');
-  };
+    localStorage.setItem('mgtsuite-mobile-prompt-dismissed', 'true')
+  }
 
   return (
     <>
@@ -98,7 +102,9 @@ export function MobilePromptTrigger() {
               </div>
 
               <div className="min-w-0 flex-1 text-center">
-                <p className="text-sm font-semibold text-white">Set up mobile access</p>
+                <p className="text-sm font-semibold text-white">
+                  Set up mobile access
+                </p>
                 <p className="text-xs text-primary-300">
                   Connect your phone to this MGT Suite instance in a few steps.
                 </p>
@@ -118,7 +124,11 @@ export function MobilePromptTrigger() {
                   className="rounded-lg p-1.5 text-primary-300 transition-colors hover:bg-primary-900 hover:text-white"
                   aria-label="Dismiss mobile setup prompt"
                 >
-                  <HugeiconsIcon icon={Cancel01Icon} size={16} strokeWidth={2} />
+                  <HugeiconsIcon
+                    icon={Cancel01Icon}
+                    size={16}
+                    strokeWidth={2}
+                  />
                 </button>
               </div>
             </div>
@@ -128,5 +138,5 @@ export function MobilePromptTrigger() {
 
       <MobileSetupModal isOpen={isModalOpen} onClose={closeSetup} />
     </>
-  );
+  )
 }

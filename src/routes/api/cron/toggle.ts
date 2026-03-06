@@ -27,13 +27,10 @@ export const Route = createFileRoute('/api/cron/toggle')({
 
           const enabled = normalizeCronBool(body.enabled, true)
 
-          const payload = await gatewayCronRpc(
-            ['cron.update'],
-            {
-              jobId,
-              patch: { enabled },
-            },
-          )
+          const payload = await gatewayCronRpc(['cron.update'], {
+            jobId,
+            patch: { enabled },
+          })
 
           return json({ ok: true, payload, enabled })
         } catch (err) {

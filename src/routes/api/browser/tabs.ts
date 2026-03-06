@@ -73,7 +73,11 @@ async function callBrowserTabs(): Promise<unknown> {
     : new Error('Gateway browser tabs request failed')
 }
 
-function normalizeTab(tab: unknown, index: number, activeTabId?: string): BrowserTab {
+function normalizeTab(
+  tab: unknown,
+  index: number,
+  activeTabId?: string,
+): BrowserTab {
   if (!isRecord(tab)) {
     return {
       id: `tab-${index + 1}`,
@@ -136,13 +140,17 @@ export const Route = createFileRoute('/api/browser/tabs')({
                 readString(payloadRecord.targetId))) ||
             ''
 
-          const tabs = rawTabs.map((tab, index) => normalizeTab(tab, index, activeTabId))
+          const tabs = rawTabs.map((tab, index) =>
+            normalizeTab(tab, index, activeTabId),
+          )
           const resolvedActiveTabId =
             tabs.find((tab) => tab.isActive)?.id || tabs[0]?.id || null
 
           const normalizedTabs = tabs.map((tab) => ({
             ...tab,
-            isActive: resolvedActiveTabId ? tab.id === resolvedActiveTabId : false,
+            isActive: resolvedActiveTabId
+              ? tab.id === resolvedActiveTabId
+              : false,
           }))
 
           return json({

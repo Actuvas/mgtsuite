@@ -46,7 +46,8 @@ export function OnboardingTour() {
       // Wait for gateway wizard to finish before starting tour
       const GATEWAY_SETUP_KEY = 'mgtsuite-gateway-configured'
       const checkAndStart = () => {
-        const gatewayConfigured = localStorage.getItem(GATEWAY_SETUP_KEY) === 'true'
+        const gatewayConfigured =
+          localStorage.getItem(GATEWAY_SETUP_KEY) === 'true'
         if (gatewayConfigured) {
           setRun(true)
           return true

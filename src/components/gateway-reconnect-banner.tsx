@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { Alert02Icon, Cancel01Icon, Settings02Icon } from '@hugeicons/core-free-icons'
+import {
+  Alert02Icon,
+  Cancel01Icon,
+  Settings02Icon,
+} from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
 import { useGatewaySetupStore } from '@/hooks/use-gateway-setup'
 import { cn } from '@/lib/utils'
@@ -138,9 +142,9 @@ export function GatewayReconnectBanner() {
       className={cn(
         'fixed bottom-4 left-4 right-4 sm:left-auto sm:w-80 z-40 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 shadow-lg',
         'transition-all duration-200 ease-out',
-        (isVisible && !isFadingOut
+        isVisible && !isFadingOut
           ? 'translate-y-0 opacity-100'
-          : 'translate-y-2 opacity-0 pointer-events-none'),
+          : 'translate-y-2 opacity-0 pointer-events-none',
       )}
       role="alert"
       aria-live="polite"

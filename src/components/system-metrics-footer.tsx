@@ -43,7 +43,9 @@ function diskColor(pct: number): string {
 }
 
 async function fetchMetrics(): Promise<SystemMetrics> {
-  const res = await fetch('/api/system-metrics', { signal: AbortSignal.timeout(4000) })
+  const res = await fetch('/api/system-metrics', {
+    signal: AbortSignal.timeout(4000),
+  })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json() as Promise<SystemMetrics>
 }
@@ -73,7 +75,8 @@ export function SystemMetricsFooter() {
 
   if (!metrics) return null
 
-  const { cpu, ramUsed, ramTotal, diskPercent, uptime, gatewayConnected } = metrics
+  const { cpu, ramUsed, ramTotal, diskPercent, uptime, gatewayConnected } =
+    metrics
 
   return (
     <div
@@ -119,9 +122,13 @@ export function SystemMetricsFooter() {
             'w-1.5 h-1.5 rounded-full flex-shrink-0',
             gatewayConnected ? 'bg-emerald-400' : 'bg-red-400',
           ].join(' ')}
-          title={gatewayConnected ? 'Gateway connected' : 'Gateway disconnected'}
+          title={
+            gatewayConnected ? 'Gateway connected' : 'Gateway disconnected'
+          }
         />
-        <span className={gatewayConnected ? 'text-emerald-400' : 'text-red-400'}>
+        <span
+          className={gatewayConnected ? 'text-emerald-400' : 'text-red-400'}
+        >
           {gatewayConnected ? 'GW' : 'GW✗'}
         </span>
       </span>

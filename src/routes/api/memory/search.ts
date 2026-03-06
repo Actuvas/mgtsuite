@@ -17,7 +17,12 @@ export const Route = createFileRoute('/api/memory/search')({
           return json({ results: searchMemoryFiles(query) })
         } catch (error) {
           return json(
-            { error: error instanceof Error ? error.message : 'Failed to search memory files' },
+            {
+              error:
+                error instanceof Error
+                  ? error.message
+                  : 'Failed to search memory files',
+            },
             { status: 500 },
           )
         }

@@ -16,10 +16,7 @@ import {
   Task01Icon,
 } from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
-import {
-  type SettingsThemeMode,
-  useSettingsStore,
-} from '@/hooks/use-settings'
+import { type SettingsThemeMode, useSettingsStore } from '@/hooks/use-settings'
 
 type OverflowItem = {
   icon: typeof File01Icon
@@ -116,11 +113,7 @@ export function DashboardOverflowPanel({ open, onClose }: Props) {
       document.documentElement.classList.contains('dark'))
   const themeIcon = resolvedDarkMode ? Moon02Icon : Sun02Icon
   const themeLabel =
-    theme === 'system'
-      ? 'System'
-      : theme === 'dark'
-        ? 'Dark'
-        : 'Light'
+    theme === 'system' ? 'System' : theme === 'dark' ? 'Dark' : 'Light'
 
   return (
     <div className="fixed inset-0 z-[80] no-swipe md:hidden">
@@ -154,8 +147,16 @@ export function DashboardOverflowPanel({ open, onClose }: Props) {
               </span>
             </button>
           </section>
-          <OverflowGrid title="System" items={SYSTEM_ITEMS} onSelect={handleSelect} />
-          <OverflowGrid title="Gateway" items={GATEWAY_ITEMS} onSelect={handleSelect} />
+          <OverflowGrid
+            title="System"
+            items={SYSTEM_ITEMS}
+            onSelect={handleSelect}
+          />
+          <OverflowGrid
+            title="Gateway"
+            items={GATEWAY_ITEMS}
+            onSelect={handleSelect}
+          />
         </div>
       </div>
     </div>

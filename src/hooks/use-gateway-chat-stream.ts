@@ -34,15 +34,17 @@ export function useGatewayChatStream(
   const connectionState = useGatewayChatStore((s) => s.connectionState)
   const setConnectionState = useGatewayChatStore((s) => s.setConnectionState)
   const processEvent = useGatewayChatStore((s) => s.processEvent)
-  const clearStreamingSession = useGatewayChatStore((s) => s.clearStreamingSession)
+  const clearStreamingSession = useGatewayChatStore(
+    (s) => s.clearStreamingSession,
+  )
   const clearAllStreaming = useGatewayChatStore((s) => s.clearAllStreaming)
   const lastError = useGatewayChatStore((s) => s.lastError)
 
   const eventSourceRef = useRef<EventSource | null>(null)
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const streamTimeoutsRef = useRef<
-    Map<string, ReturnType<typeof setTimeout>>
-  >(new Map())
+  const streamTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  )
   const reconnectAttempts = useRef(0)
   const mountedRef = useRef(true)
   // Ref to break the circular dependency between connect and scheduleReconnect.

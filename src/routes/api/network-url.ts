@@ -3,7 +3,10 @@ import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { isAuthenticated } from '../../server/auth-middleware'
 
-function getNetworkUrl(port: number): { url: string; source: 'tailscale' | 'lan' | 'localhost' } {
+function getNetworkUrl(port: number): {
+  url: string
+  source: 'tailscale' | 'lan' | 'localhost'
+} {
   const nets = networkInterfaces()
   let tailscaleIp: string | null = null
   let lanIp: string | null = null
@@ -37,7 +40,10 @@ export const Route = createFileRoute('/api/network-url')({
         if (!isAuthenticated(request)) {
           return json({ ok: false, error: 'Unauthorized' }, { status: 401 })
         }
-        const port = parseInt(new URL(request.url).searchParams.get('port') ?? '3000', 10)
+        const port = parseInt(
+          new URL(request.url).searchParams.get('port') ?? '3000',
+          10,
+        )
         const result = getNetworkUrl(Number.isFinite(port) ? port : 3000)
         return json({ ok: true, ...result })
       },

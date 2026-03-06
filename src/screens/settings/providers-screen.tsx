@@ -136,7 +136,9 @@ export function ProvidersScreen({ embedded = false }: ProvidersScreenProps) {
       <main
         className={cn(
           'mx-auto flex w-full max-w-[1200px] flex-col gap-4',
-          embedded ? 'px-4 pt-4 pb-6 md:px-6 md:pb-6' : 'px-4 pt-5 pb-24 md:px-6 md:pt-8',
+          embedded
+            ? 'px-4 pt-4 pb-6 md:px-6 md:pb-6'
+            : 'px-4 pt-5 pb-24 md:px-6 md:pt-8',
         )}
       >
         <header className="rounded-xl border border-primary-200 bg-primary-50/80 px-4 py-3 shadow-sm dark:border-neutral-800 dark:bg-neutral-900/60">

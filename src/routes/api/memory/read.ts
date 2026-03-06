@@ -17,8 +17,15 @@ export const Route = createFileRoute('/api/memory/read')({
           const content = readMemoryFile(pathParam)
           return json({ path: pathParam, content })
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Failed to read memory file'
-          const status = /not allowed|outside workspace|required/i.test(message) ? 400 : /ENOENT/.test(message) ? 404 : 500
+          const message =
+            error instanceof Error
+              ? error.message
+              : 'Failed to read memory file'
+          const status = /not allowed|outside workspace|required/i.test(message)
+            ? 400
+            : /ENOENT/.test(message)
+              ? 404
+              : 500
           return json({ error: message }, { status })
         }
       },

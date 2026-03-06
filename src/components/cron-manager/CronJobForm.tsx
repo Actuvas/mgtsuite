@@ -80,7 +80,10 @@ function detectScheduleKind(schedule: string): ScheduleKind {
   if (schedule.startsWith('every ') || /^\d+[smhd]$/.test(schedule.trim())) {
     return 'every'
   }
-  if (schedule.startsWith('at ') || /^\d{4}-\d{2}-\d{2}/.test(schedule.trim())) {
+  if (
+    schedule.startsWith('at ') ||
+    /^\d{4}-\d{2}-\d{2}/.test(schedule.trim())
+  ) {
     return 'at'
   }
   return 'cron'
@@ -94,7 +97,9 @@ function getAtDatetimeValue(schedule: string): string {
 
 function getEveryMinutesValue(schedule: string): string {
   const trimmed = schedule.trim()
-  const fromEveryPrefix = trimmed.match(/^every\s+(\d+)\s*(m|min|minute|minutes)?$/i)
+  const fromEveryPrefix = trimmed.match(
+    /^every\s+(\d+)\s*(m|min|minute|minutes)?$/i,
+  )
   if (fromEveryPrefix?.[1]) return fromEveryPrefix[1]
   const shorthand = trimmed.match(/^(\d+)\s*(m|min|minute|minutes)$/i)
   if (shorthand?.[1]) return shorthand[1]
@@ -129,7 +134,9 @@ function SegmentedControl<T extends string>({
         <button
           key={opt}
           type="button"
-          onClick={() => { onChange(opt) }}
+          onClick={() => {
+            onChange(opt)
+          }}
           className={[
             'rounded-md px-3 py-1 text-xs font-medium transition-colors',
             value === opt
@@ -266,7 +273,9 @@ export function CronJobForm({
     if (scheduleKind === 'every') {
       const minutes = Number(everyIntervalMinutes)
       if (!Number.isInteger(minutes) || minutes <= 0) {
-        setLocalError('Every interval must be a positive whole number of minutes.')
+        setLocalError(
+          'Every interval must be a positive whole number of minutes.',
+        )
         return
       }
     }
@@ -326,7 +335,9 @@ export function CronJobForm({
           </label>
 
           <label className="space-y-1">
-            <span className="text-xs text-primary-600 tabular-nums">Description</span>
+            <span className="text-xs text-primary-600 tabular-nums">
+              Description
+            </span>
             <input
               value={description}
               onChange={function onChangeDescription(event) {
@@ -341,7 +352,9 @@ export function CronJobForm({
         {/* ── Schedule ─────────────────────────────────────────────────────── */}
         <div className="space-y-2 rounded-lg border border-primary-200 bg-primary-100/40 p-3">
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <span className="text-xs font-medium text-primary-600 tabular-nums">Schedule</span>
+            <span className="text-xs font-medium text-primary-600 tabular-nums">
+              Schedule
+            </span>
             <SegmentedControl<ScheduleKind>
               options={['at', 'every', 'cron']}
               labels={SCHEDULE_LABELS}
@@ -354,8 +367,12 @@ export function CronJobForm({
             <div className="space-y-1">
               <input
                 value={cronExpr}
-                onChange={function onChangeCron(e) { handleCronExprChange(e.target.value) }}
-                onBlur={function onBlurCron() { setCronError(validateCronExpr(cronExpr)) }}
+                onChange={function onChangeCron(e) {
+                  handleCronExprChange(e.target.value)
+                }}
+                onBlur={function onBlurCron() {
+                  setCronError(validateCronExpr(cronExpr))
+                }}
                 placeholder="0 9 * * 1-5"
                 className={[
                   'h-9 w-full rounded-lg border px-3 text-sm text-primary-900 outline-none transition-colors focus:border-primary-400 tabular-nums bg-primary-100/60',
@@ -365,7 +382,10 @@ export function CronJobForm({
               {cronError ? (
                 <p className="text-xs text-accent-500">{cronError}</p>
               ) : (
-                <p className="text-xs text-primary-500">Standard 5-field cron — e.g. <code>0 9 * * 1-5</code> (weekdays at 9am)</p>
+                <p className="text-xs text-primary-500">
+                  Standard 5-field cron — e.g. <code>0 9 * * 1-5</code>{' '}
+                  (weekdays at 9am)
+                </p>
               )}
             </div>
           )}
@@ -378,7 +398,9 @@ export function CronJobForm({
                 step={1}
                 inputMode="numeric"
                 value={everyIntervalMinutes}
-                onChange={function onChangeEvery(e) { setEveryIntervalMinutes(e.target.value) }}
+                onChange={function onChangeEvery(e) {
+                  setEveryIntervalMinutes(e.target.value)
+                }}
                 placeholder="15"
                 className="h-9 w-full rounded-lg border border-primary-200 bg-primary-100/60 px-3 text-sm text-primary-900 outline-none transition-colors focus:border-primary-400 tabular-nums"
               />
@@ -391,10 +413,14 @@ export function CronJobForm({
               <input
                 type="datetime-local"
                 value={atDatetime}
-                onChange={function onChangeAt(e) { setAtDatetime(e.target.value) }}
+                onChange={function onChangeAt(e) {
+                  setAtDatetime(e.target.value)
+                }}
                 className="h-9 w-full rounded-lg border border-primary-200 bg-primary-100/60 px-3 text-sm text-primary-900 outline-none transition-colors focus:border-primary-400 tabular-nums"
               />
-              <p className="text-xs text-primary-500">One-time run at the selected date/time</p>
+              <p className="text-xs text-primary-500">
+                One-time run at the selected date/time
+              </p>
             </div>
           )}
         </div>
@@ -402,7 +428,9 @@ export function CronJobForm({
         {/* ── Payload type ─────────────────────────────────────────────────── */}
         <div className="space-y-2 rounded-lg border border-primary-200 bg-primary-100/40 p-3">
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <span className="text-xs font-medium text-primary-600 tabular-nums">Payload Type</span>
+            <span className="text-xs font-medium text-primary-600 tabular-nums">
+              Payload Type
+            </span>
             <SegmentedControl<PayloadKind>
               options={['systemEvent', 'agentTurn']}
               labels={PAYLOAD_LABELS}
@@ -418,7 +446,9 @@ export function CronJobForm({
             <span className="text-xs text-primary-600">Message</span>
             <textarea
               value={payloadMessage}
-              onChange={function onChangePayloadMessage(e) { setPayloadMessage(e.target.value) }}
+              onChange={function onChangePayloadMessage(e) {
+                setPayloadMessage(e.target.value)
+              }}
               placeholder="Message payload"
               rows={3}
               className="w-full rounded-lg border border-primary-200 bg-primary-100/60 px-3 py-2 text-sm text-primary-900 outline-none transition-colors focus:border-primary-400"
@@ -432,7 +462,9 @@ export function CronJobForm({
               </span>
               <input
                 value={agentModel}
-                onChange={function onChangeAgentModel(e) { setAgentModel(e.target.value) }}
+                onChange={function onChangeAgentModel(e) {
+                  setAgentModel(e.target.value)
+                }}
                 placeholder="openai/gpt-5"
                 className="h-9 w-full rounded-lg border border-primary-200 bg-primary-100/60 px-3 text-sm text-primary-900 outline-none transition-colors focus:border-primary-400"
               />
@@ -443,7 +475,8 @@ export function CronJobForm({
         {/* ── Delivery Config ───────────────────────────────────────────────── */}
         <label className="space-y-1 block">
           <span className="text-xs text-primary-600 tabular-nums">
-            Delivery Config JSON <span className="text-primary-400">(optional)</span>
+            Delivery Config JSON{' '}
+            <span className="text-primary-400">(optional)</span>
           </span>
           <textarea
             value={deliveryConfigInput}

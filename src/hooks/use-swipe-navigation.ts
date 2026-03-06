@@ -63,7 +63,9 @@ function triggerHaptic() {
 
 export function useSwipeNavigation() {
   const navigate = useNavigate()
-  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
   const gestureRef = useRef<GestureState | null>(null)
 
   const onTouchStart = useCallback((event: TouchEvent<HTMLElement>) => {

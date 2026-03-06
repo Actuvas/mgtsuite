@@ -37,19 +37,28 @@ async function pingGateway(): Promise<{ ok: boolean; error?: string }> {
   }
 }
 
-async function fetchCurrentConfig(): Promise<{ url: string; hasToken: boolean }> {
+async function fetchCurrentConfig(): Promise<{
+  url: string
+  hasToken: boolean
+}> {
   try {
     const response = await fetch('/api/gateway-config', {
       signal: AbortSignal.timeout(5000),
     })
     const data = (await response.json()) as { url?: string; hasToken?: boolean }
-    return { url: data.url || 'ws://127.0.0.1:18789', hasToken: Boolean(data.hasToken) }
+    return {
+      url: data.url || 'ws://127.0.0.1:18789',
+      hasToken: Boolean(data.hasToken),
+    }
   } catch {
     return { url: 'ws://127.0.0.1:18789', hasToken: false }
   }
 }
 
-async function saveConfig(url: string, token: string): Promise<{ ok: boolean; error?: string }> {
+async function saveConfig(
+  url: string,
+  token: string,
+): Promise<{ ok: boolean; error?: string }> {
   try {
     const response = await fetch('/api/gateway-config', {
       method: 'POST',
@@ -57,13 +66,20 @@ async function saveConfig(url: string, token: string): Promise<{ ok: boolean; er
       body: JSON.stringify({ url, token }),
       signal: AbortSignal.timeout(15000),
     })
-    const data = (await response.json()) as { ok?: boolean; connected?: boolean; error?: string }
+    const data = (await response.json()) as {
+      ok?: boolean
+      connected?: boolean
+      error?: string
+    }
     if (data.ok && data.connected === false) {
       return { ok: true, error: 'Config saved. Reconnecting to gateway...' }
     }
     return { ok: Boolean(data.ok), error: data.error }
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'Failed to save config' }
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : 'Failed to save config',
+    }
   }
 }
 
@@ -148,8 +164,10 @@ export const useGatewaySetupStore = create<GatewaySetupState>((set, get) => ({
     }
   },
 
-  setGatewayUrl: (url) => set({ gatewayUrl: url, testStatus: 'idle', testError: null }),
-  setGatewayToken: (token) => set({ gatewayToken: token, testStatus: 'idle', testError: null }),
+  setGatewayUrl: (url) =>
+    set({ gatewayUrl: url, testStatus: 'idle', testError: null }),
+  setGatewayToken: (token) =>
+    set({ gatewayToken: token, testStatus: 'idle', testError: null }),
 
   saveAndTest: async () => {
     const { gatewayUrl, gatewayToken } = get()
@@ -180,7 +198,9 @@ export const useGatewaySetupStore = create<GatewaySetupState>((set, get) => ({
 
     set({
       testStatus: 'error',
-      testError: error || 'Gateway not reachable after saving config. You may need to restart MGT Suite.',
+      testError:
+        error ||
+        'Gateway not reachable after saving config. You may need to restart MGT Suite.',
     })
     return false
   },

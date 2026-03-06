@@ -387,11 +387,14 @@ export async function resolveGatewayApproval(
   const controller = new AbortController()
   const timeout = globalThis.setTimeout(() => controller.abort(), 8000)
   try {
-    const response = await fetch(makeEndpoint(`/api/gateway/approvals/${approvalId}/${action}`), {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      signal: controller.signal,
-    })
+    const response = await fetch(
+      makeEndpoint(`/api/gateway/approvals/${approvalId}/${action}`),
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        signal: controller.signal,
+      },
+    )
     return { ok: response.ok }
   } catch {
     return { ok: false }

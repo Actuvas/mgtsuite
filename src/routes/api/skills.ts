@@ -78,7 +78,17 @@ async function getBuiltinRoot(): Promise<string | null> {
 
   const candidates = [
     // npm global (nvm)
-    path.join(HOME_DIR, '.nvm', 'versions', 'node', process.version, 'lib', 'node_modules', 'openclaw', 'skills'),
+    path.join(
+      HOME_DIR,
+      '.nvm',
+      'versions',
+      'node',
+      process.version,
+      'lib',
+      'node_modules',
+      'openclaw',
+      'skills',
+    ),
     // npm global (system)
     path.join('/usr', 'local', 'lib', 'node_modules', 'openclaw', 'skills'),
     path.join('/usr', 'lib', 'node_modules', 'openclaw', 'skills'),
@@ -91,7 +101,13 @@ async function getBuiltinRoot(): Promise<string | null> {
   // Also try `npm root -g` result
   try {
     const cp = await import('node:child_process')
-    const globalRoot = cp.execSync('npm root -g', { encoding: 'utf8', timeout: 3000, stdio: ['pipe', 'pipe', 'pipe'] }).trim()
+    const globalRoot = cp
+      .execSync('npm root -g', {
+        encoding: 'utf8',
+        timeout: 3000,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      })
+      .trim()
     candidates.unshift(path.join(globalRoot, 'openclaw', 'skills'))
   } catch {
     // npm not available (Docker etc)
@@ -739,12 +755,18 @@ async function collectMarketplaceSkillEntries(): Promise<
 // --- ClawHub API-based marketplace (fallback when git registry is unavailable) ---
 
 const CLAWHUB_API_URL = 'https://clawhub.ai/api/v1/skills'
-let apiMarketplaceCache: { builtAt: number; items: Array<SkillIndexRecord> } | null = null
+let apiMarketplaceCache: {
+  builtAt: number
+  items: Array<SkillIndexRecord>
+} | null = null
 const API_CACHE_TTL_MS = 10 * 60 * 1000
 
 async function fetchMarketplaceFromApi(): Promise<Array<SkillIndexRecord>> {
   const now = Date.now()
-  if (apiMarketplaceCache && now - apiMarketplaceCache.builtAt < API_CACHE_TTL_MS) {
+  if (
+    apiMarketplaceCache &&
+    now - apiMarketplaceCache.builtAt < API_CACHE_TTL_MS
+  ) {
     return apiMarketplaceCache.items
   }
 
@@ -813,7 +835,10 @@ async function fetchMarketplaceFromApi(): Promise<Array<SkillIndexRecord>> {
         tags: version ? [version] : [],
         homepage: `https://clawhub.ai/skills/${item.slug}`,
         category: deriveCategory({}, `${item.displayName} ${item.summary}`),
-        icon: CATEGORY_ICONS[deriveCategory({}, `${item.displayName} ${item.summary}`)] || '🧩',
+        icon:
+          CATEGORY_ICONS[
+            deriveCategory({}, `${item.displayName} ${item.summary}`)
+          ] || '🧩',
         content: item.summary || '',
         sourcePath: `clawhub://${item.slug}`,
         folderPath: '',

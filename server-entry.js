@@ -61,7 +61,8 @@ const SECURITY_HEADERS = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
 
   // Disable browser features that the app does not need
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+  'Permissions-Policy':
+    'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
 
   // HSTS: only set when running over HTTPS (detected via env var or proxy header)
   // 1 year max-age; includeSubDomains is intentionally omitted for local-first use.
@@ -112,7 +113,10 @@ function applySecurityHeaders(res) {
 }
 
 async function tryServeStatic(req, res) {
-  const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`)
+  const url = new URL(
+    req.url || '/',
+    `http://${req.headers.host || 'localhost'}`,
+  )
   const pathname = decodeURIComponent(url.pathname)
 
   // Prevent directory traversal

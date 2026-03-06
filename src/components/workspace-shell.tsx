@@ -204,7 +204,8 @@ export function WorkspaceShell() {
 
     if (prevIdx !== -1 && currentIdx !== -1 && currentIdx !== prevIdx) {
       // Navigate right (higher index) = slide left; left = slide right
-      const direction = currentIdx > prevIdx ? 'slide-enter-left' : 'slide-enter-right'
+      const direction =
+        currentIdx > prevIdx ? 'slide-enter-left' : 'slide-enter-right'
       setSlideClass(direction)
       // Remove class after animation completes
       const timer = setTimeout(() => setSlideClass(''), 250)
@@ -346,7 +347,11 @@ export function WorkspaceShell() {
             ].join(' ')}
             data-tour="chat-area"
           >
-            <div className={['page-transition h-full', slideClass].filter(Boolean).join(' ')}>
+            <div
+              className={['page-transition h-full', slideClass]
+                .filter(Boolean)
+                .join(' ')}
+            >
               <ErrorBoundary
                 className="h-full"
                 title="Something went wrong"

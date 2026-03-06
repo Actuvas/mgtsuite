@@ -21,9 +21,17 @@ const GRID_SPAN_BY_SIZE: Record<WidgetSize, string> = {
 
 export function WidgetGrid({ items, className }: WidgetGridProps) {
   return (
-    <div className={cn('grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4', className)}>
+    <div
+      className={cn(
+        'grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4',
+        className,
+      )}
+    >
       {items.map((item) => (
-        <div key={item.id} className={cn('min-w-0', GRID_SPAN_BY_SIZE[item.size])}>
+        <div
+          key={item.id}
+          className={cn('min-w-0', GRID_SPAN_BY_SIZE[item.size])}
+        >
           {item.node}
         </div>
       ))}

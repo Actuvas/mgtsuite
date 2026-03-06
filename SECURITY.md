@@ -28,17 +28,20 @@ We will acknowledge your report within 48 hours and aim to provide a fix within 
 ## Security Measures (v3.0.0+)
 
 **Authentication**
+
 - All API routes require authentication as of v3.0.0
 - Session tokens use timing-safe comparison to prevent timing attacks
 - httpOnly + SameSite=Strict cookies
 - Token revocation on logout
 
 **Network**
+
 - `Access-Control-Allow-Origin` restricted to localhost — no wildcard CORS
 - Browser proxy and screenshot endpoints locked to same-origin only
 - Rate limiting on high-risk endpoints (file access, debug, exec)
 
 **Data & File Access**
+
 - Path traversal prevention on all file and memory routes (`ensureWorkspacePath()`)
 - `.md`-only restriction on memory write routes
 - No API keys or secrets ever exposed to client-side code
@@ -46,10 +49,12 @@ We will acknowledge your report within 48 hours and aim to provide a fix within 
 - Diagnostic output scrubbed of sensitive data
 
 **Agent Safety**
+
 - Exec approval workflow — sensitive gateway exec commands require explicit human approval via in-UI modal
 - Skills security scanning — every skill from the marketplace is scanned for suspicious patterns before install
 
 **Configuration**
+
 - Environment files are gitignored
 - Config endpoints redact credentials in responses
 - Example configs use placeholder keys only
@@ -69,8 +74,8 @@ We will acknowledge your report within 48 hours and aim to provide a fix within 
 
 ## Supported Versions
 
-| Version | Supported |
-|---------|-----------|
-| v3.x (main) | ✅ Active |
-| v2.x | ⚠️ Security fixes only |
-| < v2.0 | ❌ Unsupported |
+| Version     | Supported              |
+| ----------- | ---------------------- |
+| v3.x (main) | ✅ Active              |
+| v2.x        | ⚠️ Security fixes only |
+| < v2.0      | ❌ Unsupported         |

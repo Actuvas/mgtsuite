@@ -10,14 +10,17 @@ const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000 // 30 days, matching cookie 
 const tokenExpiry = new Map<string, number>()
 
 // Purge expired tokens every 60 minutes to prevent unbounded memory growth.
-setInterval(() => {
-  const now = Date.now()
-  for (const [tok, expiresAt] of tokenExpiry) {
-    if (now >= expiresAt) {
-      tokenExpiry.delete(tok)
+setInterval(
+  () => {
+    const now = Date.now()
+    for (const [tok, expiresAt] of tokenExpiry) {
+      if (now >= expiresAt) {
+        tokenExpiry.delete(tok)
+      }
     }
-  }
-}, 60 * 60 * 1000).unref?.()
+  },
+  60 * 60 * 1000,
+).unref?.()
 
 /**
  * Generate a cryptographically secure session token.

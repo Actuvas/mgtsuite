@@ -90,7 +90,9 @@ function ErrorState({
     <div className="min-h-full bg-surface px-4 pt-5 pb-24 md:px-6 md:pt-8 text-primary-900 dark:text-neutral-100">
       <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-4">
         <section className="rounded-xl border border-primary-200 bg-primary-50/80 px-4 py-3 shadow-sm dark:border-neutral-800 dark:bg-neutral-900/60">
-          <h1 className="text-base font-semibold text-primary-900 dark:text-neutral-100">Failed to load skills</h1>
+          <h1 className="text-base font-semibold text-primary-900 dark:text-neutral-100">
+            Failed to load skills
+          </h1>
           <p className="mt-2 text-sm text-primary-600">
             {message || 'Something went wrong while fetching skills.'}
           </p>
@@ -137,8 +139,10 @@ export function SkillsScreen() {
   const [actionError, setActionError] = useState<string | null>(null)
 
   // Mobile detection for pull-to-refresh
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches,
+  const [isMobile, setIsMobile] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia('(max-width: 767px)').matches,
   )
   useEffect(() => {
     const media = window.matchMedia('(max-width: 767px)')
@@ -173,7 +177,9 @@ export function SkillsScreen() {
   // Pull-to-refresh: attach to the scrollable parent (<main> in workspace-shell)
   const scrollContainerRef = useRef<HTMLElement | null>(null)
   useEffect(() => {
-    const el = document.querySelector('main[data-tour="chat-area"]') as HTMLElement | null
+    const el = document.querySelector(
+      'main[data-tour="chat-area"]',
+    ) as HTMLElement | null
     scrollContainerRef.current = el
   }, [])
 
@@ -334,7 +340,10 @@ export function SkillsScreen() {
   }
 
   const pullIndicatorStyle = isPulling
-    ? { transform: `translateY(${Math.min(pullDistance - 8, 48)}px)`, opacity: Math.min(pullDistance / threshold, 1) }
+    ? {
+        transform: `translateY(${Math.min(pullDistance - 8, 48)}px)`,
+        opacity: Math.min(pullDistance / threshold, 1),
+      }
     : undefined
 
   return (
@@ -350,11 +359,15 @@ export function SkillsScreen() {
             <span
               className={cn(
                 'size-3 rounded-full border-2 border-accent-500',
-                pullDistance >= threshold ? 'border-t-transparent animate-spin' : 'opacity-50',
+                pullDistance >= threshold
+                  ? 'border-t-transparent animate-spin'
+                  : 'opacity-50',
               )}
             />
             <span className="text-[11px] font-medium text-neutral-600 dark:text-neutral-300">
-              {pullDistance >= threshold ? 'Release to refresh' : 'Pull to refresh'}
+              {pullDistance >= threshold
+                ? 'Release to refresh'
+                : 'Pull to refresh'}
             </span>
           </div>
         </div>
@@ -370,8 +383,8 @@ export function SkillsScreen() {
                 Skills Browser
               </h1>
               <p className="mt-0.5 line-clamp-2 text-xs text-primary-500 text-pretty dark:text-neutral-400 sm:line-clamp-none">
-                Discover, install, and manage skills across your local
-                workspace and ClawHub registry.
+                Discover, install, and manage skills across your local workspace
+                and ClawHub registry.
               </p>
             </div>
           </div>
@@ -384,13 +397,22 @@ export function SkillsScreen() {
                 className="w-full overflow-x-auto rounded-xl border border-primary-200 bg-primary-100/60 p-1 scrollbar-none sm:w-auto"
                 variant="default"
               >
-                <TabsTab value="installed" className="min-w-0 shrink-0 px-3 text-xs sm:min-w-[132px] sm:text-sm">
+                <TabsTab
+                  value="installed"
+                  className="min-w-0 shrink-0 px-3 text-xs sm:min-w-[132px] sm:text-sm"
+                >
                   Installed
                 </TabsTab>
-                <TabsTab value="marketplace" className="min-w-0 shrink-0 px-3 text-xs sm:min-w-[168px] sm:text-sm">
+                <TabsTab
+                  value="marketplace"
+                  className="min-w-0 shrink-0 px-3 text-xs sm:min-w-[168px] sm:text-sm"
+                >
                   Marketplace
                 </TabsTab>
-                <TabsTab value="featured" className="min-w-0 shrink-0 px-3 text-xs sm:min-w-[120px] sm:text-sm">
+                <TabsTab
+                  value="featured"
+                  className="min-w-0 shrink-0 px-3 text-xs sm:min-w-[120px] sm:text-sm"
+                >
                   Featured
                 </TabsTab>
               </TabsList>
@@ -841,7 +863,9 @@ function SkillsGrid({
     return (
       <div className="rounded-xl border border-dashed border-primary-200 bg-primary-100/40 px-4 py-8 text-center">
         <p className="text-sm font-medium text-primary-700">
-          {isMarketplace ? 'No marketplace skills available' : 'No skills found'}
+          {isMarketplace
+            ? 'No marketplace skills available'
+            : 'No skills found'}
         </p>
         <p className="mt-1 text-xs text-primary-500 text-pretty max-w-sm mx-auto">
           {isMarketplace ? (
@@ -881,7 +905,9 @@ function SkillsGrid({
             >
               {/* Header: icon + name + badge */}
               <div className="mb-1.5 flex items-start gap-2.5 md:mb-2">
-                <span className="mt-0.5 text-2xl leading-none md:text-xl">{skill.icon}</span>
+                <span className="mt-0.5 text-2xl leading-none md:text-xl">
+                  {skill.icon}
+                </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="line-clamp-1 text-sm font-medium text-ink md:text-base">
@@ -953,7 +979,9 @@ function SkillsGrid({
                           }
                           aria-label={`Toggle ${skill.name}`}
                         />
-                        <span className="hidden sm:inline">{skill.enabled ? 'Enabled' : 'Disabled'}</span>
+                        <span className="hidden sm:inline">
+                          {skill.enabled ? 'Enabled' : 'Disabled'}
+                        </span>
                       </div>
                     )}
                     {!skill.builtin && (

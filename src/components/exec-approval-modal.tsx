@@ -37,10 +37,16 @@ type EnrichedApproval = GatewayApprovalEntry & {
 const DEFAULT_TIMEOUT_MS = 30_000
 
 function approvalCommand(approval: GatewayApprovalEntry): string {
-  if (typeof approval.action === 'string' && approval.action.trim().length > 0) return approval.action
-  if (typeof approval.tool === 'string' && approval.tool.trim().length > 0) return approval.tool
+  if (typeof approval.action === 'string' && approval.action.trim().length > 0)
+    return approval.action
+  if (typeof approval.tool === 'string' && approval.tool.trim().length > 0)
+    return approval.tool
   if (approval.input !== undefined) {
-    try { return JSON.stringify(approval.input, null, 2) } catch { return 'Approval requested' }
+    try {
+      return JSON.stringify(approval.input, null, 2)
+    } catch {
+      return 'Approval requested'
+    }
   }
   return 'Approval requested'
 }
@@ -50,16 +56,37 @@ function approvalAgent(approval: GatewayApprovalEntry): string {
 }
 
 function approvalWorkDir(approval: GatewayApprovalEntry): string | null {
-  if (typeof approval.context === 'string' && approval.context.trim().length > 0) return approval.context.trim()
+  if (
+    typeof approval.context === 'string' &&
+    approval.context.trim().length > 0
+  )
+    return approval.context.trim()
   return null
 }
 
 function computeDeadline(approval: EnrichedApproval): number {
-  if (typeof approval.timeoutAt === 'number' && Number.isFinite(approval.timeoutAt)) return approval.timeoutAt
-  if (typeof approval.expiresAt === 'number' && Number.isFinite(approval.expiresAt)) return approval.expiresAt
-  if (typeof approval.deadline === 'number' && Number.isFinite(approval.deadline)) return approval.deadline
-  if (typeof approval.timeoutMs === 'number' && Number.isFinite(approval.timeoutMs)) {
-    return (approval.requestedAt ?? Date.now()) + Math.max(0, approval.timeoutMs)
+  if (
+    typeof approval.timeoutAt === 'number' &&
+    Number.isFinite(approval.timeoutAt)
+  )
+    return approval.timeoutAt
+  if (
+    typeof approval.expiresAt === 'number' &&
+    Number.isFinite(approval.expiresAt)
+  )
+    return approval.expiresAt
+  if (
+    typeof approval.deadline === 'number' &&
+    Number.isFinite(approval.deadline)
+  )
+    return approval.deadline
+  if (
+    typeof approval.timeoutMs === 'number' &&
+    Number.isFinite(approval.timeoutMs)
+  ) {
+    return (
+      (approval.requestedAt ?? Date.now()) + Math.max(0, approval.timeoutMs)
+    )
   }
   if (approval._localDeadline) return approval._localDeadline
   return (approval.requestedAt ?? Date.now()) + DEFAULT_TIMEOUT_MS
@@ -76,7 +103,9 @@ function formatTime(ms: number): string {
 
 export function ExecApprovalModal() {
   const [pending, setPending] = useState<EnrichedApproval[]>([])
-  const [resolving, setResolving] = useState<Record<string, 'approve' | 'deny'>>({})
+  const [resolving, setResolving] = useState<
+    Record<string, 'approve' | 'deny'>
+  >({})
   const [now, setNow] = useState(Date.now())
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
   const [activeIndex, setActiveIndex] = useState(0)
@@ -85,12 +114,19 @@ export function ExecApprovalModal() {
   const refresh = useCallback(async () => {
     try {
       const response = await fetchGatewayApprovals()
-      const rows = (response.pending ?? response.approvals ?? []) as EnrichedApproval[]
-      const pendingRows = rows.filter((entry) => (entry.status ?? 'pending') === 'pending')
+      const rows = (response.pending ??
+        response.approvals ??
+        []) as EnrichedApproval[]
+      const pendingRows = rows.filter(
+        (entry) => (entry.status ?? 'pending') === 'pending',
+      )
       const seenMap = seenRef.current
       const enriched = pendingRows.map((entry) => {
         if (!seenMap.has(entry.id)) {
-          seenMap.set(entry.id, (entry.requestedAt ?? Date.now()) + DEFAULT_TIMEOUT_MS)
+          seenMap.set(
+            entry.id,
+            (entry.requestedAt ?? Date.now()) + DEFAULT_TIMEOUT_MS,
+          )
         }
         return { ...entry, _localDeadline: seenMap.get(entry.id) }
       })
@@ -104,16 +140,25 @@ export function ExecApprovalModal() {
     void refresh()
     const poll = window.setInterval(() => void refresh(), 3_000)
     const ticker = window.setInterval(() => setNow(Date.now()), 1_000)
-    return () => { window.clearInterval(poll); window.clearInterval(ticker) }
+    return () => {
+      window.clearInterval(poll)
+      window.clearInterval(ticker)
+    }
   }, [refresh])
 
   // Auto-deny expired
   useEffect(() => {
     for (const approval of pending) {
       const deadline = computeDeadline(approval)
-      if (deadline - now <= 0 && !resolving[approval.id] && !dismissed.has(approval.id)) {
+      if (
+        deadline - now <= 0 &&
+        !resolving[approval.id] &&
+        !dismissed.has(approval.id)
+      ) {
         void resolveGatewayApproval(approval.id, 'deny').then(() => {
-          showToast(`Auto-denied: ${approvalCommand(approval).slice(0, 60)}`, { type: 'warning' })
+          showToast(`Auto-denied: ${approvalCommand(approval).slice(0, 60)}`, {
+            type: 'warning',
+          })
           void refresh()
         })
         setDismissed((prev) => new Set(prev).add(approval.id))
@@ -129,7 +174,8 @@ export function ExecApprovalModal() {
 
   // Clamp active index
   useEffect(() => {
-    if (activeIndex >= visible.length) setActiveIndex(Math.max(0, visible.length - 1))
+    if (activeIndex >= visible.length)
+      setActiveIndex(Math.max(0, visible.length - 1))
   }, [visible.length, activeIndex])
 
   async function handleResolve(id: string, action: 'approve' | 'deny') {
@@ -137,12 +183,18 @@ export function ExecApprovalModal() {
     try {
       const result = await resolveGatewayApproval(id, action)
       if (result.ok) {
-        showToast(action === 'approve' ? 'Approved ✓' : 'Denied ✕', { type: action === 'approve' ? 'success' : 'error' })
+        showToast(action === 'approve' ? 'Approved ✓' : 'Denied ✕', {
+          type: action === 'approve' ? 'success' : 'error',
+        })
       }
       setDismissed((prev) => new Set(prev).add(id))
       await refresh()
     } finally {
-      setResolving((prev) => { const next = { ...prev }; delete next[id]; return next })
+      setResolving((prev) => {
+        const next = { ...prev }
+        delete next[id]
+        return next
+      })
     }
   }
 
@@ -153,7 +205,10 @@ export function ExecApprovalModal() {
 
   const deadline = computeDeadline(current)
   const remaining = Math.max(0, deadline - now)
-  const progressPct = Math.max(0, Math.min(100, (remaining / DEFAULT_TIMEOUT_MS) * 100))
+  const progressPct = Math.max(
+    0,
+    Math.min(100, (remaining / DEFAULT_TIMEOUT_MS) * 100),
+  )
   const isUrgent = remaining < 10_000
   const command = approvalCommand(current)
   const agent = approvalAgent(current)
@@ -183,10 +238,14 @@ export function ExecApprovalModal() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className={cn(
-                'font-mono text-sm font-bold tabular-nums',
-                isUrgent ? 'text-red-500 animate-pulse' : 'text-neutral-500 dark:text-neutral-400',
-              )}>
+              <span
+                className={cn(
+                  'font-mono text-sm font-bold tabular-nums',
+                  isUrgent
+                    ? 'text-red-500 animate-pulse'
+                    : 'text-neutral-500 dark:text-neutral-400',
+                )}
+              >
                 {formatTime(remaining)}
               </span>
             </div>

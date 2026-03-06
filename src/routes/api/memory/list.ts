@@ -15,7 +15,12 @@ export const Route = createFileRoute('/api/memory/list')({
           return json({ files: listMemoryFiles() })
         } catch (error) {
           return json(
-            { error: error instanceof Error ? error.message : 'Failed to list memory files' },
+            {
+              error:
+                error instanceof Error
+                  ? error.message
+                  : 'Failed to list memory files',
+            },
             { status: 500 },
           )
         }

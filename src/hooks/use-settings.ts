@@ -48,7 +48,10 @@ export const defaultStudioSettings: StudioSettings = {
 }
 
 function resolveStoredAccent(value: string | null): AccentColor | null {
-  return value === 'purple' || value === 'blue' || value === 'green' || value === 'orange'
+  return value === 'purple' ||
+    value === 'blue' ||
+    value === 'green' ||
+    value === 'orange'
     ? value
     : null
 }
@@ -116,24 +119,29 @@ export function applyTheme(theme: SettingsThemeMode) {
 
   // Sync data-theme so CSS variable overrides don't fight Tailwind dark: classes.
   // paper-light CSS has !important overrides that win over dark: variants unless data-theme is correct.
-  const resolvedDark =
-    theme === 'dark' || (theme === 'system' && media.matches)
+  const resolvedDark = theme === 'dark' || (theme === 'system' && media.matches)
   if (resolvedDark) {
     // Preserve user's enterprise dark theme if set, otherwise default to ops-dark
     const stored = localStorage.getItem('mgtsuite-theme')
     const darkThemes = ['ops-dark', 'premium-dark', 'sunset-brand']
-    root.setAttribute('data-theme', darkThemes.includes(stored ?? '') ? (stored as string) : 'ops-dark')
+    root.setAttribute(
+      'data-theme',
+      darkThemes.includes(stored ?? '') ? (stored as string) : 'ops-dark',
+    )
   } else {
     root.setAttribute('data-theme', 'paper-light')
   }
 
-  const storedAccent = resolveStoredAccent(localStorage.getItem('mgtsuite-accent')) || 'orange'
+  const storedAccent =
+    resolveStoredAccent(localStorage.getItem('mgtsuite-accent')) || 'orange'
   root.setAttribute('data-accent', storedAccent)
 }
 
 function applySettingsAppearance(settings: StudioSettings) {
   applyTheme(settings.theme)
-  const storedAccent = resolveStoredAccent(localStorage.getItem('mgtsuite-accent'))
+  const storedAccent = resolveStoredAccent(
+    localStorage.getItem('mgtsuite-accent'),
+  )
   applyAccentColor(storedAccent ?? settings.accentColor)
 }
 

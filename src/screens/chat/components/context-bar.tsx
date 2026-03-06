@@ -116,7 +116,10 @@ function ContextBarComponent({ compact: _compact }: { compact?: boolean }) {
         {/* Bar — always 3px, never moves */}
         <div className={cn('w-full h-[3px]', barBg)}>
           <div
-            className={cn('h-full transition-all duration-700 ease-out', barColor)}
+            className={cn(
+              'h-full transition-all duration-700 ease-out',
+              barColor,
+            )}
             style={{ width: `${clampedPct}%` }}
           />
         </div>

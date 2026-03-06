@@ -119,7 +119,8 @@ export const useSwarmStore = create<SwarmState>((set, get) => ({
         if (!key.includes('subagent:')) {
           // Accept dedicated agent sessions like agent:bossclaw:bossclaw
           const parts = key.split(':')
-          const isDedicatedAgent = parts[0] === 'agent' && parts.length >= 3 && parts[1] !== 'main'
+          const isDedicatedAgent =
+            parts[0] === 'agent' && parts.length >= 3 && parts[1] !== 'main'
           if (!isDedicatedAgent) return false
         }
         // Skip sessions with zero tokens and very old (never ran)

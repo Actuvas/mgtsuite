@@ -20,9 +20,14 @@ export const Route = createFileRoute('/api/chat-abort')({
         if (csrfCheck) return csrfCheck
 
         try {
-          const body = (await request.json().catch(() => null)) as AbortRequestBody | null
+          const body = (await request
+            .json()
+            .catch(() => null)) as AbortRequestBody | null
           if (!body) {
-            return json({ ok: false, error: 'Invalid JSON body' }, { status: 400 })
+            return json(
+              { ok: false, error: 'Invalid JSON body' },
+              { status: 400 },
+            )
           }
 
           const sessionKey = body.sessionKey?.trim() || undefined

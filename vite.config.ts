@@ -63,7 +63,10 @@ const config = defineConfig(({ mode }) => {
     server: {
       // Force IPv4 — 'localhost' resolves to ::1 (IPv6) on Windows, breaking gateway connectivity
       host: allowedHosts.length > 0 ? '0.0.0.0' : '127.0.0.1',
-      allowedHosts: allowedHosts.length > 0 ? [...allowedHosts, '127.0.0.1', 'localhost'] : ['127.0.0.1', 'localhost'],
+      allowedHosts:
+        allowedHosts.length > 0
+          ? [...allowedHosts, '127.0.0.1', 'localhost']
+          : ['127.0.0.1', 'localhost'],
       proxy: {
         // WebSocket proxy: clients connect to /ws-gateway on the MGT Suite
         // server (any IP/port), which internally forwards to the local gateway.
@@ -119,14 +122,24 @@ const config = defineConfig(({ mode }) => {
         transform(code, _id) {
           const envName = this.environment?.name
           if (envName !== 'client') return null
-          if (!code.includes('process.env') && !code.includes('process.platform')) return null
+          if (
+            !code.includes('process.env') &&
+            !code.includes('process.platform')
+          )
+            return null
 
           // Replace specific non-secret env vars, then blank the rest.
           // WARNING: Do NOT add CLAWDBOT_GATEWAY_TOKEN, CLAWDBOT_GATEWAY_PASSWORD,
           // or MGTSUITE_PASSWORD here — those are server-only secrets.
           let result = code
-          result = result.replace(/process\.env\.CLAWDBOT_GATEWAY_URL/g, JSON.stringify(gatewayUrl))
-          result = result.replace(/process\.env\.NODE_ENV/g, JSON.stringify(mode))
+          result = result.replace(
+            /process\.env\.CLAWDBOT_GATEWAY_URL/g,
+            JSON.stringify(gatewayUrl),
+          )
+          result = result.replace(
+            /process\.env\.NODE_ENV/g,
+            JSON.stringify(mode),
+          )
           result = result.replace(/process\.env/g, '{}')
           result = result.replace(/process\.platform/g, '"browser"')
           return result

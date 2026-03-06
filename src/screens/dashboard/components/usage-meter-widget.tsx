@@ -157,7 +157,10 @@ function parseUsagePayload(payload: unknown): UsageMeterData {
 }
 
 /** Fetch a URL with a hard timeout; returns null on timeout or network error. */
-function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response | null> {
+function fetchWithTimeout(
+  url: string,
+  timeoutMs: number,
+): Promise<Response | null> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   return fetch(url, { signal: controller.signal })
@@ -207,7 +210,11 @@ export async function fetchUsage(): Promise<UsageQueryResult> {
         : []
       const oneDayAgo = Date.now() - 86_400_000
       const activeSessions = sessions.filter((s) => {
-        if (typeof s.updatedAt === 'number' && (s.updatedAt as number) <= oneDayAgo) return false
+        if (
+          typeof s.updatedAt === 'number' &&
+          (s.updatedAt as number) <= oneDayAgo
+        )
+          return false
         const key = readString(s.key ?? '')
         const label = readString(s.label ?? '')
         // Exclude subagent sessions from the count
@@ -231,12 +238,8 @@ export async function fetchUsage(): Promise<UsageQueryResult> {
           .filter((m) => readString(m.provider) || readString(m.model))
           .map((m) => ({
             provider: readString(m.provider) || readString(m.model),
-            total:
-              readNumber(m.inputTokens) +
-              readNumber(m.outputTokens),
-            inputOutput:
-              readNumber(m.inputTokens) +
-              readNumber(m.outputTokens),
+            total: readNumber(m.inputTokens) + readNumber(m.outputTokens),
+            inputOutput: readNumber(m.inputTokens) + readNumber(m.outputTokens),
             cached: 0,
             cost: readNumber(m.costUsd),
             directCost: readNumber(m.costUsd),
@@ -368,12 +371,15 @@ export function UsageMeterWidget({
   }, [usageData])
 
   // Use overrideCost (from dashboard's session-status) when provided — avoids $0.00 vs actual contradiction
-  const displayCost = overrideCost !== undefined ? overrideCost : (usageData?.totalCost ?? 0)
+  const displayCost =
+    overrideCost !== undefined ? overrideCost : (usageData?.totalCost ?? 0)
   // Use overrideTokens (from dashboard's session-status dailyBreakdown) when provided
-  const displayTokens = overrideTokens !== undefined ? overrideTokens : (usageData?.totalUsage ?? 0)
+  const displayTokens =
+    overrideTokens !== undefined ? overrideTokens : (usageData?.totalUsage ?? 0)
 
   // Whether there is anything meaningful to show (non-zero cost, tokens, or provider rows)
-  const hasAnyData = displayCost > 0 || displayTokens > 0 || topProviders.length > 0
+  const hasAnyData =
+    displayCost > 0 || displayTokens > 0 || topProviders.length > 0
 
   const tabSwitcher = (
     <div className="hidden items-center gap-0.5 rounded-full border border-primary-200 dark:border-neutral-800 bg-primary-50 dark:bg-neutral-950 p-0.5 text-[10px] md:inline-flex">
@@ -398,9 +404,13 @@ export function UsageMeterWidget({
     </div>
   )
 
-  const showTimeoutOrError = (showSkeleton && timedOut) || queryResult?.kind === 'error' || queryResult?.kind === 'unavailable'
+  const showTimeoutOrError =
+    (showSkeleton && timedOut) ||
+    queryResult?.kind === 'error' ||
+    queryResult?.kind === 'unavailable'
   // Show empty state when: settled (not loading/fetching) and no meaningful data
-  const showEmptyState = !showSkeleton && !showTimeoutOrError && (!usageData || !hasAnyData)
+  const showEmptyState =
+    !showSkeleton && !showTimeoutOrError && (!usageData || !hasAnyData)
 
   return (
     <WidgetShell
@@ -421,11 +431,18 @@ export function UsageMeterWidget({
               ? queryResult.message
               : timedOut
                 ? 'Request timed out. Check gateway connection.'
-                : (queryResult as { kind: 'error'; message: string } | undefined)?.message ?? 'Could not load usage data.'}
+                : ((
+                    queryResult as
+                      | { kind: 'error'; message: string }
+                      | undefined
+                  )?.message ?? 'Could not load usage data.')}
           </p>
           <button
             type="button"
-            onClick={() => { setTimedOut(false); void usageQuery.refetch() }}
+            onClick={() => {
+              setTimedOut(false)
+              void usageQuery.refetch()
+            }}
             className="rounded-md border border-primary-200 dark:border-neutral-800 bg-primary-50 dark:bg-neutral-950 px-2.5 py-1 text-xs font-medium text-primary-800 dark:text-neutral-200 transition-colors hover:bg-primary-100 dark:hover:bg-primary-800"
           >
             Retry
@@ -433,7 +450,9 @@ export function UsageMeterWidget({
         </div>
       ) : showEmptyState ? (
         <div className="flex h-full flex-col items-center justify-center gap-1.5 py-4 text-center">
-          <p className="text-sm font-medium text-primary-700 dark:text-neutral-300">No usage yet today</p>
+          <p className="text-sm font-medium text-primary-700 dark:text-neutral-300">
+            No usage yet today
+          </p>
           <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
             Usage will appear once your first session is active.
           </p>
@@ -453,9 +472,13 @@ export function UsageMeterWidget({
           <div className="space-y-3 md:hidden">
             <div className="flex items-baseline gap-2">
               <p className="font-mono text-2xl sm:text-3xl font-bold leading-none tabular-nums text-primary-900 dark:text-neutral-100">
-                {view === 'cost' ? formatUsd(displayCost) : formatTokens(displayTokens)}
+                {view === 'cost'
+                  ? formatUsd(displayCost)
+                  : formatTokens(displayTokens)}
               </p>
-              <span className="text-xs text-primary-500 dark:text-neutral-400">{view === 'cost' ? 'today' : 'tokens'}</span>
+              <span className="text-xs text-primary-500 dark:text-neutral-400">
+                {view === 'cost' ? 'today' : 'tokens'}
+              </span>
             </div>
 
             <div className="inline-flex gap-1 rounded-full border border-primary-200 dark:border-neutral-800 bg-primary-50 dark:bg-neutral-950 p-1">
@@ -485,16 +508,26 @@ export function UsageMeterWidget({
                 {topProviders.map((p) => (
                   <div key={p.provider} className="space-y-0.5">
                     <div className="flex items-center justify-between">
-                      <span className={cn('text-[11px] font-semibold', getProviderTextColor(p.provider))}>
+                      <span
+                        className={cn(
+                          'text-[11px] font-semibold',
+                          getProviderTextColor(p.provider),
+                        )}
+                      >
                         {capitalizeProvider(p.provider)}
                       </span>
                       <span className="font-mono text-[11px] tabular-nums text-primary-700 dark:text-neutral-300">
-                        {view === 'cost' ? formatUsd(p.cost) : formatTokens(p.total)}
+                        {view === 'cost'
+                          ? formatUsd(p.cost)
+                          : formatTokens(p.total)}
                       </span>
                     </div>
                     <div className="h-1 w-full overflow-hidden rounded-full bg-primary-100 dark:bg-neutral-800">
                       <div
-                        className={cn('h-1 rounded-full transition-[width] duration-500', getProviderBarColor(p.provider))}
+                        className={cn(
+                          'h-1 rounded-full transition-[width] duration-500',
+                          getProviderBarColor(p.provider),
+                        )}
                         style={{ width: `${p.barWidth}%` }}
                       />
                     </div>
@@ -510,15 +543,19 @@ export function UsageMeterWidget({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="font-mono text-2xl sm:text-3xl font-bold leading-none text-primary-900 dark:text-neutral-100 tabular-nums">
-                  {view === 'cost' ? formatUsd(displayCost) : formatTokens(displayTokens)}
+                  {view === 'cost'
+                    ? formatUsd(displayCost)
+                    : formatTokens(displayTokens)}
                 </p>
                 <p className="mt-1 text-[11px] uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-                  {view === 'cost' ? 'today\'s spend' : 'tokens today'}
+                  {view === 'cost' ? "today's spend" : 'tokens today'}
                 </p>
               </div>
               <div className="text-right">
                 <p className="font-mono text-sm font-semibold tabular-nums text-primary-700 dark:text-neutral-300">
-                  {view === 'cost' ? formatTokens(displayTokens) : formatUsd(displayCost)}
+                  {view === 'cost'
+                    ? formatTokens(displayTokens)
+                    : formatUsd(displayCost)}
                 </p>
                 <p className="mt-0.5 text-[11px] uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                   {view === 'cost' ? 'tokens' : 'spend'}
@@ -535,7 +572,12 @@ export function UsageMeterWidget({
                 {topProviders.map((p) => (
                   <div key={p.provider} className="space-y-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className={cn('text-[11px] font-semibold', getProviderTextColor(p.provider))}>
+                      <span
+                        className={cn(
+                          'text-[11px] font-semibold',
+                          getProviderTextColor(p.provider),
+                        )}
+                      >
                         {capitalizeProvider(p.provider)}
                       </span>
                       <div className="flex items-center gap-2">
@@ -563,22 +605,26 @@ export function UsageMeterWidget({
               <div className="space-y-1">
                 {view === 'cost' ? (
                   <p className="text-xs text-primary-500 dark:text-neutral-400">
-                    Direct: {formatUsd(usageData.totalDirectCost)} • Total: {formatUsd(displayCost)}
+                    Direct: {formatUsd(usageData.totalDirectCost)} • Total:{' '}
+                    {formatUsd(displayCost)}
                   </p>
                 ) : (
                   <p className="text-xs text-primary-500 dark:text-neutral-400">
-                    In/Out: {formatTokens(usageData.totalInputOutput)} • Cached: {formatTokens(usageData.totalCached)}
+                    In/Out: {formatTokens(usageData.totalInputOutput)} • Cached:{' '}
+                    {formatTokens(usageData.totalCached)}
                   </p>
                 )}
               </div>
             )}
 
             {/* Session count if available */}
-            {typeof usageData.sessionCount === 'number' && usageData.sessionCount > 0 && (
-              <p className="text-[10px] text-neutral-500 dark:text-neutral-400">
-                {usageData.sessionCount} active session{usageData.sessionCount !== 1 ? 's' : ''}
-              </p>
-            )}
+            {typeof usageData.sessionCount === 'number' &&
+              usageData.sessionCount > 0 && (
+                <p className="text-[10px] text-neutral-500 dark:text-neutral-400">
+                  {usageData.sessionCount} active session
+                  {usageData.sessionCount !== 1 ? 's' : ''}
+                </p>
+              )}
           </div>
         </>
       )}

@@ -20,7 +20,7 @@ export type FormattedSystemMetrics = SystemMetricsResponse & {
 }
 
 function formatGiB(bytes: number): string {
-  const gib = bytes / (1024 ** 3)
+  const gib = bytes / 1024 ** 3
   if (!Number.isFinite(gib) || gib <= 0) return '0.0GiB'
   return `${gib.toFixed(gib >= 10 ? 0 : 1)}GiB`
 }
@@ -56,7 +56,10 @@ export function useSystemMetrics() {
     if (!query.data) return null
     const ramPercent =
       query.data.ramTotal > 0
-        ? Math.max(0, Math.min(100, (query.data.ramUsed / query.data.ramTotal) * 100))
+        ? Math.max(
+            0,
+            Math.min(100, (query.data.ramUsed / query.data.ramTotal) * 100),
+          )
         : 0
 
     return {
@@ -75,4 +78,3 @@ export function useSystemMetrics() {
     metrics,
   }
 }
-

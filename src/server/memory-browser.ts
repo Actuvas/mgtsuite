@@ -27,15 +27,20 @@ export function getMemoryWorkspaceRoot(): string {
 function normalizeRelativeMemoryPath(input: string): string {
   const normalized = input.replace(/\\/g, '/').trim()
   if (!normalized) throw new Error('Path is required')
-  if (normalized.startsWith('/')) throw new Error('Absolute paths are not allowed')
-  if (normalized.includes('..')) throw new Error('Path traversal is not allowed')
+  if (normalized.startsWith('/'))
+    throw new Error('Absolute paths are not allowed')
+  if (normalized.includes('..'))
+    throw new Error('Path traversal is not allowed')
   if (!(normalized === 'MEMORY.md' || normalized.startsWith('memory/'))) {
     throw new Error('Only MEMORY.md and memory/* paths are allowed')
   }
   return normalized
 }
 
-export function resolveMemoryFilePath(relativePath: string): { fullPath: string; relativePath: string } {
+export function resolveMemoryFilePath(relativePath: string): {
+  fullPath: string
+  relativePath: string
+} {
   const safeRelativePath = normalizeRelativeMemoryPath(relativePath)
   const workspaceRoot = getMemoryWorkspaceRoot()
   const fullPath = path.resolve(workspaceRoot, safeRelativePath)
@@ -45,7 +50,11 @@ export function resolveMemoryFilePath(relativePath: string): { fullPath: string;
   return { fullPath, relativePath: safeRelativePath }
 }
 
-function pushIfMarkdownFile(entries: Array<MemoryFileMeta>, workspaceRoot: string, fullPath: string) {
+function pushIfMarkdownFile(
+  entries: Array<MemoryFileMeta>,
+  workspaceRoot: string,
+  fullPath: string,
+) {
   if (!fullPath.toLowerCase().endsWith('.md')) return
   let stats: fs.Stats
   try {
@@ -55,8 +64,11 @@ function pushIfMarkdownFile(entries: Array<MemoryFileMeta>, workspaceRoot: strin
   }
   if (!stats.isFile()) return
 
-  const relativePath = path.relative(workspaceRoot, fullPath).replace(/\\/g, '/')
-  if (!(relativePath === 'MEMORY.md' || relativePath.startsWith('memory/'))) return
+  const relativePath = path
+    .relative(workspaceRoot, fullPath)
+    .replace(/\\/g, '/')
+  if (!(relativePath === 'MEMORY.md' || relativePath.startsWith('memory/')))
+    return
 
   entries.push({
     path: relativePath,
@@ -66,7 +78,11 @@ function pushIfMarkdownFile(entries: Array<MemoryFileMeta>, workspaceRoot: strin
   })
 }
 
-function walkMemoryDir(entries: Array<MemoryFileMeta>, workspaceRoot: string, dirPath: string) {
+function walkMemoryDir(
+  entries: Array<MemoryFileMeta>,
+  workspaceRoot: string,
+  dirPath: string,
+) {
   let dirEntries: Array<string>
   try {
     dirEntries = fs.readdirSync(dirPath)
@@ -107,7 +123,11 @@ export function listMemoryFiles(): Array<MemoryFileMeta> {
   const workspaceRoot = getMemoryWorkspaceRoot()
   const results: Array<MemoryFileMeta> = []
 
-  pushIfMarkdownFile(results, workspaceRoot, path.join(workspaceRoot, 'MEMORY.md'))
+  pushIfMarkdownFile(
+    results,
+    workspaceRoot,
+    path.join(workspaceRoot, 'MEMORY.md'),
+  )
   walkMemoryDir(results, workspaceRoot, path.join(workspaceRoot, 'memory'))
 
   results.sort(compareMemoryFiles)
@@ -124,7 +144,9 @@ export function searchMemoryFiles(query: string): Array<MemorySearchMatch> {
   if (!needle) return []
 
   const matches: Array<MemorySearchMatch> = []
-  const files = listMemoryFiles().filter((file) => file.path.startsWith('memory/'))
+  const files = listMemoryFiles().filter((file) =>
+    file.path.startsWith('memory/'),
+  )
 
   for (const file of files) {
     let content = ''

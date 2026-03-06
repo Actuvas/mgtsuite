@@ -157,7 +157,9 @@ export function HeaderAmbientStatus() {
           {timeStr}
         </span>
         <span className="text-primary-400 dark:text-neutral-500">·</span>
-        <span className="text-primary-600 dark:text-neutral-300">{dateStr}</span>
+        <span className="text-primary-600 dark:text-neutral-300">
+          {dateStr}
+        </span>
         {weather ? (
           <>
             <span className="text-primary-400 dark:text-neutral-500">·</span>

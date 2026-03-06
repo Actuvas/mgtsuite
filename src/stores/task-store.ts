@@ -151,13 +151,17 @@ export const useTaskStore = create<TaskStore>()(
         }).catch(() => null)
 
         if (!response) {
-          set((state) => ({ tasks: state.tasks.filter((t) => t.id !== task.id) }))
+          set((state) => ({
+            tasks: state.tasks.filter((t) => t.id !== task.id),
+          }))
           throw new Error('Failed to create task')
         }
 
         if (!response.ok) {
           const message = await readApiError(response)
-          set((state) => ({ tasks: state.tasks.filter((t) => t.id !== task.id) }))
+          set((state) => ({
+            tasks: state.tasks.filter((t) => t.id !== task.id),
+          }))
           throw new Error(message)
         }
 

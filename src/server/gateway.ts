@@ -1,4 +1,11 @@
-import { randomUUID, generateKeyPairSync, createPrivateKey, createPublicKey, createHash, sign as cryptoSign } from 'node:crypto'
+import {
+  randomUUID,
+  generateKeyPairSync,
+  createPrivateKey,
+  createPublicKey,
+  createHash,
+  sign as cryptoSign,
+} from 'node:crypto'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import * as os from 'node:os'
@@ -37,7 +44,13 @@ type ConnectParams = {
   auth?: { token?: string; password?: string }
   role?: 'operator' | 'node'
   scopes?: Array<string>
-  device?: { id: string; publicKey: string; signature: string; signedAt: number; nonce?: string }
+  device?: {
+    id: string
+    publicKey: string
+    signature: string
+    signedAt: number
+    nonce?: string
+  }
 }
 
 type PendingRequest = {
@@ -57,46 +70,87 @@ type InflightRequest = {
 const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex')
 
 function base64UrlEncode(buf: Buffer): string {
-  return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+  return buf
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '')
 }
 
 function derivePublicKeyRaw(pem: string): Buffer {
   const spki = createPublicKey(pem).export({ type: 'spki', format: 'der' })
-  if (spki.length === ED25519_SPKI_PREFIX.length + 32 &&
-      spki.subarray(0, ED25519_SPKI_PREFIX.length).equals(ED25519_SPKI_PREFIX))
+  if (
+    spki.length === ED25519_SPKI_PREFIX.length + 32 &&
+    spki.subarray(0, ED25519_SPKI_PREFIX.length).equals(ED25519_SPKI_PREFIX)
+  )
     return spki.subarray(ED25519_SPKI_PREFIX.length)
   return spki
 }
 
-type DeviceIdentity = { deviceId: string; publicKeyPem: string; privateKeyPem: string }
+type DeviceIdentity = {
+  deviceId: string
+  publicKeyPem: string
+  privateKeyPem: string
+}
 
 let _identity: DeviceIdentity | null = null
 function getDeviceIdentity(): DeviceIdentity {
   if (_identity) return _identity
   const idPath = path.join(
-    process.env.OPENCLAW_STATE_DIR || path.join(os.homedir(), '.openclaw', 'state'),
-    'identity', 'mgtsuite-device.json')
+    process.env.OPENCLAW_STATE_DIR ||
+      path.join(os.homedir(), '.openclaw', 'state'),
+    'identity',
+    'mgtsuite-device.json',
+  )
   try {
     if (fs.existsSync(idPath)) {
       const p = JSON.parse(fs.readFileSync(idPath, 'utf8'))
       if (p?.version === 1 && p.deviceId && p.publicKeyPem && p.privateKeyPem) {
-        _identity = { deviceId: p.deviceId, publicKeyPem: p.publicKeyPem, privateKeyPem: p.privateKeyPem }
+        _identity = {
+          deviceId: p.deviceId,
+          publicKeyPem: p.publicKeyPem,
+          privateKeyPem: p.privateKeyPem,
+        }
         return _identity
       }
     }
-  } catch { /* regenerate */ }
+  } catch {
+    /* regenerate */
+  }
   const { publicKey, privateKey } = generateKeyPairSync('ed25519')
   const pubPem = publicKey.export({ type: 'spki', format: 'pem' }).toString()
   const privPem = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString()
-  const deviceId = createHash('sha256').update(derivePublicKeyRaw(pubPem)).digest('hex')
+  const deviceId = createHash('sha256')
+    .update(derivePublicKeyRaw(pubPem))
+    .digest('hex')
   fs.mkdirSync(path.dirname(idPath), { recursive: true })
-  fs.writeFileSync(idPath, JSON.stringify({ version: 1, deviceId, publicKeyPem: pubPem, privateKeyPem: privPem, createdAtMs: Date.now() }, null, 2) + '\n', { mode: 0o600 })
+  fs.writeFileSync(
+    idPath,
+    JSON.stringify(
+      {
+        version: 1,
+        deviceId,
+        publicKeyPem: pubPem,
+        privateKeyPem: privPem,
+        createdAtMs: Date.now(),
+      },
+      null,
+      2,
+    ) + '\n',
+    { mode: 0o600 },
+  )
   _identity = { deviceId, publicKeyPem: pubPem, privateKeyPem: privPem }
   return _identity
 }
 
 function signPayload(privPem: string, payload: string): string {
-  return base64UrlEncode(cryptoSign(null, Buffer.from(payload, 'utf8'), createPrivateKey(privPem)) as unknown as Buffer)
+  return base64UrlEncode(
+    cryptoSign(
+      null,
+      Buffer.from(payload, 'utf8'),
+      createPrivateKey(privPem),
+    ) as unknown as Buffer,
+  )
 }
 
 // ── Constants ─────────────────────────────────────────────────────
@@ -108,8 +162,12 @@ const HANDSHAKE_TIMEOUT_MS = 15000
 
 export function getGatewayConfig() {
   // Check if browser set a custom gateway URL (for network/mobile access)
-  const browserUrl = typeof window !== 'undefined' ? (window as any).__GATEWAY_URL__ : undefined
-  const url = browserUrl || process.env.CLAWDBOT_GATEWAY_URL?.trim() || 'ws://127.0.0.1:18789'
+  const browserUrl =
+    typeof window !== 'undefined' ? (window as any).__GATEWAY_URL__ : undefined
+  const url =
+    browserUrl ||
+    process.env.CLAWDBOT_GATEWAY_URL?.trim() ||
+    'ws://127.0.0.1:18789'
   const token = process.env.CLAWDBOT_GATEWAY_TOKEN?.trim() || ''
   const password = process.env.CLAWDBOT_GATEWAY_PASSWORD?.trim() || ''
 
@@ -131,7 +189,16 @@ export function buildConnectParams(
   const clientId = 'openclaw-control-ui'
   const clientMode = 'ui'
   const version = nonce ? 'v2' : 'v1'
-  const parts = [version, identity.deviceId, clientId, clientMode, role, scopes.join(','), String(signedAtMs), token || '']
+  const parts = [
+    version,
+    identity.deviceId,
+    clientId,
+    clientMode,
+    role,
+    scopes.join(','),
+    String(signedAtMs),
+    token || '',
+  ]
   if (version === 'v2') parts.push(nonce || '')
   const signature = signPayload(identity.privateKeyPem, parts.join('|'))
 
@@ -280,9 +347,14 @@ class GatewayClient {
           try {
             const parsed = new URL(url.replace(/^ws/, 'http'))
             return `${parsed.protocol}//${parsed.host}`
-          } catch { return 'http://127.0.0.1:18789' }
+          } catch {
+            return 'http://127.0.0.1:18789'
+          }
         })()
-        const ws = new WebSocket(url, { origin: gatewayOrigin, headers: { Origin: gatewayOrigin } })
+        const ws = new WebSocket(url, {
+          origin: gatewayOrigin,
+          headers: { Origin: gatewayOrigin },
+        })
 
         this.clearReconnectTimer()
         this.attachSocket(ws)
@@ -302,12 +374,17 @@ class GatewayClient {
           const challengeHandler = (data: RawData) => {
             try {
               const f = JSON.parse(rawDataToString(data))
-              if ((f.type === 'event' || f.type === 'evt') && f.event === 'connect.challenge') {
+              if (
+                (f.type === 'event' || f.type === 'evt') &&
+                f.event === 'connect.challenge'
+              ) {
                 ws.removeListener('message', challengeHandler)
                 resolve(f.payload?.nonce || undefined)
                 return
               }
-            } catch { /* ignore */ }
+            } catch {
+              /* ignore */
+            }
           }
           ws.removeAllListeners('message')
           ws.on('message', challengeHandler)
@@ -319,7 +396,9 @@ class GatewayClient {
         })
         // Re-attach the normal message handler
         ws.removeAllListeners('message')
-        ws.on('message', (data: RawData) => { this.handleMessage(data) })
+        ws.on('message', (data: RawData) => {
+          this.handleMessage(data)
+        })
 
         const connectId = randomUUID()
         const connectReq: GatewayFrame = {
@@ -383,8 +462,12 @@ class GatewayClient {
     })
 
     ws.on('close', (code, reason) => {
-      console.log(`[gateway] WebSocket closed: code=${code} reason=${reason?.toString() || 'n/a'}`)
-      this.handleDisconnect(new Error(`Gateway connection closed (code=${code})`))
+      console.log(
+        `[gateway] WebSocket closed: code=${code} reason=${reason?.toString() || 'n/a'}`,
+      )
+      this.handleDisconnect(
+        new Error(`Gateway connection closed (code=${code})`),
+      )
     })
 
     ws.on('error', (error) => {
@@ -639,8 +722,7 @@ function nextReconnectDelayMs(attempt: number) {
   // Use (attempt - lastIndex) so the exponent is always relative to where
   // the fixed table ends, regardless of how many entries are in the table.
   const lastIndex = RECONNECT_DELAYS_MS.length - 1
-  const doubled =
-    RECONNECT_DELAYS_MS[lastIndex] * 2 ** (attempt - lastIndex)
+  const doubled = RECONNECT_DELAYS_MS[lastIndex] * 2 ** (attempt - lastIndex)
   return Math.min(doubled, MAX_RECONNECT_DELAY_MS)
 }
 
@@ -682,16 +764,25 @@ if (existingClient) {
   // both would see a healthy singleton and both would fire ensureConnected(), causing an
   // HTTPError on the first request before the doubled handshake settles.
   const GW_LAST_RECONNECT_KEY = '__mgtsuite_gateway_last_reconnect__' as const
-  const lastReconnect = (globalThis as any)[GW_LAST_RECONNECT_KEY] as number | undefined
+  const lastReconnect = (globalThis as any)[GW_LAST_RECONNECT_KEY] as
+    | number
+    | undefined
   const cooldownMs = 5_000
   const now = Date.now()
   const cooledDown = !lastReconnect || now - lastReconnect > cooldownMs
-  if ((!snapshot.authenticated || snapshot.readyState !== WebSocket.OPEN) && cooledDown) {
+  if (
+    (!snapshot.authenticated || snapshot.readyState !== WebSocket.OPEN) &&
+    cooledDown
+  ) {
     ;(globalThis as any)[GW_LAST_RECONNECT_KEY] = now
-    console.warn('[gateway] WARNING: Reused singleton is disconnected — triggering reconnect')
+    console.warn(
+      '[gateway] WARNING: Reused singleton is disconnected — triggering reconnect',
+    )
     existingClient.ensureConnected().catch((error: unknown) => {
       const message = error instanceof Error ? error.message : String(error)
-      console.warn(`[gateway] Reconnect attempt after singleton reuse failed: ${message}`)
+      console.warn(
+        `[gateway] Reconnect attempt after singleton reuse failed: ${message}`,
+      )
     })
   } else if (!cooledDown) {
     console.log('[gateway] Skipping reconnect — within cooldown window')

@@ -1,6 +1,7 @@
 # MGT Suite Roadmap
 
 ## Recently Shipped (v3.0.0)
+
 - [x] 3-tab restructure (Overview/Configure/Missions)
 - [x] Pixel robot avatars + avatar picker
 - [x] Enterprise light theme polish
@@ -13,6 +14,7 @@
 - [ ] Final QA pass + push to GitHub
 
 ## Phase 1 — Close Competitive Gaps (Next Sprint)
+
 - [ ] 🔐 Authentication (password gate + session tokens, later MFA)
 - [ ] 📊 Cron management UI (API exists, needs frontend)
 - [ ] 🔍 Memory browser UI (API exists, needs frontend)
@@ -21,6 +23,7 @@
 - [ ] 🎨 Theme system (ops-dark, premium-dark, paper-light)
 
 ## Phase 2 — Differentiation
+
 - [ ] 🔄 Flow visualization (animated agent message flow, inspired by ClawMetry)
 - [ ] 📁 File browser/editor (workspace file management)
 - [ ] 💰 Cost analytics with trends, charts, per-model breakdown
@@ -29,10 +32,9 @@
 - [ ] 👥 Multi-user support (roles, team sharing)
 
 ## Phase 3 — Scale
+
 - [ ] Agent tools/capabilities (assign browser, code exec, etc. per agent)
 - [ ] Guardrails enforcement (spending limits, approval gates, server-enforced)
 - [ ] Fine-tuning pipeline integration
 - [ ] Plugin marketplace (community agent templates)
 - [ ] Public cloud deployment option
-
-

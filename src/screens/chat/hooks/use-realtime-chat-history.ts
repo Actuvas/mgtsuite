@@ -8,7 +8,12 @@ import type { GatewayMessage } from '../types'
 import { textFromMessage } from '../utils'
 
 const EMPTY_MESSAGES: GatewayMessage[] = []
-const EMPTY_TOOL_CALLS: Array<{ id: string; name: string; phase: string; args?: unknown }> = []
+const EMPTY_TOOL_CALLS: Array<{
+  id: string
+  name: string
+  phase: string
+  args?: unknown
+}> = []
 
 type UseRealtimeChatHistoryOptions = {
   sessionKey: string
@@ -123,7 +128,9 @@ export function useRealtimeChatHistory({
     onApprovalRequest,
   })
 
-  const mergeHistoryMessages = useGatewayChatStore((s) => s.mergeHistoryMessages)
+  const mergeHistoryMessages = useGatewayChatStore(
+    (s) => s.mergeHistoryMessages,
+  )
   const clearSession = useGatewayChatStore((s) => s.clearSession)
   const lastEventAt = useGatewayChatStore((s) => s.lastEventAt)
   const clearRealtimeBuffer = useGatewayChatStore((s) => s.clearRealtimeBuffer)
@@ -132,10 +139,14 @@ export function useRealtimeChatHistory({
   )
 
   // Subscribe directly to streaming state — useMemo with stable fn ref was stale (bug #1)
-  const streamingState = useGatewayChatStore((s) => s.streamingState.get(sessionKey) ?? null)
+  const streamingState = useGatewayChatStore(
+    (s) => s.streamingState.get(sessionKey) ?? null,
+  )
   const streamingStateRef = useRef(streamingState)
   const syncIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const delayedClearSessionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const delayedClearSessionTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null)
   const activeSessionKeyRef = useRef(sessionKey)
   const isUnmountingRef = useRef(false)
   activeSessionKeyRef.current = sessionKey
@@ -174,11 +185,11 @@ export function useRealtimeChatHistory({
 
     const textCandidates = [
       textFromMessage(latest),
-      ...((Array.isArray(latest.content) ? latest.content : []).map((part) => {
+      ...(Array.isArray(latest.content) ? latest.content : []).map((part) => {
         if (part.type === 'text') return String(part.text ?? '')
         if (part.type === 'thinking') return String(part.thinking ?? '')
         return ''
-      })),
+      }),
     ]
       .join('\n')
       .toLowerCase()

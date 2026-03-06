@@ -56,7 +56,11 @@ export function AddWidgetPopover({
         title="Widgets"
         disabled={hiddenWidgets.length === 0}
       >
-        <HugeiconsIcon icon={Add01Icon} size={compact ? 16 : 13} strokeWidth={1.5} />
+        <HugeiconsIcon
+          icon={Add01Icon}
+          size={compact ? 16 : 13}
+          strokeWidth={1.5}
+        />
         {!compact ? <span>Widgets</span> : null}
       </button>
 

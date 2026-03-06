@@ -141,9 +141,7 @@ export function WidgetShell({
         </div>
 
         {/* Trailing action (only shown when not in edit mode) */}
-        {action && !editMode ? (
-          <div className="shrink-0">{action}</div>
-        ) : null}
+        {action && !editMode ? <div className="shrink-0">{action}</div> : null}
       </header>
 
       {/* Body */}

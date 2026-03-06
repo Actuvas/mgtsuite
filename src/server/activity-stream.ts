@@ -86,7 +86,11 @@ async function connectToGateway() {
 function parsePayload(frame: any): unknown {
   if (frame.payload !== undefined) return frame.payload
   if (typeof frame.payloadJSON === 'string') {
-    try { return JSON.parse(frame.payloadJSON) } catch { return null }
+    try {
+      return JSON.parse(frame.payloadJSON)
+    } catch {
+      return null
+    }
   }
   return null
 }

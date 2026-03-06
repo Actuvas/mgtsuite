@@ -1,6 +1,7 @@
 # AGENTS.md — MGT Suite Codebase Guide
 
 ## Stack
+
 - **Framework:** TanStack Start (React, file-based routing)
 - **Language:** TypeScript (strict) — `npx tsc --noEmit` must pass with 0 errors
 - **Styling:** Tailwind CSS with custom design tokens
@@ -10,6 +11,7 @@
 - **Package manager:** npm (NOT pnpm)
 
 ## Key Paths
+
 ```
 src/routes/          — File-based routes (pages + API endpoints)
 src/routes/api/      — API routes (TanStack Start server handlers)
@@ -23,6 +25,7 @@ public/              — Static assets (logos, icons)
 ```
 
 ## Design Tokens (always use these, never raw colors)
+
 ```
 bg-primary-950/900/800/700  — dark backgrounds (darkest to lighter)
 text-primary-100/200/300/400 — text (lightest to dimmer)
@@ -34,6 +37,7 @@ text-accent-300/400/500      — orange text
 ## Component Patterns
 
 ### API Routes
+
 ```ts
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
@@ -44,12 +48,14 @@ export const Route = createFileRoute('/api/my-endpoint')({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        if (!isAuthenticated(request)) return json({ ok: false, error: 'Unauthorized' }, { status: 401 })
+        if (!isAuthenticated(request))
+          return json({ ok: false, error: 'Unauthorized' }, { status: 401 })
         // ...
         return json({ ok: true, data })
       },
       POST: async ({ request }) => {
-        if (!isAuthenticated(request)) return json({ ok: false, error: 'Unauthorized' }, { status: 401 })
+        if (!isAuthenticated(request))
+          return json({ ok: false, error: 'Unauthorized' }, { status: 401 })
         const csrfCheck = requireJsonContentType(request)
         if (csrfCheck) return csrfCheck
         const body = await request.json()
@@ -61,33 +67,38 @@ export const Route = createFileRoute('/api/my-endpoint')({
 ```
 
 ### Dynamic API Routes
+
 File: `src/routes/api/items.$id.action.ts`
 Route: `createFileRoute('/api/items/$id/action')`
 Access: `params.id`
 
 ### UI Components
+
 - Always use `HugeiconsIcon` from `@hugeicons/react` for icons
 - Wrap transitions in `AnimatePresence` from `motion/react`
 - Use `cn()` from `@/lib/utils` for conditional classNames
 - Path alias `@/` maps to `src/`
 
 ### Gateway RPC
+
 ```ts
 import { gatewayRpc } from '../../server/gateway'
 await gatewayRpc('sessions.delete', { key: sessionKey })
 ```
 
 ## Rules
+
 - **Never push to GitHub** — PRs only, Eric reviews before merge
 - **Always run `npx tsc --noEmit`** before finishing — 0 errors required
 - **No pnpm** — use npm
 - **No new dependencies** without asking — check if existing packages cover it first
 - **Mobile-first** — all UI must work on small screens
-- **Dark theme only** — use primary-* tokens, never hardcode colors
+- **Dark theme only** — use primary-\* tokens, never hardcode colors
 - **POST endpoints** must have `requireJsonContentType` CSRF check
 - **All endpoints** must have `isAuthenticated` check
 
 ## Common Imports
+
 ```ts
 import { cn } from '@/lib/utils'
 import { HugeiconsIcon } from '@hugeicons/react'
@@ -97,4 +108,5 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 ```
 
 ## Current Branch: main
+
 Latest commit: f7d4ff9 — mobile setup wizard, paste fix, CLI kill fix

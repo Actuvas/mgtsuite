@@ -31,10 +31,18 @@ function startIfNeeded() {
   onGatewayEvent((frame) => {
     if (frame.type !== 'event' && frame.type !== 'evt') return
     const event = frame.event
-    const rawPayload = 'payloadJSON' in frame && frame.payloadJSON
-      ? (() => { try { return JSON.parse(frame.payloadJSON as string) } catch { return {} } })()
-      : frame.payload
-    const payload: Record<string, unknown> = (rawPayload as Record<string, unknown>) ?? {}
+    const rawPayload =
+      'payloadJSON' in frame && frame.payloadJSON
+        ? (() => {
+            try {
+              return JSON.parse(frame.payloadJSON as string)
+            } catch {
+              return {}
+            }
+          })()
+        : frame.payload
+    const payload: Record<string, unknown> =
+      (rawPayload as Record<string, unknown>) ?? {}
 
     if (event === 'exec.approval.requested') {
       const id = (payload.id ?? payload.approvalId) as string | undefined
@@ -49,7 +57,7 @@ function startIfNeeded() {
         context: (payload.context ?? request.cwd) as string | null,
         input: request,
         requestedAt: (payload.createdAtMs ?? Date.now()) as number,
-        expiresAt: (payload.expiresAtMs) as number | undefined,
+        expiresAt: payload.expiresAtMs as number | undefined,
         status: 'pending',
       }
       _pending.set(id, entry)

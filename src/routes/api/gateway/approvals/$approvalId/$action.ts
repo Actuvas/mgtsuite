@@ -4,7 +4,9 @@ import { isAuthenticated } from '@/server/auth-middleware'
 import { gatewayRpc } from '@/server/gateway'
 import { requireJsonContentType } from '@/server/rate-limit'
 
-export const Route = createFileRoute('/api/gateway/approvals/$approvalId/$action')({
+export const Route = createFileRoute(
+  '/api/gateway/approvals/$approvalId/$action',
+)({
   server: {
     handlers: {
       POST: async ({ request, params }) => {
@@ -18,7 +20,10 @@ export const Route = createFileRoute('/api/gateway/approvals/$approvalId/$action
 
         if (action !== 'approve' && action !== 'deny') {
           return json(
-            { ok: false, error: `Invalid action: "${action}". Must be "approve" or "deny".` },
+            {
+              ok: false,
+              error: `Invalid action: "${action}". Must be "approve" or "deny".`,
+            },
             { status: 400 },
           )
         }
@@ -27,7 +32,10 @@ export const Route = createFileRoute('/api/gateway/approvals/$approvalId/$action
         const decision = action === 'approve' ? 'allow-once' : 'deny'
 
         try {
-          await gatewayRpc('exec.approval.resolve', { id: approvalId, decision })
+          await gatewayRpc('exec.approval.resolve', {
+            id: approvalId,
+            decision,
+          })
           return json({ ok: true })
         } catch (err) {
           return json(

@@ -98,7 +98,11 @@ export function CronJobCard({
             {job.nextRunAt ? (
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 text-xs text-primary-600 tabular-nums">
-                  <HugeiconsIcon icon={Clock01Icon} size={20} strokeWidth={1.5} />
+                  <HugeiconsIcon
+                    icon={Clock01Icon}
+                    size={20}
+                    strokeWidth={1.5}
+                  />
                   <span>Next Run</span>
                 </div>
                 <p className="mt-0.5 truncate text-sm text-primary-900 tabular-nums">
