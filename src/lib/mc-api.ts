@@ -31,6 +31,9 @@ function getMcBaseUrl(): string {
 }
 
 function getMcAuthToken(): string | null {
+  // Never expose auth token in browser context — MC calls should
+  // route through server functions (loaders/actions) in production
+  if (typeof window !== 'undefined') return null
   const raw =
     typeof process !== 'undefined'
       ? process.env.MC_AUTH_TOKEN?.trim()
