@@ -64,6 +64,20 @@ export const WIDGET_META: WidgetMeta[] = [
     defaultVisible: true,
   },
   {
+    id: 'studio-clips',
+    label: 'Studio Clips',
+    scope: 'dashboard',
+    tier: 'secondary',
+    defaultVisible: true,
+  },
+  {
+    id: 'mc-agents',
+    label: 'Mission Control',
+    scope: 'dashboard',
+    tier: 'secondary',
+    defaultVisible: true,
+  },
+  {
     id: 'notifications',
     label: 'Notifications',
     scope: 'dashboard',

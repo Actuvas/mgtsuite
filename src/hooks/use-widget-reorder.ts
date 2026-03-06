@@ -5,6 +5,8 @@ export type DashboardWidgetOrderId =
   | 'metrics'
   | 'services'
   | 'scheduled-jobs'
+  | 'studio-clips'
+  | 'mc-agents'
   | 'tasks'
   | 'usage'
   | 'skills'
@@ -20,6 +22,8 @@ export const DEFAULT_DASHBOARD_WIDGET_ORDER: Array<DashboardWidgetOrderId> = [
   'metrics',
   'services',
   'scheduled-jobs',
+  'studio-clips',
+  'mc-agents',
   'tasks',
   'usage',
   'skills',
@@ -79,9 +83,8 @@ function saveWidgetOrder(order: Array<DashboardWidgetOrderId>) {
 }
 
 export function useWidgetReorder() {
-  const [order, setOrder] = useState<Array<DashboardWidgetOrderId>>(
-    loadWidgetOrder,
-  )
+  const [order, setOrder] =
+    useState<Array<DashboardWidgetOrderId>>(loadWidgetOrder)
 
   const moveWidget = useCallback((fromIndex: number, toIndex: number) => {
     setOrder((previousOrder) => {
