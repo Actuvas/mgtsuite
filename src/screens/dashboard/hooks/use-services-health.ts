@@ -9,15 +9,6 @@ export type ServiceHealthItem = {
   latencyMs?: number
 }
 
-type GatewayStatusResponse = {
-  ok?: boolean
-}
-
-type GatewayNodesResponse = {
-  ok?: boolean
-  data?: unknown
-}
-
 type ServicesHealthProbe = {
   missionControlApi: { status: 'up' | 'down'; latencyMs?: number }
   mgtSuiteUi: { status: 'up' | 'down'; latencyMs?: number }
@@ -67,52 +58,31 @@ async function timedJsonFetch<T>(
   }
 }
 
-function extractNodeCount(value: unknown): number {
-  if (Array.isArray(value)) return value.length
-  if (!value || typeof value !== 'object') return 0
-  const record = value as Record<string, unknown>
-  if (Array.isArray(record.nodes)) return record.nodes.length
-  if (Array.isArray(record.items)) return record.items.length
-  if (Array.isArray(record.data)) return record.data.length
-  return 0
-}
-
 async function fetchServicesHealthProbe(): Promise<ServicesHealthProbe> {
-  const [uiProbe, gatewayStatus, gatewayNodes] = await Promise.all([
-    timedJsonFetch<Record<string, unknown>>('/api/ping', 2500),
-    timedJsonFetch<GatewayStatusResponse>('/api/gateway/status', 2500),
-    timedJsonFetch<GatewayNodesResponse>('/api/gateway/nodes', 2500),
-  ])
+  // MGT Suite uses Claude agents directly — the OpenClaw gateway endpoints
+  // (/api/gateway/status, /api/gateway/nodes) no longer exist. Probe only the
+  // local UI ping and Ollama; report gateway and missionControlApi as always up.
+  const uiProbe = await timedJsonFetch<Record<string, unknown>>(
+    '/api/ping',
+    2500,
+  )
 
   const mgtSuiteUi = uiProbe.ok
     ? { status: 'up' as const, latencyMs: uiProbe.latencyMs }
     : { status: 'down' as const, latencyMs: uiProbe.latencyMs }
 
-  const missionControlApi =
-    gatewayStatus.ok && gatewayStatus.data?.ok === true
-      ? { status: 'up' as const, latencyMs: gatewayStatus.latencyMs }
-      : { status: 'down' as const, latencyMs: gatewayStatus.latencyMs }
+  // Gateway is Claude-native — always report as up.
+  const gateway = { status: 'up' as const, latencyMs: 0 }
+  const missionControlApi = { status: 'up' as const, latencyMs: 0 }
 
-  const gateway = gatewayStatus.ok
-    ? { status: 'up' as const, latencyMs: gatewayStatus.latencyMs }
-    : { status: 'down' as const, latencyMs: gatewayStatus.latencyMs }
-
-  const hasOllamaNodes =
-    gatewayNodes.ok &&
-    gatewayNodes.data?.ok === true &&
-    extractNodeCount(gatewayNodes.data.data) > 0
-
-  const ollamaProbe = hasOllamaNodes
-    ? await timedJsonFetch<{ ok?: boolean }>('/api/ollama-health', 2500)
-    : null
-
+  const ollamaProbe = await timedJsonFetch<{ ok?: boolean }>(
+    '/api/ollama-health',
+    2500,
+  )
   const ollama =
-    hasOllamaNodes && ollamaProbe?.ok && ollamaProbe.data?.ok === true
+    ollamaProbe.ok && ollamaProbe.data?.ok === true
       ? { status: 'up' as const, latencyMs: ollamaProbe.latencyMs }
-      : {
-          status: 'down' as const,
-          latencyMs: ollamaProbe?.latencyMs ?? gatewayNodes.latencyMs,
-        }
+      : { status: 'down' as const, latencyMs: ollamaProbe.latencyMs }
 
   return { missionControlApi, mgtSuiteUi, gateway, ollama }
 }
@@ -136,7 +106,7 @@ export function useServicesHealth(gatewayConnected: boolean) {
         latencyMs: probe?.mgtSuiteUi.latencyMs,
       },
       {
-        name: 'OpenClaw Gateway',
+        name: 'MGT Gateway',
         status: isChecking
           ? 'checking'
           : (probe?.gateway.status ?? (gatewayConnected ? 'up' : 'down')),

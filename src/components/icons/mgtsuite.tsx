@@ -1,17 +1,17 @@
 import { useId } from 'react'
 import { cn } from '@/lib/utils'
 
-export type OpenClawStudioIconProps = {
+export type MGTSuiteIconProps = {
   className?: string
   animateDots?: boolean
   dotClassName?: string
 }
 
-export function OpenClawStudioIcon({
+export function MGTSuiteIcon({
   className,
   animateDots = false,
   dotClassName,
-}: OpenClawStudioIconProps) {
+}: MGTSuiteIconProps) {
   // Each instance gets a unique gradient ID to prevent SVG defs collision
   // when the icon is rendered multiple times on the same page.
   const uid = useId().replace(/:/g, '')
